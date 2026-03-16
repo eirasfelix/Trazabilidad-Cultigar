@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SISTEMA TRAZABILIDAD CULTIGAR - FINAL</title>
+    <style>
+        body { font-family: sans-serif; background: #444; margin: 0; padding: 0; }
+        .cabecera { background: white; padding: 8px; position: sticky; top: 0; z-index: 500; text-align: center; box-shadow: 0 2px 5px rgba(0,0,0,0.3); }
+        
+        /* Contenedor de búsqueda y nube en una sola línea */
+        .busqueda-nube-container { display: flex; gap: 5px; align-items: center; max-width: 98%; margin: 0 auto 5px auto; }
+        .buscador { flex-grow: 1; padding: 10px; font-size: 16px; border-radius: 8px; border: 1px solid #ccc; }
+        
+        .resumen-stock { background: #e3f2fd; padding: 5px; margin: 2px auto; width: 98%; border-radius: 8px; display: flex; flex-wrap: wrap; gap: 4px; justify-content: center; font-size: 11px; max-height: 60px; overflow-y: auto; border: 1px solid #2196F3; }
+        .stock-item { background: white; padding: 2px 6px; border-radius: 4px; border: 1px solid #2196F3; font-weight: bold; color: #0d47a1; }
+        
+        .btn-nube { padding: 10px 8px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; color: white; font-size: 11px; white-space: nowrap; }
+        .btn-subir { background: #4CAF50; }
+        .btn-bajar { background: #2196F3; }
+
+        .mapa-real { background: white; margin: 10px auto; padding: 10px; border: 1px solid #000; display: block; width: 490px; position: relative; }
+        .mesa { fill: white; stroke: black; stroke-width: 1.2; cursor: pointer; }
+        .ocupada { fill: #c8e6c9; stroke: #2e7d32; }
+        .resaltado { fill: #FF8C00 !important; }
+        .texto-mesa { font-size: 9px; font-weight: bold; pointer-events: none; text-anchor: middle; fill: #000; }
+
+        #infoPanel { 
+            position: fixed; top: 2%; left: 2%; width: 92%; height: 92%; 
+            background: #1a1a1a; color: white; padding: 15px; border-radius: 15px; 
+            display: none; border: 4px solid #4CAF50; z-index: 10000; 
+            box-shadow: 0 0 50px rgba(0,0,0,0.9); overflow-y: auto;
+        }
+        
+        .tabla-lotes { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 12px; background: #222; }
+        .tabla-lotes th { background: #333; color: #4CAF50; padding: 8px; text-align: left; border-bottom: 2px solid #4CAF50; }
+        .tabla-lotes td { padding: 8px; border-bottom: 1px solid #444; }
+
+        .formulario-lote { background: #333; padding: 15px; border-radius: 10px; margin-top: 15px; border: 1px solid #555; }
+        .formulario-lote input { width: 95%; padding: 10px; margin: 4px 0; border-radius: 5px; border: none; font-size: 16px; display: block; }
+        .label-form { font-size: 11px; color: #aaa; margin-top: 8px; display: block; font-weight: bold; }
+        .bloque-etiqueta { border-left: 4px solid #FF9800; padding-left: 10px; margin-top: 10px; background: #3d3d3d; padding-bottom: 5px; border-radius: 0 5px 5px 0; }
+
+        .btn { padding: 15px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; width: 100%; font-size: 16px; margin-top: 10px; }
+        .btn-guardar { background: #4CAF50; color: white; }
+        .btn-cerrar { background: #cc0000; color: white; margin-top: 20px; }
+        .btn-mini { padding: 6px; border-radius: 4px; border: none; color: white; font-weight: bold; margin-left: 3px; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+<div class="cabecera">
+    <div class="busqueda-nube-container">
+        <input type="text" id="inputBusqueda" class="buscador" placeholder="🔍 Buscar..." onkeyup="buscar()">
+        <button class="btn-nube btn-subir" onclick="guardarEnNube()">⬆ SUBIR</button>
+        <button class="btn-nube btn-bajar" onclick="cargarDeNube()">⬇ BAJAR</button>
+    </div>
+    <div id="resumenStock" class="resumen-stock">Cargando datos...</div>
+</div>
+
+<div class="mapa-real">
+    <svg width="490" height="780" viewBox="0 0 490 780">
+        <text x="245" y="25" style="font-size:18px; font-weight:bold; text-anchor:middle; fill:#1a5d1a;">TRAZABILIDAD CULTIGAR</text>
+
+        <rect id="m10-48" class="mesa" x="10" y="70" width="40" height="140" onclick="abrirMesa('10-48')" /><text x="30" y="200" class="texto-mesa">10-48</text>
+        <rect id="m11-49" class="mesa" x="55" y="70" width="40" height="140" onclick="abrirMesa('11-49')" /><text x="75" y="200" class="texto-mesa">11-49</text>
+        <rect id="m12-50" class="mesa" x="105" y="70" width="40" height="140" onclick="abrirMesa('12-50')" /><text x="125" y="200" class="texto-mesa">12-50</text>
+        <rect id="m13-51" class="mesa" x="150" y="70" width="40" height="140" onclick="abrirMesa('13-51')" /><text x="170" y="200" class="texto-mesa">13-51</text>
+        <rect id="m7-45" class="mesa" x="15" y="220" width="40" height="65" onclick="abrirMesa('7-45')" /><text x="35" y="275" class="texto-mesa">7-45</text>
+        <rect id="m8-46" class="mesa" x="65" y="220" width="45" height="90" onclick="abrirMesa('8-46')" /><text x="87" y="300" class="texto-mesa">8-46</text>
+        <rect id="m9-47" class="mesa" x="135" y="220" width="38" height="90" onclick="abrirMesa('9-47')" /><text x="154" y="300" class="texto-mesa">9-47</text>
+        <rect id="m4-42" class="mesa" x="10" y="325" width="45" height="200" onclick="abrirMesa('4-42')" /><text x="32" y="515" class="texto-mesa">4-42</text>
+        <rect id="m5-43" class="mesa" x="65" y="325" width="45" height="200" onclick="abrirMesa('5-43')" /><text x="87" y="515" class="texto-mesa">5-43</text>
+        <rect id="m6-44" class="mesa" x="125" y="325" width="45" height="200" onclick="abrirMesa('6-44')" /><text x="147" y="515" class="texto-mesa">6-44</text>
+        <rect id="m1-39" class="mesa" x="10" y="540" width="45" height="210" onclick="abrirMesa('1-39')" /><text x="32" y="740" class="texto-mesa">1-39</text>
+        <rect id="m2-40" class="mesa" x="65" y="540" width="45" height="210" onclick="abrirMesa('2-40')" /><text x="87" y="740" class="texto-mesa">2-40</text>
+        <rect id="m3-41" class="mesa" x="125" y="580" width="45" height="170" onclick="abrirMesa('3-41')" /><text x="147" y="740" class="texto-mesa">3-41</text>
+        <rect id="m22-63" class="mesa" x="210" y="70" width="38" height="75" onclick="abrirMesa('22-63')" /><text x="229" y="135" class="texto-mesa">22-63</text>
+        <rect id="m23-64" class="mesa" x="255" y="70" width="38" height="75" onclick="abrirMesa('23-64')" /><text x="274" y="135" class="texto-mesa">23-64</text>
+        <rect id="m24-65" class="mesa" x="300" y="70" width="38" height="75" onclick="abrirMesa('24-65')" /><text x="319" y="135" class="texto-mesa">24-65</text>
+        <rect id="m22-60" class="mesa" x="210" y="155" width="38" height="100" onclick="abrirMesa('22-60')" /><text x="229" y="245" class="texto-mesa">22-60</text>
+        <rect id="m23-61" class="mesa" x="255" y="155" width="38" height="100" onclick="abrirMesa('23-61')" /><text x="274" y="245" class="texto-mesa">23-61</text>
+        <rect id="m24-62" class="mesa" x="300" y="155" width="38" height="100" onclick="abrirMesa('24-62')" /><text x="319" y="245" class="texto-mesa">24-62</text>
+        <rect id="m18-56" class="mesa" x="215" y="360" width="35" height="110" onclick="abrirMesa('18-56')" /><text x="232" y="460" class="texto-mesa">18-56</text>
+        <rect id="m19-57" class="mesa" x="255" y="325" width="38" height="200" onclick="abrirMesa('19-57')" /><text x="274" y="515" class="texto-mesa">19-57</text>
+        <rect id="m20-58" class="mesa" x="300" y="325" width="38" height="200" onclick="abrirMesa('20-58')" /><text x="319" y="515" class="texto-mesa">20-58</text>
+        <rect id="m21-59" class="mesa" x="345" y="325" width="38" height="200" onclick="abrirMesa('21-59')" /><text x="364" y="515" class="texto-mesa">21-59</text>
+        <rect id="m14-52" class="mesa" x="210" y="540" width="38" height="145" onclick="abrirMesa('14-52')" /><text x="229" y="675" class="texto-mesa">14-52</text>
+        <rect id="m15-53" class="mesa" x="255" y="540" width="38" height="145" onclick="abrirMesa('15-53')" /><text x="274" y="675" class="texto-mesa">15-53</text>
+        <rect id="m16-54" class="mesa" x="300" y="540" width="38" height="145" onclick="abrirMesa('16-54')" /><text x="319" y="675" class="texto-mesa">16-54</text>
+        <rect id="m17-55" class="mesa" x="345" y="540" width="38" height="145" onclick="abrirMesa('17-55')" /><text x="364" y="675" class="texto-mesa">17-55</text>
+
+        <text x="440" y="55" style="font-size:14px; font-weight:bold; fill:#2e7d32; text-anchor:middle;">TÚNELES</text>
+        <rect id="m14" class="mesa" x="400" y="70" width="80" height="35" onclick="abrirMesa('14')" /><text x="440" y="92" class="texto-mesa">14</text>
+        <rect id="m13" class="mesa" x="400" y="115" width="80" height="35" onclick="abrirMesa('13')" /><text x="440" y="137" class="texto-mesa">13</text>
+        <rect id="m12" class="mesa" x="400" y="160" width="80" height="35" onclick="abrirMesa('12')" /><text x="440" y="182" class="texto-mesa">12</text>
+        <rect id="m11" class="mesa" x="400" y="205" width="80" height="35" onclick="abrirMesa('11')" /><text x="440" y="227" class="texto-mesa">11</text>
+        <rect id="m10" class="mesa" x="400" y="250" width="80" height="35" onclick="abrirMesa('10')" /><text x="440" y="272" class="texto-mesa">10</text>
+        <rect id="m9" class="mesa" x="400" y="295" width="80" height="35" onclick="abrirMesa('9')" /><text x="440" y="317" class="texto-mesa">9</text>
+        <rect id="m8" class="mesa" x="400" y="340" width="80" height="35" onclick="abrirMesa('8')" /><text x="440" y="362" class="texto-mesa">8</text>
+        <rect id="m7" class="mesa" x="400" y="385" width="80" height="35" onclick="abrirMesa('7')" /><text x="440" y="407" class="texto-mesa">7</text>
+        <rect id="m6" class="mesa" x="400" y="430" width="80" height="35" onclick="abrirMesa('6')" /><text x="440" y="452" class="texto-mesa">6</text>
+        <rect id="m5" class="mesa" x="400" y="475" width="80" height="35" onclick="abrirMesa('5')" /><text x="440" y="497" class="texto-mesa">5</text>
+        <rect id="m4" class="mesa" x="400" y="520" width="80" height="35" onclick="abrirMesa('4')" /><text x="440" y="542" class="texto-mesa">4</text>
+        <rect id="m3" class="mesa" x="400" y="565" width="80" height="35" onclick="abrirMesa('3')" /><text x="440" y="587" class="texto-mesa">3</text>
+        <rect id="m2" class="mesa" x="400" y="610" width="80" height="35" onclick="abrirMesa('2')" /><text x="440" y="632" class="texto-mesa">2</text>
+        <rect id="m1" class="mesa" x="400" y="655" width="80" height="35" onclick="abrirMesa('1')" /><text x="440" y="677" class="texto-mesa">1</text>
+    </svg>
+
+    <div id="infoPanel">
+        <h2 id="tituloMesa" style="margin:0; color:#4CAF50;">Mesa</h2>
+        <table class="tabla-lotes">
+            <thead>
+                <tr><th>Ref/Lote</th><th>Caja/Origen</th><th>F. Enr.</th><th>F. Bandeja</th><th>Acción</th></tr>
+            </thead>
+            <tbody id="listaLotes"></tbody>
+        </table>
+
+        <div class="formulario-lote">
+            <h3 id="formTitulo" style="margin:0 0 10px 0; font-size:14px; color:#4CAF50;">+ REGISTRO DE DATOS:</h3>
+            <span class="label-form">REFERENCIA</span><input type="text" id="f_ref">
+            <span class="label-form">LOTE</span><input type="text" id="f_lote">
+            <span class="label-form">SUSTRATO</span><input type="text" id="f_sustrato">
+            <span class="label-form">CANTIDAD BANDEJAS</span><input type="number" id="f_cant">
+            <div class="bloque-etiqueta">
+                <span class="label-form" style="color:#FF9800;">1. FECHA ENRAIZADO</span><input type="date" id="f_enraizado">
+                <span class="label-form" style="color:#FF9800;">2. Nº DE CAJA</span><input type="text" id="f_caja">
+                <span class="label-form" style="color:#4CAF50;">3. FECHA PASE A BANDEJA</span><input type="date" id="f_vivero">
+            </div>
+            <button class="btn btn-guardar" id="btnGuardar" onclick="guardarLote()">+ REGISTRAR</button>
+            <button id="btnCancelarEdit" style="display:none; background:#666; color:white;" class="btn" onclick="cancelarEdicion()">CANCELAR EDICIÓN</button>
+        </div>
+
+        <button class="btn btn-cerrar" onclick="cerrarPanel()">CERRAR PANEL</button>
+
+        <div style="margin-top:20px; border-top:1px dashed #666; padding-top:10px;">
+            <p style="font-size:11px; color:#888;">SEGURIDAD MANUAL:</p>
+            <div style="display:flex; gap:10px;">
+                <button onclick="copiarSeguridad()" style="flex:1; background:#2196F3; color:white; border:none; padding:10px; border-radius:5px; font-weight:bold;">📋 COPIAR COPIA</button>
+                <button onclick="restaurarSeguridad()" style="flex:1; background:#FF9800; color:white; border:none; padding:10px; border-radius:5px; font-weight:bold;">📥 RESTAURAR</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const GITHUB_TOKEN = "ghp_LWjzgh29AsGYZDTuH8qC8CZhKDnDWJ3mvJ0e";
+    const GIST_ID = "ac4301d0a514d06a92b987c581613533";
+    let db = JSON.parse(localStorage.getItem('cultigar_pro_final')) || {};
+    let mesaActual = null;
+    let editIndex = null;
+
+    async function cargarDeNube() {
+        try {
+            const res = await fetch(`https://api.github.com/gists/${GIST_ID}?cb=${Date.now()}`);
+            const json = await res.json();
+            db = JSON.parse(json.files["cultigar_db.json"].content);
+            localStorage.setItem('cultigar_pro_final', JSON.stringify(db));
+            actualizarMapa();
+            alert("✅ Datos bajados de la Nube");
+        } catch (e) { alert("❌ Error al bajar datos"); }
+    }
+
+    async function guardarEnNube() {
+        try {
+            await fetch(`https://api.github.com/gists/${GIST_ID}`, {
+                method: 'PATCH',
+                headers: { 'Authorization': `token ${GITHUB_TOKEN}` },
+                body: JSON.stringify({ "files": { "cultigar_db.json": { "content": JSON.stringify(db) } } })
+            });
+            console.log("Sincronizado");
+        } catch (e) { console.error("Error nube"); }
+    }
+
+    function abrirMesa(id) {
+        mesaActual = id; editIndex = null;
+        document.getElementById('tituloMesa').innerText = "Mesa " + id;
+        cancelarEdicion(); renderLotes();
+        document.getElementById('infoPanel').style.display = 'block';
+    }
+
+    function formatearFecha(fecha) {
+        if(!fecha) return "---";
+        let f = fecha.split('-'); return f[2] + "/" + f[1];
+    }
+
+    function renderLotes() {
+        let html = "";
+        (db[mesaActual] || []).forEach((l, index) => {
+            html += `<tr><td><b>${l.ref}</b><br><small>L-${l.lote}</small></td>
+                <td>Caja: ${l.caja || '?'}<br><small>${l.sustrato}</small></td>
+                <td style="color:#FF9800">${formatearFecha(l.f_enraizado)}</td>
+                <td style="color:#4CAF50">${formatearFecha(l.f_vivero)}</td>
+                <td><button class="btn-mini" style="background:#2196F3" onclick="prepararEdicion(${index})">✍️</button>
+                    <button class="btn-mini" style="background:#cc0000" onclick="borrarLote(${index})">X</button></td></tr>`;
+        });
+        document.getElementById('listaLotes').innerHTML = html || "<tr><td colspan='5' style='text-align:center;'>Mesa vacía</td></tr>";
+    }
+
+    function guardarLote() {
+        let ref = document.getElementById('f_ref').value.toUpperCase();
+        let cant = parseInt(document.getElementById('f_cant').value);
+        if(!ref || !cant) return alert("Faltan datos");
+
+        let nuevo = {
+            ref, lote: document.getElementById('f_lote').value.toUpperCase(),
+            caja: document.getElementById('f_caja').value.toUpperCase(),
+            sustrato: document.getElementById('f_sustrato').value.toUpperCase(),
+            cant, f_enraizado: document.getElementById('f_enraizado').value,
+            f_vivero: document.getElementById('f_vivero').value
+        };
+
+        if(!db[mesaActual]) db[mesaActual] = [];
+        if(editIndex !== null) db[mesaActual][editIndex] = nuevo;
+        else db[mesaActual].push(nuevo);
+
+        localStorage.setItem('cultigar_pro_final', JSON.stringify(db));
+        guardarEnNube();
+        cancelarEdicion(); renderLotes(); actualizarMapa();
+    }
+
+    function prepararEdicion(index) {
+        let l = db[mesaActual][index]; editIndex = index;
+        document.getElementById('f_ref').value = l.ref;
+        document.getElementById('f_lote').value = l.lote;
+        document.getElementById('f_caja').value = l.caja || "";
+        document.getElementById('f_sustrato').value = l.sustrato;
+        document.getElementById('f_cant').value = l.cant;
+        document.getElementById('f_enraizado').value = l.f_enraizado;
+        document.getElementById('f_vivero').value = l.f_vivero;
+        document.getElementById('formTitulo').innerText = "✍️ EDITANDO:";
+        document.getElementById('btnGuardar').innerText = "💾 ACTUALIZAR";
+        document.getElementById('btnCancelarEdit').style.display = "block";
+    }
+
+    function cancelarEdicion() {
+        editIndex = null;
+        document.querySelectorAll('.formulario-lote input').forEach(i => i.value = "");
+        document.getElementById('formTitulo').innerText = "+ REGISTRO DE DATOS:";
+        document.getElementById('btnGuardar').innerText = "+ REGISTRAR EN MESA";
+        document.getElementById('btnCancelarEdit').style.display = "none";
+    }
+
+    function borrarLote(index) {
+        if(confirm("¿Eliminar?")) {
+            db[mesaActual].splice(index, 1);
+            if(db[mesaActual].length === 0) delete db[mesaActual];
+            localStorage.setItem('cultigar_pro_final', JSON.stringify(db));
+            guardarEnNube();
+            renderLotes(); actualizarMapa();
+        }
+    }
+
+    function actualizarMapa() {
+        let totales = {}; let granTotal = 0;
+        document.querySelectorAll('.mesa').forEach(m => {
+            let id = m.id.substring(1);
+            if(db[id]) { m.classList.add('ocupada'); db[id].forEach(l => {
+                totales[l.ref] = (totales[l.ref] || 0) + l.cant; granTotal += l.cant;
+            }); } else m.classList.remove('ocupada');
+        });
+        let res = `<div class="stock-item" style="background:#4CAF50; color:white">TOTAL: ${granTotal} b.</div>`;
+        for(let r in totales) res += `<div class="stock-item">${r}: ${totales[r]}</div>`;
+        document.getElementById('resumenStock').innerHTML = res || "Vivero Vacío";
+    }
+
+    function buscar() {
+        let t = document.getElementById('inputBusqueda').value.toUpperCase();
+        document.querySelectorAll('.mesa').forEach(m => m.classList.remove('resaltado'));
+        if(!t) return;
+        for(let id in db) {
+            if(db[id].some(l => l.ref.includes(t) || l.lote.includes(t) || l.sustrato.includes(t) || (l.caja && l.caja.includes(t)))) {
+                let el = document.getElementById('m'+id); if(el) el.classList.add('resaltado');
+            }
+        }
+    }
+
+    function copiarSeguridad() {
+        let t = document.createElement("textarea");
+        t.value = JSON.stringify(db);
+        document.body.appendChild(t); t.select();
+        document.execCommand("copy");
+        document.body.removeChild(t);
+        alert("¡Copiado! Pégalo en tu nota de seguridad.");
+    }
+
+    function restaurarSeguridad() {
+        let t = prompt("Pega aquí el código:");
+        if(t) {
+            try {
+                db = JSON.parse(t);
+                localStorage.setItem('cultigar_pro_final', JSON.stringify(db));
+                actualizarMapa();
+                alert("✅ Restaurado");
+            } catch(e) { alert("❌ Código no válido"); }
+        }
+    }
+
+    function cerrarPanel() { document.getElementById('infoPanel').style.display = 'none'; }
+    
+    // Al arrancar, baja los datos de la nube
+    cargarDeNube();
+</script>
+</body>
+</html>
