@@ -132,7 +132,11 @@
         </div>
 
         <button class="btn btn-cerrar" onclick="cerrarPanel()">CERRAR PANEL</button>
-
+<div id="config-panel" style="margin-top: 20px; padding: 10px; border: 1px solid #4CAF50; background: #e8f5e9; border-radius: 8px;">
+    <h4 style="margin: 0 0 10px 0; color: #2e7d32;">🔐 Acceso Administrador</h4>
+    <input type="password" id="input-token" placeholder="Pega aquí tu TOKEN (ghp_...)" style="width: 90%; padding: 8px; margin-bottom: 8px; border: 1px solid #ccc; border-radius: 4px;"><br>
+    <button onclick="guardarConfiguracion()" style="background: #2e7d32; color: white; padding: 10px; border: none; border-radius: 4px; width: 100%; cursor: pointer; font-weight: bold;">💾 ACTIVAR MI LLAVE</button>
+</div> 
         <div style="margin-top:20px; border-top:1px dashed #666; padding-top:10px;">
             <p style="font-size:11px; color:#888;">SEGURIDAD MANUAL:</p>
             <div style="display:flex; gap:10px;">
@@ -153,7 +157,16 @@ const parte1 = "";
     let db = JSON.parse(localStorage.getItem('cultigar_pro_final')) || {};
     let mesaActual = null;
     let editIndex = null;
-
+function guardarConfiguracion() {
+    const elToken = document.getElementById('input-token').value.trim();
+    if(elToken.startsWith('ghp_')) {
+        localStorage.setItem('github_token', elToken);
+        alert("✅ ¡Llave activada! Ahora ya puedes guardar cambios en este dispositivo.");
+        location.reload(); 
+    } else {
+        alert("⚠️ El código debe empezar por ghp_ para ser válido.");
+    }
+}
     async function cargarDeNube() {
         try {
             const res = await fetch(`https://api.github.com/gists/${GIST_ID}?cb=${Date.now()}`);
