@@ -314,7 +314,35 @@ function guardarConfiguracion() {
     }
 
     function cerrarPanel() { document.getElementById('infoPanel').style.display = 'none'; }
-    
+    async function subirANube() {
+    const token = localStorage.getItem('github_token');
+    if (!token) {
+        alert("❌ No tienes la llave activada. Pégala en el cuadro verde de abajo.");
+        return;
+    }
+
+    try {
+        const res = await fetch(`https://api.github.com/gists/${GIST_ID}`, {
+            method: 'PATCH',
+            headers: { 
+                'Authorization': `token ${token}`,
+                'Content-Type': 'application/json' 
+            },
+            body: JSON.stringify({
+                files: { "cultigar_db.json": { content: JSON.stringify(db) } }
+            })
+        });
+
+        if (res.ok) {
+            alert("✅ ¡Guardado con éxito en la nube!");
+        } else {
+            const errorData = await res.json();
+            alert("❌ Error al guardar: " + (errorData.message || "Token no válido"));
+        }
+    } catch (e) {
+        alert("❌ Error de conexión: " + e.message);
+    }
+}
     // Al arrancar, baja los datos de la nube
     cargarDeNube();
 </script>
