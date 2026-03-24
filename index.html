@@ -28,10 +28,9 @@
         .label-form { font-size: 11px; color: #aaa; margin-top: 8px; display: block; font-weight: bold; }
         .btn { padding: 15px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; width: 100%; font-size: 16px; margin-top: 10px; }
         .btn-guardar { background: #4CAF50; color: white; }
-        .btn-copiar { background: #FF9800; color: white; }
-        .btn-pegar { background: #9C27B0; color: white; }
-        .btn-mini { padding: 6px; border-radius: 4px; border: none; color: white; font-weight: bold; margin-left: 3px; cursor: pointer; font-size: 10px; }
-        .btn-receta { background: #555; color: #fff; padding: 8px; font-size: 11px; width: auto; margin-right: 5px; margin-top: 5px; cursor: pointer; border-radius: 4px; border: 1px solid #777; }
+        .btn-pegar { background: #9C27B0; color: white; border: 2px dashed white; }
+        .btn-mini { padding: 8px; border-radius: 4px; border: none; color: white; font-weight: bold; margin-bottom: 4px; cursor: pointer; font-size: 11px; width: 100%; display: block; }
+        .btn-receta { background: #555; color: #fff; padding: 8px; font-size: 11px; width: auto; margin-right: 5px; margin-top: 5px; cursor: pointer; border-radius: 4px; border: 1px solid #777; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -106,7 +105,7 @@
         </table>
 
         <div class="formulario-lote">
-            <button class="btn btn-pegar" id="btnPegar" onclick="pegarDatos()" style="display:none; margin-bottom:15px;">📋 PEGAR PLANTA MOVIDA AQUÍ</button>
+            <button class="btn btn-pegar" id="btnPegar" onclick="pegarDatos()" style="display:none; margin-bottom:15px;">📋 PEGAR PLANTA AQUÍ</button>
 
             <h3 style="margin:0 0 10px 0; font-size:14px; color:#4CAF50;">+ REGISTRO RÁPIDO:</h3>
             
@@ -116,14 +115,15 @@
             
             <span class="label-form">SUSTRATO / RECETA</span>
             <div>
-                <button type="button" class="btn-receta" onclick="document.getElementById('f_sustrato').value='F8P16FC, 2AG, 0,75 TRIANUM'">RECETA TRIANUM</button>
-           
+                <button type="button" class="btn-receta" onclick="document.getElementById('f_sustrato').value='F8P16FC, 2AG, 0,75 TRIANUM'">TRIANUM</button>
+                <button type="button" class="btn-receta" onclick="document.getElementById('f_sustrato').value='RECETA 2'">RECETA 2</button>
+                <button type="button" class="btn-receta" onclick="document.getElementById('f_sustrato').value='RECETA 3'">RECETA 3</button>
             </div>
             <input type="text" id="f_sustrato">
             
             <span class="label-form">Nº CAJA JIFFY</span><input type="text" id="f_caja">
-            <span class="label-form">FECHA ENRAIZADO (Cara trasera)</span><input type="date" id="f_enraizado">
-            <span class="label-form">FECHA TRABAJO (Hoy)</span><input type="date" id="f_vivero">
+            <span class="label-form">FECHA ENRAIZADO</span><input type="date" id="f_enraizado">
+            <span class="label-form">FECHA TRABAJO</span><input type="date" id="f_vivero">
             
             <button class="btn btn-guardar" onclick="guardarLote()">+ REGISTRAR EN MAPA</button>
         </div>
@@ -132,7 +132,7 @@
         
         <div id="config-panel" style="margin-top:20px; padding:10px; border:1px solid #4CAF50; background:#e8f5e9; border-radius:8px; color:black;">
             <p style="margin:0 0 5px 0; font-size:11px; font-weight:bold;">🔐 ACCESO ADMIN:</p>
-            <input type="password" id="input-token" placeholder="Pega el Token ghp_..." style="width:90%; padding:8px; border:1px solid #ccc;">
+            <input type="password" id="input-token" placeholder="Pega el Token ghp_...">
             <button onclick="guardarConfig()" style="width:100%; margin-top:5px; background:#2e7d32; color:white; padding:8px; border:none; border-radius:4px; font-weight:bold;">ACTIVAR MI LLAVE</button>
         </div>
     </div>
@@ -142,27 +142,29 @@
     const GIST_ID = "dc4b1ac9b41655086c76352f03ccfafe";
     let db = JSON.parse(localStorage.getItem('cultigar_pro_final')) || {};
     let mesaActual = null;
-    let memoriaCopiada = null; // Almacén para la función Mover/Pegar
+    let memoriaCopiada = null; 
     let ultimosDatos = { ref: "", lote: "", sustrato: "", f_enraizado: "" };
+
+    // Función para formatear fecha a DD/MM/AAAA
+    function formatearFechaVista(fechaStr) {
+        if(!fechaStr) return "";
+        const partes = fechaStr.split('-');
+        if(partes.length !== 3) return fechaStr;
+        return `${partes[2]}/${partes[1]}/${partes[0]}`;
+    }
 
     function abrirMesa(id) {
         mesaActual = id;
         document.getElementById('tituloMesa').innerText = "Mesa " + id;
-        
-        // Mostrar botón pegar si hay algo en memoria
         document.getElementById('btnPegar').style.display = memoriaCopiada ? 'block' : 'none';
         
-        // Sugerir datos de la bandeja anterior para ir más rápido
         if(ultimosDatos.ref) {
             document.getElementById('f_ref').value = ultimosDatos.ref;
             document.getElementById('f_lote').value = ultimosDatos.lote;
             document.getElementById('f_sustrato').value = ultimosDatos.sustrato;
             document.getElementById('f_enraizado').value = ultimosDatos.f_enraizado;
         }
-
-        // Fecha de hoy por defecto para el trabajo
         document.getElementById('f_vivero').value = new Date().toISOString().split('T')[0];
-        
         renderLotes();
         document.getElementById('infoPanel').style.display = 'block';
     }
@@ -173,10 +175,10 @@
             html += `<tr>
                 <td><b>${l.ref}</b><br><small>L-${l.lote}</small></td>
                 <td>Caja: ${l.caja}<br><small>${l.sustrato}</small></td>
-                <td>${l.f_vivero}</td>
+                <td>${formatearFechaVista(l.f_vivero)}</td>
                 <td>
-                    <button onclick="copiarParaMover(${index})" class="btn-mini btn-copiar" title="Mover a otra mesa">📦 MOVER</button>
-                    <button onclick="borrarLote(${index})" class="btn-mini" style="background:red;" title="Eliminar">X</button>
+                    <button onclick="copiarParaMover(${index})" class="btn-mini" style="background:#FF9800;">📦 MOVER</button>
+                    <button onclick="borrarLote(${index})" class="btn-mini" style="background:red;">X</button>
                 </td></tr>`;
         });
         document.getElementById('listaLotes').innerHTML = html || "<tr><td colspan='4' style='text-align:center;'>Vacia</td></tr>";
@@ -187,7 +189,7 @@
         db[mesaActual].splice(index, 1);
         if(db[mesaActual].length === 0) delete db[mesaActual];
         localStorage.setItem('cultigar_pro_final', JSON.stringify(db));
-        alert("Planta recogida en memoria. Abre la mesa de destino y dale a PEGAR.");
+        alert("✅ Planta recogida. Abre otra mesa y dale a PEGAR.");
         renderLotes();
         actualizarMapa();
     }
@@ -204,6 +206,17 @@
         document.getElementById('btnPegar').style.display = 'none';
     }
 
+    function borrarLote(index) {
+        if(confirm("¿Seguro que quieres borrar este lote?")) {
+            db[mesaActual].splice(index, 1);
+            if(db[mesaActual].length === 0) delete db[mesaActual];
+            localStorage.setItem('cultigar_pro_final', JSON.stringify(db));
+            subirANube();
+            renderLotes();
+            actualizarMapa();
+        }
+    }
+
     function guardarLote() {
         let nuevo = {
             ref: document.getElementById('f_ref').value.toUpperCase(),
@@ -214,35 +227,28 @@
             f_enraizado: document.getElementById('f_enraizado').value,
             f_vivero: document.getElementById('f_vivero').value
         };
-
         if(!nuevo.ref) return alert("Falta la Referencia");
-
-        // Guardamos estos datos para que la próxima mesa ya los tenga escritos
         ultimosDatos = { ref: nuevo.ref, lote: nuevo.lote, sustrato: nuevo.sustrato, f_enraizado: nuevo.f_enraizado };
-
         if(!db[mesaActual]) db[mesaActual] = [];
         db[mesaActual].push(nuevo);
-        
         localStorage.setItem('cultigar_pro_final', JSON.stringify(db));
         subirANube();
         renderLotes();
         actualizarMapa();
-        
-        // Limpiamos los campos únicos para la siguiente bandeja
         document.getElementById('f_caja').value = "";
         document.getElementById('f_cant').value = "";
     }
 
     async function subirANube() {
         const token = localStorage.getItem('github_token');
-        if(!token) return console.log("Sin token");
+        if(!token) return;
         try {
             await fetch(`https://api.github.com/gists/${GIST_ID}`, {
                 method: 'PATCH',
                 headers: { 'Authorization': `token ${token}` },
                 body: JSON.stringify({ files: { "cultigar_db.json": { content: JSON.stringify(db) } } })
             });
-        } catch (e) { console.error("Error nube"); }
+        } catch (e) { console.error(e); }
     }
 
     async function cargarDeNube() {
