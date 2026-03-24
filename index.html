@@ -19,7 +19,7 @@
         .ocupada { fill: #c8e6c9; stroke: #2e7d32; }
         .resaltado { fill: #FF8C00 !important; }
         .texto-mesa { font-size: 9px; font-weight: bold; pointer-events: none; text-anchor: middle; fill: #000; }
-        #infoPanel { position: fixed; top: 2%; left: 2%; width: 92%; height: 92%; background: #1a1a1a; color: white; padding: 15px; border-radius: 15px; display: none; border: 4px solid #4CAF50; z-index: 10000; box-shadow: 0 0 50px rgba(0,0,0,0.9); overflow-y: auto; }
+        #infoPanel { position: fixed; top: 2%; left: 2%; width: 92%; height: 92%; background: #1a1a1a; color: white; padding: 15px; border-radius: 15px; display: none; border: 4px solid #4CAF50; z-index: 10000; box-shadow: 0 0 50px rgba(0,0,0,0.9); overflow-y: auto; scroll-behavior: smooth; }
         .tabla-lotes { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 12px; background: #222; }
         .tabla-lotes th { background: #333; color: #4CAF50; padding: 8px; text-align: left; border-bottom: 2px solid #4CAF50; }
         .tabla-lotes td { padding: 8px; border-bottom: 1px solid #444; }
@@ -38,8 +38,8 @@
 <div class="cabecera">
     <div class="busqueda-nube-container">
         <input type="text" id="inputBusqueda" class="buscador" placeholder="🔍 Buscar variedad, lote..." onkeyup="buscar()">
-        <button class="btn-nube btn-subir" onclick="subirANube()">⬆ SUBIR</button>
-        <button class="btn-nube btn-bajar" onclick="cargarDeNube()">⬇ BAJAR</button>
+        <button class="btn-nube btn-subir" onclick="subirANube(true)">⬆ SUBIR</button>
+        <button class="btn-nube btn-bajar" onclick="cargarDeNube(true)">⬇ BAJAR</button>
     </div>
     <div id="resumenStock" class="resumen-stock">Cargando datos...</div>
 </div>
@@ -77,7 +77,6 @@
         <rect id="m16-54" class="mesa" x="300" y="540" width="38" height="145" onclick="abrirMesa('16-54')" /><text x="319" y="675" class="texto-mesa">16-54</text>
         <rect id="m17-55" class="mesa" x="345" y="540" width="38" height="145" onclick="abrirMesa('17-55')" /><text x="364" y="675" class="texto-mesa">17-55</text>
 
-        <text x="440" y="55" style="font-size:14px; font-weight:bold; fill:#2e7d32; text-anchor:middle;">TÚNELES</text>
         <rect id="m14" class="mesa" x="400" y="70" width="80" height="35" onclick="abrirMesa('14')" /><text x="440" y="92" class="texto-mesa">14</text>
         <rect id="m13" class="mesa" x="400" y="115" width="80" height="35" onclick="abrirMesa('13')" /><text x="440" y="137" class="texto-mesa">13</text>
         <rect id="m12" class="mesa" x="400" y="160" width="80" height="35" onclick="abrirMesa('12')" /><text x="440" y="182" class="texto-mesa">12</text>
@@ -95,41 +94,32 @@
     </svg>
 
     <div id="infoPanel">
-        <h2 id="tituloMesa" style="margin:0; color:#4CAF50;">Mesa</h2>
-        
+        <h2 id="tituloMesa" style="margin:0; color:#4CAF50; text-align:center;">Mesa</h2>
         <table class="tabla-lotes">
             <thead>
                 <tr><th>Datos</th><th>Caja/Receta</th><th>F.Trabajo</th><th>Acción</th></tr>
             </thead>
             <tbody id="listaLotes"></tbody>
         </table>
-
         <div class="formulario-lote">
             <button class="btn btn-pegar" id="btnPegar" onclick="pegarDatos()" style="display:none; margin-bottom:15px;">📋 PEGAR PLANTA AQUÍ</button>
-
             <h3 style="margin:0 0 10px 0; font-size:14px; color:#4CAF50;">+ REGISTRO RÁPIDO:</h3>
-            
             <span class="label-form">REFERENCIA</span><input type="text" id="f_ref">
             <span class="label-form">LOTE</span><input type="text" id="f_lote">
             <span class="label-form">CANTIDAD BANDEJAS</span><input type="number" id="f_cant">
-            
             <span class="label-form">SUSTRATO / RECETA</span>
             <div>
                 <button type="button" class="btn-receta" onclick="document.getElementById('f_sustrato').value='F8P16FC, 2AG, 0,75 TRIANUM'">TRIANUM</button>
-                <button type="button" class="btn-receta" onclick="document.getElementById('f_sustrato').value='GRAMOSEMI CON PERLITA'">GRAMOSEMI PERL</button>
-                <button type="button" class="btn-receta" onclick="document.getElementById('f_sustrato').value='SIRO ÁCIDO'">SIRO ÁCIDO</button>
+                <button type="button" class="btn-receta" onclick="document.getElementById('f_sustrato').value='RECETA 2'">RECETA 2</button>
+                <button type="button" class="btn-receta" onclick="document.getElementById('f_sustrato').value='RECETA 3'">RECETA 3</button>
             </div>
             <input type="text" id="f_sustrato">
-            
             <span class="label-form">Nº CAJA JIFFY</span><input type="text" id="f_caja">
             <span class="label-form">FECHA ENRAIZADO</span><input type="date" id="f_enraizado">
             <span class="label-form">FECHA TRABAJO</span><input type="date" id="f_vivero">
-            
             <button class="btn btn-guardar" onclick="guardarLote()">+ REGISTRAR EN MAPA</button>
         </div>
-
         <button class="btn" style="background:#cc0000; color:white;" onclick="cerrarPanel()">CERRAR PANEL</button>
-        
         <div id="config-panel" style="margin-top:20px; padding:10px; border:1px solid #4CAF50; background:#e8f5e9; border-radius:8px; color:black;">
             <p style="margin:0 0 5px 0; font-size:11px; font-weight:bold;">🔐 ACCESO ADMIN:</p>
             <input type="password" id="input-token" placeholder="Pega el Token ghp_...">
@@ -145,19 +135,16 @@
     let memoriaCopiada = null; 
     let ultimosDatos = { ref: "", lote: "", sustrato: "", f_enraizado: "" };
 
-    // Función para formatear fecha a DD/MM/AAAA
     function formatearFechaVista(fechaStr) {
         if(!fechaStr) return "";
         const partes = fechaStr.split('-');
-        if(partes.length !== 3) return fechaStr;
-        return `${partes[2]}/${partes[1]}/${partes[0]}`;
+        return partes.length === 3 ? `${partes[2]}/${partes[1]}/${partes[0]}` : fechaStr;
     }
 
     function abrirMesa(id) {
         mesaActual = id;
         document.getElementById('tituloMesa').innerText = "Mesa " + id;
         document.getElementById('btnPegar').style.display = memoriaCopiada ? 'block' : 'none';
-        
         if(ultimosDatos.ref) {
             document.getElementById('f_ref').value = ultimosDatos.ref;
             document.getElementById('f_lote').value = ultimosDatos.lote;
@@ -167,6 +154,7 @@
         document.getElementById('f_vivero').value = new Date().toISOString().split('T')[0];
         renderLotes();
         document.getElementById('infoPanel').style.display = 'block';
+        document.getElementById('infoPanel').scrollTop = 0;
     }
 
     function renderLotes() {
@@ -192,6 +180,7 @@
         alert("✅ Planta recogida. Abre otra mesa y dale a PEGAR.");
         renderLotes();
         actualizarMapa();
+        document.getElementById('infoPanel').scrollTop = 0;
     }
 
     function pegarDatos() {
@@ -200,10 +189,11 @@
         db[mesaActual].push(memoriaCopiada);
         memoriaCopiada = null;
         localStorage.setItem('cultigar_pro_final', JSON.stringify(db));
-        subirANube();
+        subirANube(false);
         renderLotes();
         actualizarMapa();
         document.getElementById('btnPegar').style.display = 'none';
+        document.getElementById('infoPanel').scrollTop = 0;
     }
 
     function borrarLote(index) {
@@ -211,54 +201,64 @@
             db[mesaActual].splice(index, 1);
             if(db[mesaActual].length === 0) delete db[mesaActual];
             localStorage.setItem('cultigar_pro_final', JSON.stringify(db));
-            subirANube();
+            subirANube(false);
             renderLotes();
             actualizarMapa();
         }
     }
 
     function guardarLote() {
+        let refInput = document.getElementById('f_ref').value.toUpperCase();
+        if(!refInput) return alert("Falta la Referencia");
+        
         let nuevo = {
-            ref: document.getElementById('f_ref').value.toUpperCase(),
+            ref: refInput,
             lote: document.getElementById('f_lote').value.toUpperCase(),
             caja: document.getElementById('f_caja').value.toUpperCase(),
             sustrato: document.getElementById('f_sustrato').value.toUpperCase(),
-            cant: document.getElementById('f_cant').value,
+            cant: document.getElementById('f_cant').value || 0,
             f_enraizado: document.getElementById('f_enraizado').value,
             f_vivero: document.getElementById('f_vivero').value
         };
-        if(!nuevo.ref) return alert("Falta la Referencia");
+        
         ultimosDatos = { ref: nuevo.ref, lote: nuevo.lote, sustrato: nuevo.sustrato, f_enraizado: nuevo.f_enraizado };
         if(!db[mesaActual]) db[mesaActual] = [];
         db[mesaActual].push(nuevo);
         localStorage.setItem('cultigar_pro_final', JSON.stringify(db));
-        subirANube();
+        subirANube(false);
         renderLotes();
         actualizarMapa();
         document.getElementById('f_caja').value = "";
         document.getElementById('f_cant').value = "";
+        
+        // El salto automático arriba
+        document.getElementById('infoPanel').scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    async function subirANube() {
+    async function subirANube(mostrarAviso) {
         const token = localStorage.getItem('github_token');
         if(!token) return;
         try {
-            await fetch(`https://api.github.com/gists/${GIST_ID}`, {
+            const res = await fetch(`https://api.github.com/gists/${GIST_ID}`, {
                 method: 'PATCH',
                 headers: { 'Authorization': `token ${token}` },
                 body: JSON.stringify({ files: { "cultigar_db.json": { content: JSON.stringify(db) } } })
             });
-        } catch (e) { console.error(e); }
+            if(res.ok && mostrarAviso) alert("✅ Nube actualizada con éxito");
+        } catch (e) { if(mostrarAviso) alert("❌ Error al subir"); }
     }
 
-    async function cargarDeNube() {
+    async function cargarDeNube(mostrarAviso) {
         try {
             const res = await fetch(`https://api.github.com/gists/${GIST_ID}?cb=${Date.now()}`);
             const json = await res.json();
-            db = JSON.parse(json.files["cultigar_db.json"].content);
-            localStorage.setItem('cultigar_pro_final', JSON.stringify(db));
-            actualizarMapa();
-        } catch (e) { console.log("Error cargando"); }
+            if(json.files && json.files["cultigar_db.json"]) {
+                db = JSON.parse(json.files["cultigar_db.json"].content);
+                localStorage.setItem('cultigar_pro_final', JSON.stringify(db));
+                actualizarMapa();
+                if(mostrarAviso) alert("✅ Datos actualizados");
+            }
+        } catch (e) { console.log("Error nube"); }
     }
 
     function actualizarMapa() {
@@ -291,15 +291,11 @@
 
     function guardarConfig() {
         const t = document.getElementById('input-token').value.trim();
-        if(t) {
-            localStorage.setItem('github_token', t);
-            alert("Llave activada. Reiniciando...");
-            location.reload();
-        }
+        if(t) { localStorage.setItem('github_token', t); alert("🔑 Llave guardada"); location.reload(); }
     }
     
     function cerrarPanel() { document.getElementById('infoPanel').style.display = 'none'; }
-    cargarDeNube();
+    cargarDeNube(false);
 </script>
 </body>
 </html>
