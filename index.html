@@ -3,159 +3,159 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CULTIGAR PRO - GESTIÓN SUPERFICIES</title>
+    <title>CULTIGAR - CONTROL TOTAL VIVERO</title>
     <style>
         body { font-family: sans-serif; background: #333; margin: 0; padding: 0; color: white; }
-        .cabecera { background: white; padding: 10px; position: sticky; top: 0; z-index: 500; text-align: center; box-shadow: 0 2px 10px rgba(0,0,0,0.5); color: black; }
+        .cabecera { background: white; padding: 10px; position: sticky; top: 0; z-index: 500; text-align: center; color: black; box-shadow: 0 2px 10px rgba(0,0,0,0.5); }
+        
         .tabs { display: flex; gap: 5px; justify-content: center; margin-bottom: 10px; }
-        .tab { padding: 12px; border-radius: 20px; border: none; cursor: pointer; font-weight: bold; background: #ccc; flex: 1; max-width: 150px; }
+        .tab { padding: 10px; border-radius: 20px; border: none; cursor: pointer; font-weight: bold; background: #ccc; flex: 1; max-width: 150px; font-size: 12px; }
         .tab.active { background: #2e7d32; color: white; }
         .tab-fito.active { background: #d32f2f; color: white; }
-        .mapa-real { background: white; margin: 10px auto; padding: 10px; border: 1px solid #000; width: 490px; border-radius: 8px; }
-        .mesa { fill: #f1f1f1; stroke: #999; stroke-width: 1; cursor: pointer; transition: 0.2s; }
-        .ocupada { fill: #c8e6c9; stroke: #2e7d32; }
-        .infectada { fill: #ffcdd2 !important; stroke: #c62828; stroke-width: 2.5; }
-        .tratada { fill: #fff9c4 !important; stroke: #fbc02d; stroke-width: 2.5; }
-        .texto-id { font-size: 8px; font-weight: bold; text-anchor: middle; fill: #000; pointer-events: none; }
-        .texto-m2 { font-size: 7px; fill: #555; text-anchor: middle; pointer-events: none; font-weight: normal; }
+
+        .mapa-real { background: white; margin: 10px auto; padding: 10px; border: 1px solid #000; width: 490px; border-radius: 8px; position: relative; }
+        .mesa { fill: #f1f1f1; stroke: #999; stroke-width: 1; cursor: pointer; }
+        
+        /* Colores de estado */
+        .ocupada { fill: #c8e6c9 !important; stroke: #2e7d32; }
+        .infectada { fill: #ffcdd2 !important; stroke: #c62828; stroke-width: 2; }
+        .tratada { fill: #fff9c4 !important; stroke: #fbc02d; stroke-width: 2; }
+        .resaltado { fill: #FF8C00 !important; stroke: black; stroke-width: 3; }
+
+        .txt-id { font-size: 9px; font-weight: bold; text-anchor: middle; fill: #000; pointer-events: none; }
+        .txt-m2 { font-size: 7px; fill: #666; text-anchor: middle; pointer-events: none; }
+
         #infoPanel { position: fixed; top: 2%; left: 2%; width: 92%; height: 92%; background: #1a1a1a; color: white; padding: 15px; border-radius: 15px; display: none; border: 4px solid #4CAF50; z-index: 10000; overflow-y: auto; }
-        .formulario-lote { background: #262626; padding: 15px; border-radius: 10px; margin-top: 10px; border: 1px solid #444; }
+        .formulario { background: #262626; padding: 15px; border-radius: 10px; margin-top: 10px; border: 1px solid #444; }
         input, select { width: 95%; padding: 12px; margin: 5px 0; border-radius: 8px; border: none; font-size: 16px; background: #eee; }
         .btn { padding: 15px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; width: 100%; font-size: 16px; margin-top: 10px; color: white; }
-        .btn-guardar { background: #2e7d32; }
-        .btn-fito { background: #d32f2f; }
-        .badge-m2 { background: #e8f5e9; color: #2e7d32; padding: 5px 10px; border-radius: 5px; font-weight: bold; display: inline-block; margin-bottom: 10px; }
     </style>
 </head>
 <body>
 
 <div class="cabecera">
     <div class="tabs">
-        <button id="tabPlantas" class="tab active" onclick="cambiarModo('PLANTAS')">🌱 PLANTAS</button>
-        <button id="tabFitos" class="tab tab-fito" onclick="cambiarModo('FITOS')">🚑 SALUD</button>
+        <button id="tabP" class="tab active" onclick="cambiarModo('P')">🌱 PLANTAS</button>
+        <button id="tabF" class="tab" onclick="cambiarModo('F')">🚑 SALUD</button>
     </div>
-    <input type="text" id="bus" placeholder="🔍 Buscar variedad o plaga..." onkeyup="buscar()" style="width: 80%; padding: 8px; border-radius: 20px;">
+    <input type="text" id="bus" placeholder="🔍 Buscar..." onkeyup="buscar()" style="width: 80%; padding: 10px; border-radius: 20px;">
 </div>
 
 <div class="mapa-real">
-    <svg width="490" height="750" viewBox="0 0 490 750">
-        <rect id="m48" class="mesa" x="10" y="50" width="35" height="120" onclick="abrir('48', 18)" />
-        <text x="27" y="100" class="texto-id">M-48</text><text x="27" y="112" class="texto-m2">18m²</text>
+    <svg width="490" height="850" viewBox="0 0 490 850">
+        <g id="gSuperior">
+            </g>
+
+        <rect id="m48" class="mesa" x="10" y="100" width="45" height="150" onclick="abrir('48', 18)" />
+        <text x="32" y="140" class="txt-id">48</text><text x="32" y="155" class="txt-m2">18m²</text>
         
-        <rect id="m49" class="mesa" x="50" y="50" width="35" height="120" onclick="abrir('49', 18)" />
-        <text x="67" y="100" class="texto-id">M-49</text><text x="67" y="112" class="texto-m2">18m²</text>
+        <rect id="m49" class="mesa" x="60" y="100" width="45" height="150" onclick="abrir('49', 18)" />
+        <text x="82" y="140" class="txt-id">49</text><text x="82" y="155" class="txt-m2">18m²</text>
 
-        <rect id="m50" class="mesa" x="95" y="50" width="35" height="120" onclick="abrir('50', 18)" />
-        <text x="112" y="100" class="texto-id">M-50</text><text x="112" y="112" class="texto-m2">18m²</text>
+        <rect id="m50" class="mesa" x="110" y="100" width="45" height="150" onclick="abrir('50', 18)" />
+        <text x="132" y="140" class="txt-id">50</text><text x="132" y="155" class="txt-m2">18m²</text>
 
-        <rect id="m51" class="mesa" x="135" y="50" width="35" height="120" onclick="abrir('51', 18)" />
-        <text x="152" y="100" class="texto-id">M-51</text><text x="152" y="112" class="texto-m2">18m²</text>
+        <rect id="m42" class="mesa" x="10" y="300" width="45" height="180" onclick="abrir('42', 24)" />
+        <text x="32" y="380" class="txt-id">42</text><text x="32" y="395" class="txt-m2">24m²</text>
 
-        <rect id="m42" class="mesa" x="10" y="280" width="40" height="180" onclick="abrir('42', 24)" />
-        <text x="30" y="360" class="texto-id">M-42</text><text x="30" y="372" class="texto-m2">24m²</text>
-
-        <rect id="m43" class="mesa" x="60" y="280" width="40" height="180" onclick="abrir('43', 24)" />
-        <text x="80" y="360" class="texto-id">M-43</text><text x="80" y="372" class="texto-m2">24m²</text>
-
-        <rect id="m44" class="mesa" x="115" y="280" width="40" height="180" onclick="abrir('44', 24)" />
-        <text x="135" y="360" class="texto-id">M-44</text><text x="135" y="372" class="texto-m2">24m²</text>
-
-        </svg>
+        <rect id="m43" class="mesa" x="65" y="300" width="45" height="180" onclick="abrir('43', 24)" />
+        <text x="87" y="380" class="txt-id">43</text><text x="87" y="395" class="txt-m2">24m²</text>
+    </svg>
 </div>
 
 <div id="infoPanel">
-    <h2 id="tituloMesa" style="margin-bottom:5px;">Mesa</h2>
-    <div id="badgeM2" class="badge-m2">0 m²</div>
+    <h2 id="titMesa">Mesa</h2>
+    <p id="txtM2" style="background: #333; padding: 5px; display: inline-block; border-radius: 5px;">0 m²</p>
     
     <div id="secPlantas">
-        <div id="listaLotes"></div>
-        <div class="formulario-lote">
-            <h3>+ REGISTRO PLANTA</h3>
-            <input type="text" id="f_ref" placeholder="VARIEDAD">
-            <input type="number" id="f_cant" placeholder="CANTIDAD BANDEJAS">
-            <button class="btn btn-guardar" onclick="guardarP()">REGISTRAR</button>
+        <div id="listaPlantas"></div>
+        <div class="formulario">
+            <h3>+ Añadir Planta</h3>
+            <input type="text" id="f_var" placeholder="Variedad">
+            <input type="number" id="f_cant" placeholder="Bandejas">
+            <button class="btn" style="background:#2e7d32;" onclick="guardarPlanta()">REGISTRAR</button>
         </div>
     </div>
 
-    <div id="secFitos" style="display:none;">
-        <div class="formulario-lote" style="border-left: 10px solid #d32f2f;">
-            <select id="f_estado">
+    <div id="secSalud" style="display:none;">
+        <div class="formulario" style="border-left: 10px solid #d32f2f;">
+            <h3>Estado de Salud</h3>
+            <select id="f_est">
                 <option value="sana">🟢 SANA</option>
                 <option value="infectada">🔴 INFECTADA</option>
                 <option value="tratada">🟡 TRATADA</option>
             </select>
-            <input type="text" id="f_plaga" placeholder="PLAGA (Pulgón, Trips...)">
-            <input type="text" id="f_prod" placeholder="PRODUCTO">
-            <button class="btn btn-fito" onclick="guardarS()">ACTUALIZAR SALUD</button>
+            <input type="text" id="f_plaga" placeholder="¿Qué plaga hay?">
+            <input type="text" id="f_prod" placeholder="Producto aplicado">
+            <button class="btn" style="background:#d32f2f;" onclick="guardarSalud()">ACTUALIZAR</button>
         </div>
-        <div id="histS" style="margin-top:10px; font-size:13px; color:#aaa;"></div>
     </div>
-    <button class="btn" style="background:#555;" onclick="cerrar()">CERRAR</button>
+    <button class="btn" style="background:#666;" onclick="cerrar()">VOLVER AL MAPA</button>
 </div>
 
 <script>
-    let db = JSON.parse(localStorage.getItem('cultigar_v3')) || { plantas: {}, salud: {} };
-    let modo = 'PLANTAS';
-    let idM = null;
-    let m2M = 0;
+    // 1. GENERAR MESAS SUPERIORES DINÁMICAMENTE
+    const gSup = document.getElementById('gSuperior');
+    for(let i=0; i<14; i++){
+        let id = 25 + i; let x = 10 + (i * 34);
+        gSup.innerHTML += `<rect id="m${id}" class="mesa" x="${x}" y="20" width="30" height="60" onclick="abrir('${id}', 14.4)" />
+        <text x="${x+15}" y="45" class="txt-id">${id}</text><text x="${x+15}" y="55" class="txt-m2">14.4</text>`;
+    }
 
-    function cambiarModo(m) { 
-        modo = m; 
-        document.getElementById('tabPlantas').className = (m=='PLANTAS'?'tab active':'tab');
-        document.getElementById('tabFitos').className = (m=='FITOS'?'tab tab-fito active':'tab tab-fito');
-        actualizarMapa(); 
+    // 2. LÓGICA DE LA APP
+    let db = JSON.parse(localStorage.getItem('cultigar_db')) || { plantas: {}, salud: {} };
+    let modo = 'P'; let mesaId = null;
+
+    function cambiarModo(m) {
+        modo = m;
+        document.getElementById('tabP').classList.toggle('active', m=='P');
+        document.getElementById('tabF').classList.toggle('active', m=='F');
+        actualizarMapa();
     }
 
     function abrir(id, m2) {
-        idM = id; m2M = m2;
-        document.getElementById('tituloMesa').innerText = "Mesa " + id;
-        document.getElementById('badgeM2').innerText = "Superficie: " + m2 + " m²";
+        mesaId = id;
+        document.getElementById('titMesa').innerText = "Mesa " + id;
+        document.getElementById('txtM2').innerText = "Superficie: " + m2 + " m²";
         document.getElementById('infoPanel').style.display = 'block';
-        if(modo === 'PLANTAS') {
+        if(modo == 'P') {
             document.getElementById('secPlantas').style.display = 'block';
-            document.getElementById('secFitos').style.display = 'none';
-            renderP();
+            document.getElementById('secSalud').style.display = 'none';
+            renderPlantas();
         } else {
             document.getElementById('secPlantas').style.display = 'none';
-            document.getElementById('secFitos').style.display = 'block';
-            cargarS();
+            document.getElementById('secSalud').style.display = 'block';
+            cargarSalud();
         }
     }
 
-    function guardarP() {
-        if(!db.plantas[idM]) db.plantas[idM] = [];
-        db.plantas[idM].push({ ref: document.getElementById('f_ref').value.toUpperCase(), cant: document.getElementById('f_cant').value });
-        sync(); renderP();
+    function guardarPlanta() {
+        if(!db.plantas[mesaId]) db.plantas[mesaId] = [];
+        db.plantas[mesaId].push({ v: document.getElementById('f_var').value.toUpperCase(), c: document.getElementById('f_cant').value });
+        save(); renderPlantas();
     }
 
-    function guardarS() {
-        db.salud[idM] = {
-            est: document.getElementById('f_estado').value,
-            plaga: document.getElementById('f_plaga').value.toUpperCase(),
-            prod: document.getElementById('f_prod').value.toUpperCase(),
-            fecha: new Date().toLocaleDateString()
-        };
-        sync(); alert("Salud actualizada");
+    function guardarSalud() {
+        db.salud[mesaId] = { e: document.getElementById('f_est').value, p: document.getElementById('f_plaga').value.toUpperCase(), pr: document.getElementById('f_prod').value.toUpperCase() };
+        save(); alert("Salud actualizada");
     }
 
-    function renderP() {
-        let h = "";
-        (db.plantas[idM] || []).forEach((l, i) => {
-            h += `<div style="padding:10px; border-bottom:1px solid #444;"><b>${l.ref}</b> - ${l.cant} ban.</div>`;
+    function renderPlantas() {
+        let h = ""; (db.plantas[mesaId] || []).forEach((p, i) => {
+            h += `<div style="padding:10px; border-bottom:1px solid #444;">${p.v} - ${p.c} ban.</div>`;
         });
-        document.getElementById('listaLotes').innerHTML = h || "Mesa vacía";
+        document.getElementById('listaPlantas').innerHTML = h || "Vacía";
     }
 
-    function cargarS() {
-        let s = db.salud[idM] || { est: 'sana', plaga: '', prod: '' };
-        document.getElementById('f_estado').value = s.est;
-        document.getElementById('f_plaga').value = s.plaga;
-        document.getElementById('f_prod').value = s.prod;
-        document.getElementById('histS').innerHTML = s.fecha ? `Último registro: ${s.fecha} - ${s.plaga}` : "Sin historial";
+    function cargarSalud() {
+        let s = db.salud[mesaId] || { e: 'sana', p: '', pr: '' };
+        document.getElementById('f_est').value = s.e;
+        document.getElementById('f_plaga').value = s.p;
+        document.getElementById('f_prod').value = s.pr;
     }
 
-    function sync() {
-        localStorage.setItem('cultigar_v3', JSON.stringify(db));
+    function save() {
+        localStorage.setItem('cultigar_db', JSON.stringify(db));
         actualizarMapa();
     }
 
@@ -163,10 +163,10 @@
         document.querySelectorAll('.mesa').forEach(m => {
             let id = m.id.substring(1);
             m.classList.remove('ocupada', 'infectada', 'tratada');
-            if(modo === 'PLANTAS') {
+            if(modo == 'P') {
                 if(db.plantas[id] && db.plantas[id].length > 0) m.classList.add('ocupada');
             } else {
-                if(db.salud[id]) m.classList.add(db.salud[id].est);
+                if(db.salud[id]) m.classList.add(db.salud[id].e);
             }
         });
     }
