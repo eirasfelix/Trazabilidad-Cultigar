@@ -20,16 +20,16 @@
         .resaltado { fill: #FF8C00 !important; }
         .texto-mesa { font-size: 9px; font-weight: bold; pointer-events: none; text-anchor: middle; fill: #000; }
         #infoPanel { position: fixed; top: 2%; left: 2%; width: 92%; height: 92%; background: #1a1a1a; color: white; padding: 15px; border-radius: 15px; display: none; border: 4px solid #4CAF50; z-index: 10000; box-shadow: 0 0 50px rgba(0,0,0,0.9); overflow-y: auto; scroll-behavior: smooth; }
-        .tabla-lotes { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 12px; background: #222; }
+        .tabla-lotes { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 11px; background: #222; }
         .tabla-lotes th { background: #333; color: #4CAF50; padding: 8px; text-align: left; border-bottom: 2px solid #4CAF50; }
-        .tabla-lotes td { padding: 8px; border-bottom: 1px solid #444; }
+        .tabla-lotes td { padding: 8px; border-bottom: 1px solid #444; vertical-align: middle; }
         .formulario-lote { background: #333; padding: 15px; border-radius: 10px; margin-top: 15px; border: 1px solid #555; }
         .formulario-lote input { width: 95%; padding: 10px; margin: 4px 0; border-radius: 5px; border: none; font-size: 16px; display: block; }
         .label-form { font-size: 11px; color: #aaa; margin-top: 8px; display: block; font-weight: bold; }
         .btn { padding: 15px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; width: 100%; font-size: 16px; margin-top: 10px; }
         .btn-guardar { background: #4CAF50; color: white; }
         .btn-pegar { background: #9C27B0; color: white; border: 2px dashed white; }
-        .btn-mini { padding: 8px; border-radius: 4px; border: none; color: white; font-weight: bold; margin-bottom: 4px; cursor: pointer; font-size: 11px; width: 100%; display: block; }
+        .btn-mini { padding: 6px; border-radius: 4px; border: none; color: white; font-weight: bold; margin-bottom: 3px; cursor: pointer; font-size: 10px; width: 100%; display: block; text-align: center; }
         .btn-receta { background: #555; color: #fff; padding: 8px; font-size: 11px; width: auto; margin-right: 5px; margin-top: 5px; cursor: pointer; border-radius: 4px; border: 1px solid #777; font-weight: bold; }
     </style>
 </head>
@@ -61,7 +61,6 @@
         <rect id="m1-39" class="mesa" x="10" y="540" width="45" height="210" onclick="abrirMesa('1-39')" /><text x="32" y="740" class="texto-mesa">1-39</text>
         <rect id="m2-40" class="mesa" x="65" y="540" width="45" height="210" onclick="abrirMesa('2-40')" /><text x="87" y="740" class="texto-mesa">2-40</text>
         <rect id="m3-41" class="mesa" x="125" y="580" width="45" height="170" onclick="abrirMesa('3-41')" /><text x="147" y="740" class="texto-mesa">3-41</text>
-
         <rect id="m22-63" class="mesa" x="210" y="70" width="38" height="75" onclick="abrirMesa('22-63')" /><text x="229" y="135" class="texto-mesa">22-63</text>
         <rect id="m23-64" class="mesa" x="255" y="70" width="38" height="75" onclick="abrirMesa('23-64')" /><text x="274" y="135" class="texto-mesa">23-64</text>
         <rect id="m24-65" class="mesa" x="300" y="70" width="38" height="75" onclick="abrirMesa('24-65')" /><text x="319" y="135" class="texto-mesa">24-65</text>
@@ -97,33 +96,40 @@
         <h2 id="tituloMesa" style="margin:0; color:#4CAF50; text-align:center;">Mesa</h2>
         <table class="tabla-lotes">
             <thead>
-                <tr><th>Datos</th><th>Caja/Receta</th><th>F.Trabajo</th><th>Acción</th></tr>
+                <tr><th>Planta/Lote</th><th>Caja/Receta</th><th>F.Trabajo</th><th>Acciones</th></tr>
             </thead>
             <tbody id="listaLotes"></tbody>
         </table>
-        <div class="formulario-lote">
+        
+        <div class="formulario-lote" id="formSeccion">
             <button class="btn btn-pegar" id="btnPegar" onclick="pegarDatos()" style="display:none; margin-bottom:15px;">📋 PEGAR PLANTA AQUÍ</button>
-            <h3 style="margin:0 0 10px 0; font-size:14px; color:#4CAF50;">+ REGISTRO RÁPIDO:</h3>
+            <h3 id="formTitulo" style="margin:0 0 10px 0; font-size:14px; color:#4CAF50;">+ REGISTRO RÁPIDO:</h3>
+            
             <span class="label-form">REFERENCIA</span><input type="text" id="f_ref">
             <span class="label-form">LOTE</span><input type="text" id="f_lote">
             <span class="label-form">CANTIDAD BANDEJAS</span><input type="number" id="f_cant">
+            
             <span class="label-form">SUSTRATO / RECETA</span>
             <div>
                 <button type="button" class="btn-receta" onclick="document.getElementById('f_sustrato').value='F8P16FC, 2AG, 0,75 TRIANUM'">TRIANUM</button>
-                <button type="button" class="btn-receta" onclick="document.getElementById('f_sustrato').value='GRAMOSEMI CON PERLITA'">GRAMOSEMI</button>
-                <button type="button" class="btn-receta" onclick="document.getElementById('f_sustrato').value='SIRO ÁCIDO'">SIRO</button>
+                <button type="button" class="btn-receta" onclick="document.getElementById('f_sustrato').value='RECETA 2'">RECETA 2</button>
+                <button type="button" class="btn-receta" onclick="document.getElementById('f_sustrato').value='RECETA 3'">RECETA 3</button>
             </div>
             <input type="text" id="f_sustrato">
+            
             <span class="label-form">Nº CAJA JIFFY</span><input type="text" id="f_caja">
             <span class="label-form">FECHA ENRAIZADO</span><input type="date" id="f_enraizado">
             <span class="label-form">FECHA TRABAJO</span><input type="date" id="f_vivero">
-            <button class="btn btn-guardar" onclick="guardarLote()">+ REGISTRAR EN MAPA</button>
+            
+            <button class="btn btn-guardar" onclick="guardarLote()">💾 REGISTRAR EN MAPA</button>
         </div>
+        
         <button class="btn" style="background:#cc0000; color:white;" onclick="cerrarPanel()">CERRAR PANEL</button>
+        
         <div id="config-panel" style="margin-top:20px; padding:10px; border:1px solid #4CAF50; background:#e8f5e9; border-radius:8px; color:black;">
-            <p style="margin:0 0 5px 0; font-size:11px; font-weight:bold;">🔐 ACCESO ADMIN:</p>
-            <input type="password" id="input-token" placeholder="Pega el Token ghp_...">
-            <button onclick="guardarConfig()" style="width:100%; margin-top:5px; background:#2e7d32; color:white; padding:8px; border:none; border-radius:4px; font-weight:bold;">ACTIVAR MI LLAVE</button>
+            <p style="margin:0 0 5px 0; font-size:11px; font-weight:bold;">🔐 TOKEN GitHub:</p>
+            <input type="password" id="input-token" placeholder="Pega el ghp_...">
+            <button onclick="guardarConfig()" style="width:100%; margin-top:5px; background:#2e7d32; color:white; padding:8px; border:none; border-radius:4px; font-weight:bold;">ACTIVAR LLAVE</button>
         </div>
     </div>
 </div>
@@ -161,15 +167,36 @@
         let html = "";
         (db[mesaActual] || []).forEach((l, index) => {
             html += `<tr>
-                <td><b>${l.ref}</b><br><small>L-${l.lote}</small></td>
+                <td><b>${l.ref}</b><br>L-${l.lote}</td>
                 <td>Caja: ${l.caja}<br><small>${l.sustrato}</small></td>
                 <td>${formatearFechaVista(l.f_vivero)}</td>
-                <td>
+                <td style="width: 70px;">
+                    <button onclick="editarLote(${index})" class="btn-mini" style="background:#2196F3;">📝 EDITAR</button>
                     <button onclick="copiarParaMover(${index})" class="btn-mini" style="background:#FF9800;">📦 MOVER</button>
-                    <button onclick="borrarLote(${index})" class="btn-mini" style="background:red;">X</button>
+                    <button onclick="borrarLote(${index})" class="btn-mini" style="background:red;">❌ BORRAR</button>
                 </td></tr>`;
         });
-        document.getElementById('listaLotes').innerHTML = html || "<tr><td colspan='4' style='text-align:center;'>Vacia</td></tr>";
+        document.getElementById('listaLotes').innerHTML = html || "<tr><td colspan='4' style='text-align:center;'>Mesa Vacía</td></tr>";
+    }
+
+    // --- NUEVA FUNCIÓN EDITAR ---
+    function editarLote(index) {
+        let l = db[mesaActual][index];
+        document.getElementById('f_ref').value = l.ref;
+        document.getElementById('f_lote').value = l.lote;
+        document.getElementById('f_cant').value = l.cant;
+        document.getElementById('f_sustrato').value = l.sustrato;
+        document.getElementById('f_caja').value = l.caja;
+        document.getElementById('f_enraizado').value = l.f_enraizado;
+        document.getElementById('f_vivero').value = l.f_vivero;
+        
+        // Lo borramos para que al darle a "Guardar" no esté duplicado
+        db[mesaActual].splice(index, 1);
+        if(db[mesaActual].length === 0) delete db[mesaActual];
+        
+        // Bajamos al formulario automáticamente
+        document.getElementById('formSeccion').scrollIntoView({ behavior: 'smooth' });
+        alert("⚠️ Has cargado los datos en el formulario. Edítalos y dale a REGISTRAR.");
     }
 
     function copiarParaMover(index) {
@@ -197,7 +224,7 @@
     }
 
     function borrarLote(index) {
-        if(confirm("¿Seguro que quieres borrar este lote?")) {
+        if(confirm("¿Seguro que quieres borrar este registro?")) {
             db[mesaActual].splice(index, 1);
             if(db[mesaActual].length === 0) delete db[mesaActual];
             localStorage.setItem('cultigar_pro_final', JSON.stringify(db));
@@ -231,7 +258,6 @@
         document.getElementById('f_caja').value = "";
         document.getElementById('f_cant').value = "";
         
-        // El salto automático arriba
         document.getElementById('infoPanel').scrollTo({ top: 0, behavior: 'smooth' });
     }
 
@@ -239,25 +265,23 @@
         const token = localStorage.getItem('github_token');
         if(!token) return;
         try {
-            const res = await fetch(`https://api.github.com/gists/${GIST_ID}`, {
+            await fetch(`https://api.github.com/gists/${GIST_ID}`, {
                 method: 'PATCH',
                 headers: { 'Authorization': `token ${token}` },
                 body: JSON.stringify({ files: { "cultigar_db.json": { content: JSON.stringify(db) } } })
             });
-            if(res.ok && mostrarAviso) alert("✅ Nube actualizada con éxito");
-        } catch (e) { if(mostrarAviso) alert("❌ Error al subir"); }
+            if(mostrarAviso) alert("✅ Nube actualizada");
+        } catch (e) { if(mostrarAviso) alert("❌ Error subida"); }
     }
 
     async function cargarDeNube(mostrarAviso) {
         try {
             const res = await fetch(`https://api.github.com/gists/${GIST_ID}?cb=${Date.now()}`);
             const json = await res.json();
-            if(json.files && json.files["cultigar_db.json"]) {
-                db = JSON.parse(json.files["cultigar_db.json"].content);
-                localStorage.setItem('cultigar_pro_final', JSON.stringify(db));
-                actualizarMapa();
-                if(mostrarAviso) alert("✅ Datos actualizados");
-            }
+            db = JSON.parse(json.files["cultigar_db.json"].content);
+            localStorage.setItem('cultigar_pro_final', JSON.stringify(db));
+            actualizarMapa();
+            if(mostrarAviso) alert("✅ Datos actualizados");
         } catch (e) { console.log("Error nube"); }
     }
 
@@ -291,7 +315,7 @@
 
     function guardarConfig() {
         const t = document.getElementById('input-token').value.trim();
-        if(t) { localStorage.setItem('github_token', t); alert("🔑 Llave guardada"); location.reload(); }
+        if(t) { localStorage.setItem('github_token', t); location.reload(); }
     }
     
     function cerrarPanel() { document.getElementById('infoPanel').style.display = 'none'; }
