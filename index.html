@@ -432,10 +432,8 @@
     .m-fito:hover { stroke-width: 2; stroke: #c62828; }
     .t-fito-aba { font-size: 10px; font-weight: bold; fill: #333; text-anchor: middle; pointer-events: none; }
     .t-m2-f { font-size: 9px; fill: #888; text-anchor: middle; pointer-events: none; }
-    .f-rojo { fill: #ff5252 !important; }
-    .f-naranja { fill: #ffab40 !important; }
-    .f-azul { fill: #448aff !important; }
-    .f-verde { fill: #69f0ae !important; }
+    .f-rojo { fill: #ff5252 !important; } .f-naranja { fill: #ffab40 !important; }
+    .f-azul { fill: #448aff !important; } .f-verde { fill: #69f0ae !important; }
 </style>
 
 <script>
@@ -445,9 +443,7 @@
     var indexEdicion = null;
 
     function registrarFito(id, m2) {
-        mesaActiva = id;
-        m2Activo = m2;
-        indexEdicion = null;
+        mesaActiva = id; m2Activo = m2; indexEdicion = null;
         document.getElementById('btnGuardarFito').innerText = "💾 GUARDAR REGISTRO";
         document.getElementById('mesaFitoId').innerText = "Mesa " + id;
         document.getElementById('mesaFitoM2').innerText = m2 + " m²";
@@ -460,13 +456,11 @@
     function guardarTratamientoCompleto() {
         const p = document.getElementById('fitoProducto').value;
         const a = document.getElementById('fitoAplicador').value;
-        if(!p || !a) { alert("Producto y Aplicador son obligatorios"); return; }
-        
+        if(!p || !a) { alert("Producto y Aplicador obligatorios"); return; }
         if(!db_fito[mesaActiva]) db_fito[mesaActiva] = { h: [] };
 
         let datos = {
-            prod: p.toUpperCase(), 
-            ap: a, 
+            prod: p.toUpperCase(), ap: a,
             pl: document.getElementById('fitoPlaga').value,
             reg: document.getElementById('fitoRegistro').value,
             dos: document.getElementById('fitoDosis').value,
@@ -474,11 +468,8 @@
             ts: indexEdicion !== null ? db_fito[mesaActiva].h[indexEdicion].ts : Date.now()
         };
 
-        if(indexEdicion !== null) {
-            db_fito[mesaActiva].h[indexEdicion] = datos;
-        } else {
-            db_fito[mesaActiva].h.unshift(datos);
-        }
+        if(indexEdicion !== null) db_fito[mesaActiva].h[indexEdicion] = datos;
+        else db_fito[mesaActiva].h.unshift(datos);
 
         localStorage.setItem('cultigar_fito_db', JSON.stringify(db_fito));
         actualizarColoresFito();
@@ -490,7 +481,7 @@
         let html = "<b>HISTORIAL:</b><br>";
         h.forEach((r, i) => {
             html += `<div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px dashed #ccc; padding:4px 0;">
-                <span>${r.f} - ${r.prod}</span>
+                <span>${r.f}: ${r.prod}</span>
                 <div>
                     <button onclick="prepararEdicion(${i})" style="border:none; background:none; cursor:pointer;">✏️</button>
                     <button onclick="borrarRegistro(${i})" style="border:none; background:none; cursor:pointer;">🗑️</button>
@@ -512,7 +503,7 @@
     }
 
     function borrarRegistro(index) {
-        if(confirm("¿Borrar registro?")) {
+        if(confirm("¿Borrar?")) {
             db_fito[mesaActiva].h.splice(index, 1);
             localStorage.setItem('cultigar_fito_db', JSON.stringify(db_fito));
             renderHistorialFito(mesaActiva);
@@ -525,9 +516,9 @@
     }
 
     function calcularDosisFito() {
-        const metodo = document.getElementById('metodoFito').value;
-        let dosis = (metodo === "mochila") ? (m2Activo * 0.12).toFixed(1) : (m2Activo * 5).toFixed(0);
-        document.getElementById('calculoDosis').innerHTML = `<b>Mezcla:</b> Preparar <b>${dosis} L</b> de caldo.`;
+        const m = document.getElementById('metodoFito').value;
+        let d = (m === "mochila") ? (m2Activo * 0.12).toFixed(1) : (m2Activo * 5).toFixed(0);
+        document.getElementById('calculoDosis').innerHTML = `<b>Mezcla:</b> Preparar <b>${d} L</b> de caldo.`;
     }
 
     function actualizarColoresFito() {
