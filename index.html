@@ -373,7 +373,7 @@
         <rect id="f-23-61" class="m-fito" x="255" y="165" width="38" height="100" onclick="registrarFito('23-61', 10)"/><text x="274" y="220" class="t-m2-f">10m²</text><text x="274" y="280" class="t-fito-aba">23-61</text>
         <rect id="f-24-62" class="m-fito" x="300" y="165" width="38" height="100" onclick="registrarFito('24-62', 10)"/><text x="319" y="220" class="t-m2-f">10m²</text><text x="319" y="280" class="t-fito-aba">24-62</text>
 
-        <rect id="f-18-56" class="m-fito" x="215" y="360" width="35" height="110" onclick="registrarFito('18-56', 12)"/><text x="232" y="420" class="t-m2-f">12m²</text><text x="232" y="485" class="t-fito-aba">18-56</text>
+        <rect id="f-18-56" class="m-fito" x="210" y="360" width="38" height="110" onclick="registrarFito('18-56', 12)"/><text x="229" y="420" class="t-m2-f">12m²</text><text x="229" y="485" class="t-fito-aba">18-56</text>
         <rect id="f-19-57" class="m-fito" x="255" y="360" width="38" height="160" onclick="registrarFito('19-57', 21)"/><text x="274" y="445" class="t-m2-f">21m²</text><text x="274" y="535" class="t-fito-aba">19-57</text>
         <rect id="f-20-58" class="m-fito" x="300" y="360" width="38" height="160" onclick="registrarFito('20-58', 21)"/><text x="319" y="445" class="t-m2-f">21m²</text><text x="319" y="535" class="t-fito-aba">20-58</text>
         <rect id="f-21-59" class="m-fito" x="345" y="360" width="38" height="160" onclick="registrarFito('21-59', 21)"/><text x="364" y="445" class="t-m2-f">21m²</text><text x="364" y="535" class="t-fito-aba">21-59</text>
@@ -503,7 +503,7 @@
     }
 
     function borrarRegistro(index) {
-        if(confirm("¿Borrar este tratamiento?")) {
+        if(confirm("¿Borrar tratamiento?")) {
             db_fito[mesaActiva].h.splice(index, 1);
             localStorage.setItem('cultigar_fito_db', JSON.stringify(db_fito));
             renderHistorialFito(mesaActiva);
