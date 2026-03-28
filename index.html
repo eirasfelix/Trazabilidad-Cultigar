@@ -412,17 +412,17 @@
             <strong id="mesaFitoId" style="font-size:20px; color:#c62828;"></strong>
             <span id="mesaFitoM2" style="font-weight:bold; font-size:18px;"></span>
         </div>
-        <input type="text" id="fitoProducto" placeholder="Producto/Tratamiento" style="width:100%; margin-bottom:8px; padding:10px; border:1px solid #ccc; border-radius:4px;">
-        <button id="btnGuardarFito" onclick="guardarTratamientoCompleto()" style="width:100%; background:#c62828; color:white; border:none; padding:14px; font-weight:bold; cursor:pointer; border-radius:6px;">💾 GUARDAR TRATAMIENTO</button>
+        <input type="text" id="fitoProducto" placeholder="Producto aplicado" style="width:100%; margin-bottom:8px; padding:10px; border:1px solid #ccc; border-radius:4px;">
+        <button id="btnGuardarFito" onclick="guardarTratamientoCompleto()" style="width:100%; background:#c62828; color:white; border:none; padding:14px; font-weight:bold; cursor:pointer; border-radius:6px;">💾 REGISTRAR</button>
         <button onclick="document.getElementById('panelFito').style.display='none'" style="width:100%; margin-top:10px; background:#666; color:white; border:none; padding:10px; cursor:pointer; border-radius:6px;">CERRAR</button>
     </div>
 </div>
 
 <style>
-    .m-fito { fill: #fdfdfd; stroke: #444; stroke-width: 1.2; cursor: pointer; transition: 0.2s; }
+    .m-fito { fill: #fdfdfd; stroke: #444; stroke-width: 1.2; cursor: pointer; transition: 0.1s; }
     .m-fito:hover { stroke: #c62828; fill: #fff0f0; stroke-width: 2; }
     .t-fito-aba { font-size: 10px; font-weight: bold; text-anchor: middle; pointer-events: none; fill: #333; }
-    .num-tunel { font-size: 14px; font-weight: bold; fill: #333; text-anchor: middle; pointer-events: none; }
+    .num-tunel { font-size: 15px; font-weight: bold; fill: #333; text-anchor: middle; pointer-events: none; }
     .f-rojo { fill: #ff5252 !important; stroke: #b71c1c; }
 </style>
 
@@ -432,7 +432,7 @@
 
     function registrarFito(id, m2) {
         mesaActiva = id;
-        document.getElementById('mesaFitoId').innerText = id.includes('T') ? "Túnel " + id.replace('T','') : "Unidad " + id;
+        document.getElementById('mesaFitoId').innerText = id.includes('T') ? "Túnel " + id.replace('T','') : "Mesa " + id;
         document.getElementById('mesaFitoM2').innerText = m2 + " m²";
         document.getElementById('panelFito').style.display = 'block';
         document.getElementById('fitoProducto').value = db_fito[id] ? db_fito[id].p : "";
