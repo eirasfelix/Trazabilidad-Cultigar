@@ -31,7 +31,8 @@
         .btn-copiar { background: #FF9800; color: white; }
         .btn-pegar { background: #9C27B0; color: white; }
         .btn-mini { padding: 6px; border-radius: 4px; border: none; color: white; font-weight: bold; margin-left: 3px; cursor: pointer; font-size: 10px; }
-        .btn-receta { background: #555; color: #fff; padding: 8px; font-size: 11px; width: auto; margin-right: 5px; margin-top: 5px; cursor: pointer; border-radius: 4px; border: 1px solid #777; }
+        .btn-receta { background: #555; color: #fff; padding: 6px; font-size: 10px; width: auto; margin-right: 3px; margin-top: 5px; cursor: pointer; border-radius: 4px; border: 1px solid #777; }
+        .btn-receta:hover { background: #777; }
     </style>
 </head>
 <body>
@@ -115,11 +116,15 @@
             <span class="label-form">LOTE</span><input type="text" id="f_lote">
             <span class="label-form">CANTIDAD BANDEJAS</span><input type="number" id="f_cant">
             
-            <span class="label-form">SUSTRATO / RECETA</span>
-            <div>
-                <button type="button" class="btn-receta" onclick="document.getElementById('f_sustrato').value='F8P16FC, 2AG, 0,75 TRIANUM'">RECETA TRIANUM</button>
+            <span class="label-form">BOTONES DE RECETAS RÁPIDAS:</span>
+            <div style="margin-bottom: 5px;">
+                <button type="button" class="btn-receta" onclick="ponerReceta('F8P16FC, 2AG, 0,75 TRIANUM')">TRIANUM</button>
+                <button type="button" class="btn-receta" onclick="ponerReceta('TURBA NEGRA + PERLITA (70/30)')">TURBA/PERL</button>
+                <button type="button" class="btn-receta" onclick="ponerReceta('FIBRA COCO PURA')">COCO PURA</button>
+                <button type="button" class="btn-receta" onclick="ponerReceta('SUSTRATO ESTÁNDAR VIVERO')">ESTÁNDAR</button>
+                <button type="button" class="btn-receta" onclick="ponerReceta('MEZCLA ESPECIAL ESQUEJES')">ESQUEJES</button>
             </div>
-            <input type="text" id="f_sustrato">
+            <input type="text" id="f_sustrato" placeholder="Escribe o pulsa un botón arriba">
             
             <span class="label-form">Nº CAJA JIFFY</span><input type="text" id="f_caja">
             <span class="label-form">FECHA ENRAIZADO (Cara trasera)</span><input type="date" id="f_enraizado">
@@ -139,18 +144,23 @@
 </div>
 
 <script>
+    // Todo el script se mantiene igual, solo añado la función auxiliar ponerReceta
     const GIST_ID = "dc4b1ac9b41655086c76352f03ccfafe";
     let db = JSON.parse(localStorage.getItem('cultigar_pro_final')) || {};
     let mesaActual = null;
     let memoriaCopiada = null; 
     let ultimosDatos = { ref: "", lote: "", sustrato: "", f_enraizado: "" };
 
+    function ponerReceta(texto) {
+        document.getElementById('f_sustrato').value = texto;
+    }
+
+    // El resto de funciones (abrirMesa, renderLotes, prepararEdicion, copiarParaMover, pegarDatos, guardarLote, subirANube, cargarDeNube, actualizarMapa, buscar, guardarConfig, borrarLote, cerrarPanel) se quedan exactamente como estaban.
+
     function abrirMesa(id) {
         mesaActual = id;
         document.getElementById('tituloMesa').innerText = "Mesa " + id;
         document.getElementById('btnPegar').style.display = memoriaCopiada ? 'block' : 'none';
-        
-        // Resetear modo edicion al abrir
         document.getElementById('editIndex').value = "-1";
         document.getElementById('btnGuardar').innerText = "+ REGISTRAR EN MAPA";
         document.getElementById('btnGuardar').style.background = "#4CAF50";
@@ -234,17 +244,16 @@
         };
 
         if(!nuevo.ref) return alert("Falta la Referencia");
-
         if(!db[mesaActual]) db[mesaActual] = [];
         
         if(idx > -1) {
-            db[mesaActual][idx] = nuevo; // Si estamos editando, reemplaza la fila
+            db[mesaActual][idx] = nuevo;
             document.getElementById('editIndex').value = "-1";
             document.getElementById('btnGuardar').innerText = "+ REGISTRAR EN MAPA";
             document.getElementById('btnGuardar').style.background = "#4CAF50";
             document.getElementById('formTitle').innerText = "+ REGISTRO RÁPIDO:";
         } else {
-            db[mesaActual].push(nuevo); // Si no, añade nueva
+            db[mesaActual].push(nuevo);
         }
 
         ultimosDatos = { ref: nuevo.ref, lote: nuevo.lote, sustrato: nuevo.sustrato, f_enraizado: nuevo.f_enraizado };
