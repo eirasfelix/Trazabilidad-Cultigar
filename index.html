@@ -342,184 +342,195 @@
 </html>
 
 
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CONTROL FITO - CULTIGAR PRO</title>
-    <style>
-        body { font-family: sans-serif; background: #444; margin: 0; padding: 0; }
-        .cabecera { background: white; padding: 10px; position: sticky; top: 0; z-index: 500; text-align: center; box-shadow: 0 2px 5px rgba(0,0,0,0.3); }
-        .mapa-real { background: white; margin: 10px auto; padding: 10px; border: 1px solid #000; display: block; width: 490px; position: relative; }
-        .mesa { fill: white; stroke: black; stroke-width: 1.2; cursor: pointer; }
-        
-        /* Colores de estados */
-        .fito-blanco { fill: white; }
-        .fito-amarillo { fill: #fff176; }
-        .fito-naranja { fill: #ffb74d; }
-        .fito-rojo { fill: #ef5350; }
-        .fito-verde { fill: #81c784; }
-
-        .texto-mesa { font-size: 9px; font-weight: bold; pointer-events: none; text-anchor: middle; fill: #000; }
-        
-        /* Paneles flotantes */
-        .panel-fito { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 90%; max-width: 400px; background: #1a1a1a; color: white; padding: 20px; border-radius: 15px; display: none; border: 4px solid #c62828; z-index: 10000; box-shadow: 0 0 50px rgba(0,0,0,0.9); }
-        
-        .formulario-fito input, .formulario-fito select { width: 100%; padding: 12px; margin: 5px 0; border-radius: 8px; border: none; font-size: 16px; box-sizing: border-box; }
-        .label-form { font-size: 11px; color: #aaa; margin-top: 10px; display: block; font-weight: bold; }
-        
-        .btn { padding: 15px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; width: 100%; font-size: 16px; margin-top: 10px; }
-        .btn-edit { background: #c62828; color: white; }
-        .btn-del { background: #555; color: white; }
-        .btn-save { background: #2e7d32; color: white; }
-    </style>
-</head>
-<body>
-
-<div class="cabecera">
-    <h2 style="margin:0; color:#c62828;">☣ CONTROL FITOSANITARIO</h2>
-    <div id="aviso" style="display:none; color: #2e7d32; font-weight: bold; font-size: 12px;">✅ Mapa Actualizado</div>
+<div class="cabecera" style="margin-top: 50px; border-top: 5px solid #c62828;">
+    <h2 style="margin:0; color:#c62828;">☣ MAPA 2: CONTROL FITOSANITARIO</h2>
+    <p style="margin:0; font-size:12px;">Gestión de tratamientos, plazos de seguridad y superficies</p>
 </div>
 
 <div class="mapa-real">
-    <svg width="490" height="780" viewBox="0 0 490 780">
-        <rect id="m10-48" class="mesa" x="10" y="70" width="40" height="140" onclick="menuMesa('10-48')" /><text x="30" y="200" class="texto-mesa">10-48</text>
-        <rect id="m11-49" class="mesa" x="55" y="70" width="40" height="140" onclick="menuMesa('11-49')" /><text x="75" y="200" class="texto-mesa">11-49</text>
-        <rect id="m12-50" class="mesa" x="105" y="70" width="40" height="140" onclick="menuMesa('12-50')" /><text x="125" y="200" class="texto-mesa">12-50</text>
-        <rect id="m13-51" class="mesa" x="150" y="70" width="40" height="140" onclick="menuMesa('13-51')" /><text x="170" y="200" class="texto-mesa">13-51</text>
-        <rect id="m7-45" class="mesa" x="15" y="220" width="40" height="65" onclick="menuMesa('7-45')" /><text x="35" y="275" class="texto-mesa">7-45</text>
-        <rect id="m8-46" class="mesa" x="65" y="220" width="45" height="90" onclick="menuMesa('8-46')" /><text x="87" y="300" class="texto-mesa">8-46</text>
-        <rect id="m9-47" class="mesa" x="135" y="220" width="38" height="90" onclick="menuMesa('9-47')" /><text x="154" y="300" class="texto-mesa">9-47</text>
-        <rect id="m4-42" class="mesa" x="10" y="325" width="45" height="200" onclick="menuMesa('4-42')" /><text x="32" y="515" class="texto-mesa">4-42</text>
-        <rect id="m5-43" class="mesa" x="65" y="325" width="45" height="200" onclick="menuMesa('5-43')" /><text x="87" y="515" class="texto-mesa">5-43</text>
-        <rect id="m6-44" class="mesa" x="125" y="325" width="45" height="200" onclick="menuMesa('6-44')" /><text x="147" y="515" class="texto-mesa">6-44</text>
-        <rect id="m1-39" class="mesa" x="10" y="540" width="45" height="210" onclick="menuMesa('1-39')" /><text x="32" y="740" class="texto-mesa">1-39</text>
-        <rect id="m2-40" class="mesa" x="65" y="540" width="45" height="210" onclick="menuMesa('2-40')" /><text x="87" y="740" class="texto-mesa">2-40</text>
-        <rect id="m3-41" class="mesa" x="125" y="580" width="45" height="170" onclick="menuMesa('3-41')" /><text x="147" y="740" class="texto-mesa">3-41</text>
+    <svg width="490" height="900" viewBox="0 0 490 900">
+        <rect id="f10-48" class="mesa fito-blanco" x="10" y="70" width="40" height="140" onclick="abrirFito('10-48', 28)" /><text x="30" y="200" class="texto-mesa">10-48</text>
+        <rect id="f11-49" class="mesa fito-blanco" x="55" y="70" width="40" height="140" onclick="abrirFito('11-49', 28)" /><text x="75" y="200" class="texto-mesa">11-49</text>
+        <rect id="f12-50" class="mesa fito-blanco" x="105" y="70" width="40" height="140" onclick="abrirFito('12-50', 28)" /><text x="125" y="200" class="texto-mesa">12-50</text>
+        <rect id="f13-51" class="mesa fito-blanco" x="150" y="70" width="40" height="140" onclick="abrirFito('13-51', 28)" /><text x="170" y="200" class="texto-mesa">13-51</text>
+        
+        <rect id="f7-45" class="mesa fito-blanco" x="15" y="220" width="40" height="65" onclick="abrirFito('7-45', 12)" /><text x="35" y="275" class="texto-mesa">7-45</text>
+        <rect id="f8-46" class="mesa fito-blanco" x="65" y="220" width="45" height="90" onclick="abrirFito('8-46', 18)" /><text x="87" y="300" class="texto-mesa">8-46</text>
+        <rect id="f9-47" class="mesa fito-blanco" x="135" y="220" width="38" height="90" onclick="abrirFito('9-47', 16)" /><text x="154" y="300" class="texto-mesa">9-47</text>
+        
+        <rect id="f4-42" class="mesa fito-blanco" x="10" y="325" width="45" height="200" onclick="abrirFito('4-42', 40)" /><text x="32" y="515" class="texto-mesa">4-42</text>
+        <rect id="f5-43" class="mesa fito-blanco" x="65" y="325" width="45" height="200" onclick="abrirFito('5-43', 40)" /><text x="87" y="515" class="texto-mesa">5-43</text>
+        <rect id="f6-44" class="mesa fito-blanco" x="125" y="325" width="45" height="200" onclick="abrirFito('6-44', 40)" /><text x="147" y="515" class="texto-mesa">6-44</text>
+        
+        <rect id="f22-63" class="mesa fito-blanco" x="210" y="70" width="38" height="75" onclick="abrirFito('22-63', 15)" /><text x="229" y="135" class="texto-mesa">22-63</text>
+        <rect id="f23-64" class="mesa fito-blanco" x="255" y="70" width="38" height="75" onclick="abrirFito('23-64', 15)" /><text x="274" y="135" class="texto-mesa">23-64</text>
+        <rect id="f24-65" class="mesa fito-blanco" x="300" y="70" width="38" height="75" onclick="abrirFito('24-65', 15)" /><text x="319" y="135" class="texto-mesa">24-65</text>
+        
+        <rect id="f19-57" class="mesa fito-blanco" x="255" y="325" width="38" height="200" onclick="abrirFito('19-57', 35)" /><text x="274" y="515" class="texto-mesa">19-57</text>
+        <rect id="f20-58" class="mesa fito-blanco" x="300" y="325" width="38" height="200" onclick="abrirFito('20-58', 35)" /><text x="319" y="515" class="texto-mesa">20-58</text>
+        <rect id="f21-59" class="mesa fito-blanco" x="345" y="325" width="38" height="200" onclick="abrirFito('21-59', 35)" /><text x="364" y="515" class="texto-mesa">21-59</text>
 
-        <rect id="m22-63" class="mesa" x="210" y="70" width="38" height="75" onclick="menuMesa('22-63')" /><text x="229" y="135" class="texto-mesa">22-63</text>
-        <rect id="m23-64" class="mesa" x="255" y="70" width="38" height="75" onclick="menuMesa('23-64')" /><text x="274" y="135" class="texto-mesa">23-64</text>
-        <rect id="m24-65" class="mesa" x="300" y="70" width="38" height="75" onclick="menuMesa('24-65')" /><text x="319" y="135" class="texto-mesa">24-65</text>
-        <rect id="m22-60" class="mesa" x="210" y="155" width="38" height="100" onclick="menuMesa('22-60')" /><text x="229" y="245" class="texto-mesa">22-60</text>
-        <rect id="m23-61" class="mesa" x="255" y="155" width="38" height="100" onclick="menuMesa('23-61')" /><text x="274" y="245" class="texto-mesa">23-61</text>
-        <rect id="m24-62" class="mesa" x="300" y="155" width="38" height="100" onclick="menuMesa('24-62')" /><text x="319" y="245" class="texto-mesa">24-62</text>
-        <rect id="m18-56" class="mesa" x="215" y="360" width="35" height="110" onclick="menuMesa('18-56')" /><text x="232" y="460" class="texto-mesa">18-56</text>
-        <rect id="m19-57" class="mesa" x="255" y="325" width="38" height="200" onclick="menuMesa('19-57')" /><text x="274" y="515" class="texto-mesa">19-57</text>
-        <rect id="m20-58" class="mesa" x="300" y="325" width="38" height="200" onclick="menuMesa('20-58')" /><text x="319" y="515" class="texto-mesa">20-58</text>
-        <rect id="m21-59" class="mesa" x="345" y="325" width="38" height="200" onclick="menuMesa('21-59')" /><text x="364" y="515" class="texto-mesa">21-59</text>
-        <rect id="m14-52" class="mesa" x="210" y="540" width="38" height="145" onclick="menuMesa('14-52')" /><text x="229" y="675" class="texto-mesa">14-52</text>
-        <rect id="m15-53" class="mesa" x="255" y="540" width="38" height="145" onclick="menuMesa('15-53')" /><text x="274" y="675" class="texto-mesa">15-53</text>
-        <rect id="m16-54" class="mesa" x="300" y="540" width="38" height="145" onclick="menuMesa('16-54')" /><text x="319" y="675" class="texto-mesa">16-54</text>
-        <rect id="m17-55" class="mesa" x="345" y="540" width="38" height="145" onclick="menuMesa('17-55')" /><text x="364" y="675" class="texto-mesa">17-55</text>
-
-        <text x="440" y="50" style="font-size:14px; font-weight:bold; fill:#c62828; text-anchor:middle;">TÚNELES</text>
-        <rect id="m14" class="mesa" x="400" y="60" width="80" height="30" onclick="menuMesa('14')" /><text x="440" y="80" class="texto-mesa">T-14</text>
-        <rect id="m13" class="mesa" x="400" y="95" width="80" height="30" onclick="menuMesa('13')" /><text x="440" y="115" class="texto-mesa">T-13</text>
-        <rect id="m12" class="mesa" x="400" y="130" width="80" height="30" onclick="menuMesa('12')" /><text x="440" y="150" class="texto-mesa">T-12</text>
-        <rect id="m11" class="mesa" x="400" y="165" width="80" height="30" onclick="menuMesa('11')" /><text x="440" y="185" class="texto-mesa">T-11</text>
-        <rect id="m10" class="mesa" x="400" y="200" width="80" height="30" onclick="menuMesa('10')" /><text x="440" y="220" class="texto-mesa">T-10</text>
-        <rect id="m9" class="mesa" x="400" y="235" width="80" height="30" onclick="menuMesa('9')" /><text x="440" y="255" class="texto-mesa">T-9</text>
-        <rect id="m8" class="mesa" x="400" y="270" width="80" height="30" onclick="menuMesa('8')" /><text x="440" y="290" class="texto-mesa">T-8</text>
-        <rect id="m7" class="mesa" x="400" y="305" width="80" height="30" onclick="menuMesa('7')" /><text x="440" y="325" class="texto-mesa">T-7</text>
-        <rect id="m6" class="mesa" x="400" y="340" width="80" height="30" onclick="menuMesa('6')" /><text x="440" y="360" class="texto-mesa">T-6</text>
-        <rect id="m5" class="mesa" x="400" y="375" width="80" height="30" onclick="menuMesa('5')" /><text x="440" y="395" class="texto-mesa">T-5</text>
-        <rect id="m4" class="mesa" x="400" y="410" width="80" height="30" onclick="menuMesa('4')" /><text x="440" y="430" class="texto-mesa">T-4</text>
-        <rect id="m3" class="mesa" x="400" y="445" width="80" height="30" onclick="menuMesa('3')" /><text x="440" y="465" class="texto-mesa">T-3</text>
-        <rect id="m2" class="mesa" x="400" y="480" width="80" height="30" onclick="menuMesa('2')" /><text x="440" y="500" class="texto-mesa">T-2</text>
-        <rect id="m1" class="mesa" x="400" y="515" width="80" height="30" onclick="menuMesa('1')" /><text x="440" y="535" class="texto-mesa">T-1</text>
+        <text x="440" y="60" style="font-size:12px; font-weight:bold; fill:#c62828; text-anchor:middle;">TÚNELES</text>
+        <rect id="ft14" class="mesa fito-blanco" x="410" y="80" width="60" height="35" onclick="abrirFito('T-14', 50)" /><text x="440" y="102" class="texto-mesa">T14</text>
+        <rect id="ft13" class="mesa fito-blanco" x="410" y="125" width="60" height="35" onclick="abrirFito('T-13', 50)" /><text x="440" y="147" class="texto-mesa">T13</text>
+        <rect id="ft12" class="mesa fito-blanco" x="410" y="170" width="60" height="35" onclick="abrirFito('T-12', 50)" /><text x="440" y="192" class="texto-mesa">T12</text>
+        <rect id="ft11" class="mesa fito-blanco" x="410" y="215" width="60" height="35" onclick="abrirFito('T-11', 50)" /><text x="440" y="237" class="texto-mesa">T11</text>
+        <rect id="ft10" class="mesa fito-blanco" x="410" y="260" width="60" height="35" onclick="abrirFito('T-10', 50)" /><text x="440" y="282" class="texto-mesa">T10</text>
+        <rect id="ft9" class="mesa fito-blanco" x="410" y="305" width="60" height="35" onclick="abrirFito('T-9', 50)" /><text x="440" y="327" class="texto-mesa">T9</text>
+        <rect id="ft8" class="mesa fito-blanco" x="410" y="350" width="60" height="35" onclick="abrirFito('T-8', 50)" /><text x="440" y="372" class="texto-mesa">T8</text>
+        <rect id="ft7" class="mesa fito-blanco" x="410" y="395" width="60" height="35" onclick="abrirFito('T-7', 50)" /><text x="440" y="417" class="texto-mesa">T7</text>
+        <rect id="ft6" class="mesa fito-blanco" x="410" y="440" width="60" height="35" onclick="abrirFito('T-6', 50)" /><text x="440" y="462" class="texto-mesa">T6</text>
+        <rect id="ft5" class="mesa fito-blanco" x="410" y="485" width="60" height="35" onclick="abrirFito('T-5', 50)" /><text x="440" y="507" class="texto-mesa">T5</text>
+        <rect id="ft4" class="mesa fito-blanco" x="410" y="530" width="60" height="35" onclick="abrirFito('T-4', 50)" /><text x="440" y="552" class="texto-mesa">T4</text>
+        <rect id="ft3" class="mesa fito-blanco" x="410" y="575" width="60" height="35" onclick="abrirFito('T-3', 50)" /><text x="440" y="597" class="texto-mesa">T3</text>
+        <rect id="ft2" class="mesa fito-blanco" x="410" y="620" width="60" height="35" onclick="abrirFito('T-2', 50)" /><text x="440" y="642" class="texto-mesa">T2</text>
+        <rect id="ft1" class="mesa fito-blanco" x="410" y="665" width="60" height="35" onclick="abrirFito('T-1', 50)" /><text x="440" y="687" class="texto-mesa">T1</text>
     </svg>
 </div>
 
-<div id="popMenu" class="panel-fito" style="text-align: center;">
-    <h3 id="titMenu">Mesa</h3>
-    <button class="btn btn-edit" onclick="mostrarForm()">📝 EDITAR TRATAMIENTO</button>
-    <button class="btn btn-del" onclick="borrarFito()">🗑 BORRAR DATOS</button>
-    <button class="btn" style="background:#333;" onclick="cerrarTodo()">Cerrar</button>
-</div>
-
-<div id="popForm" class="panel-fito">
-    <h3 id="titForm" style="color:#c62828;">DATOS FITO</h3>
-    <div class="formulario-fito">
-        <span class="label-form">ESTADO</span>
-        <select id="f_est"><option value="blanco">Blanco (Libre)</option><option value="amarillo">Amarillo (Programado)</option><option value="naranja">Naranja (En curso)</option><option value="rojo">Rojo (¡Peligro Plazo!)</option><option value="verde">Verde (Seguro)</option></select>
-        <span class="label-form">CAUSA</span><input type="text" id="f_causa">
-        <span class="label-form">PRODUCTO</span><input type="text" id="f_prod">
-        <span class="label-form">Nº REGISTRO</span><input type="text" id="f_reg">
-        <span class="label-form">APLICADOR</span><input type="text" id="f_pers">
-        <span class="label-form">EQUIPO</span>
-        <select id="f_equi"><option value="Mochila 12L">Mochila 12L</option><option value="Fertiirrigación">Fertiirrigación</option><option value="Pulverizador">Pulverizador</option></select>
-        <span class="label-form">FECHA</span><input type="date" id="f_fecha">
-        <button class="btn btn-save" onclick="guardarFito()">✅ GUARDAR CAMBIOS</button>
+<div id="fitoPanelGeneral" style="position: fixed; top: 2%; left: 2%; width: 92%; height: 92%; background: #1a1a1a; color: white; padding: 15px; border-radius: 15px; display: none; border: 4px solid #c62828; z-index: 11000; overflow-y: auto;">
+    <div style="display:flex; justify-content: space-between; align-items: center;">
+        <h2 id="fitoTituloMesa" style="margin:0; color:#ef5350;">Mesa</h2>
+        <div id="fitoM2" style="background:#444; padding:5px 10px; border-radius:5px; font-weight:bold; color:#fff176;">0 m²</div>
     </div>
-    <button class="btn" style="background:#555;" onclick="cerrarTodo()">Cancelar</button>
+    
+    <table class="tabla-lotes">
+        <thead>
+            <tr><th>Producto</th><th>Estado</th><th>Fecha</th><th>Acción</th></tr>
+        </thead>
+        <tbody id="fitoListaCuerpo"></tbody>
+    </table>
+
+    <div class="formulario-lote">
+        <h3 id="fitoFormLabel" style="margin:0 0 10px 0; font-size:14px; color:#ef5350;">+ NUEVA APLICACIÓN:</h3>
+        <input type="hidden" id="fitoEditIndex" value="-1">
+        
+        <span class="label-form">ESTADO/PLAZO</span>
+        <select id="fi_est" style="width:100%; padding:10px; margin-bottom:10px;">
+            <option value="blanco">⚪ Libre de tratamiento</option>
+            <option value="amarillo">🟡 Programado (Próximamente)</option>
+            <option value="naranja">🟠 Aplicando ahora</option>
+            <option value="rojo">🔴 TRATADO (En Plazo de Seguridad)</option>
+            <option value="verde">🟢 SEGURO (Fin de Plazo)</option>
+        </select>
+
+        <span class="label-form">PRODUCTO</span><input type="text" id="fi_prod" placeholder="Nombre comercial" style="width:95%; padding:10px; margin-bottom:10px;">
+        <span class="label-form">CAUSA</span><input type="text" id="fi_causa" placeholder="Pulgón, Oidio, etc." style="width:95%; padding:10px; margin-bottom:10px;">
+        <span class="label-form">Nº REGISTRO</span><input type="text" id="fi_reg" style="width:95%; padding:10px; margin-bottom:10px;">
+        <span class="label-form">APLICADOR</span><input type="text" id="fi_pers" style="width:95%; padding:10px; margin-bottom:10px;">
+        <span class="label-form">FECHA</span><input type="date" id="fi_fecha" style="width:95%; padding:10px; margin-bottom:10px;">
+        
+        <button class="btn btn-guardar" id="fitoBtnGuardar" onclick="accionGuardarFito()">+ REGISTRAR TRATAMIENTO</button>
+    </div>
+
+    <button class="btn" style="background:#555; color:white;" onclick="cerrarFitoPanel()">CERRAR</button>
 </div>
 
 <script>
-    let dbFito = JSON.parse(localStorage.getItem('fito_v3_db')) || {};
-    let mesaActiva = null;
+    // Usamos un nombre de base de datos diferente para no borrar lo del Mapa 1
+    let dbFitosanitaria = JSON.parse(localStorage.getItem('db_fito_cultigar_v5')) || {};
+    let fitoMesaActiva = null;
 
-    function menuMesa(id) {
-        mesaActiva = id;
-        document.getElementById('titMenu').innerText = "Mesa/Túnel " + id;
-        document.getElementById('popMenu').style.display = 'block';
+    function abrirFito(id, m2) {
+        fitoMesaActiva = id;
+        document.getElementById('fitoTituloMesa').innerText = "Mesa " + id;
+        document.getElementById('fitoM2').innerText = m2 + " m²";
+        document.getElementById('fitoEditIndex').value = "-1";
+        document.getElementById('fitoBtnGuardar').innerText = "+ REGISTRAR TRATAMIENTO";
+        document.getElementById('fi_fecha').value = new Date().toISOString().split('T')[0];
+        actualizarListaFito();
+        document.getElementById('fitoPanelGeneral').style.display = 'block';
     }
 
-    function mostrarForm() {
-        document.getElementById('popMenu').style.display = 'none';
-        const d = dbFito[mesaActiva] || {};
-        document.getElementById('titForm').innerText = "Editar Mesa " + mesaActiva;
-        document.getElementById('f_est').value = d.est || 'blanco';
-        document.getElementById('f_causa').value = d.causa || '';
-        document.getElementById('f_prod').value = d.prod || '';
-        document.getElementById('f_reg').value = d.reg || '';
-        document.getElementById('f_pers').value = d.pers || '';
-        document.getElementById('f_equi').value = d.equi || 'Mochila 12L';
-        document.getElementById('f_fecha').value = d.fecha || new Date().toISOString().split('T')[0];
-        document.getElementById('popForm').style.display = 'block';
+    function actualizarListaFito() {
+        let tabla = "";
+        let registros = dbFitosanitaria[fitoMesaActiva] || [];
+        registros.forEach((r, i) => {
+            tabla += `<tr>
+                <td><b>${r.prod}</b><br><small>${r.causa}</small></td>
+                <td><span style="color:${obtenerFitoColor(r.est)}">● ${r.est}</span></td>
+                <td>${r.fecha}</td>
+                <td>
+                    <button onclick="editarRegistroFito(${i})" style="background:#2196F3; color:white; border:none; padding:5px; border-radius:3px;">Editar</button>
+                    <button onclick="borrarRegistroFito(${i})" style="background:red; color:white; border:none; padding:5px; border-radius:3px;">X</button>
+                </td>
+            </tr>`;
+        });
+        document.getElementById('fitoListaCuerpo').innerHTML = tabla || "<tr><td colspan='4'>No hay tratamientos</td></tr>";
     }
 
-    function guardarFito() {
-        dbFito[mesaActiva] = {
-            est: document.getElementById('f_est').value,
-            causa: document.getElementById('f_causa').value.toUpperCase(),
-            prod: document.getElementById('f_prod').value.toUpperCase(),
-            reg: document.getElementById('f_reg').value.toUpperCase(),
-            pers: document.getElementById('f_pers').value.toUpperCase(),
-            equi: document.getElementById('f_equi').value,
-            fecha: document.getElementById('f_fecha').value
+    function editarRegistroFito(index) {
+        let r = dbFitosanitaria[fitoMesaActiva][index];
+        document.getElementById('fitoEditIndex').value = index;
+        document.getElementById('fi_est').value = r.est;
+        document.getElementById('fi_prod').value = r.prod;
+        document.getElementById('fi_causa').value = r.causa;
+        document.getElementById('fi_reg').value = r.reg;
+        document.getElementById('fi_pers').value = r.pers;
+        document.getElementById('fi_fecha').value = r.fecha;
+        document.getElementById('fitoBtnGuardar').innerText = "💾 ACTUALIZAR REGISTRO";
+    }
+
+    function accionGuardarFito() {
+        let idx = parseInt(document.getElementById('fitoEditIndex').value);
+        let nuevo = {
+            est: document.getElementById('fi_est').value,
+            prod: document.getElementById('fi_prod').value.toUpperCase(),
+            causa: document.getElementById('fi_causa').value.toUpperCase(),
+            reg: document.getElementById('fi_reg').value,
+            pers: document.getElementById('fi_pers').value.toUpperCase(),
+            fecha: document.getElementById('fi_fecha').value
         };
-        salvar();
+
+        if(!dbFitosanitaria[fitoMesaActiva]) dbFitosanitaria[fitoMesaActiva] = [];
+        
+        if(idx > -1) {
+            dbFitosanitaria[fitoMesaActiva][idx] = nuevo;
+        } else {
+            dbFitosanitaria[fitoMesaActiva].push(nuevo);
+        }
+
+        localStorage.setItem('db_fito_cultigar_v5', JSON.stringify(dbFitosanitaria));
+        actualizarListaFito();
+        repintarMapaFito();
+        document.getElementById('fitoEditIndex').value = "-1";
+        document.getElementById('fitoBtnGuardar').innerText = "+ REGISTRAR TRATAMIENTO";
     }
 
-    function borrarFito() {
-        if(confirm("¿Limpiar datos de esta mesa?")) {
-            delete dbFito[mesaActiva];
-            salvar();
+    function borrarRegistroFito(index) {
+        if(confirm("¿Eliminar este registro de tratamiento?")) {
+            dbFitosanitaria[fitoMesaActiva].splice(index, 1);
+            localStorage.setItem('db_fito_cultigar_v5', JSON.stringify(dbFitosanitaria));
+            actualizarListaFito();
+            repintarMapaFito();
         }
     }
 
-    function salvar() {
-        localStorage.setItem('fito_v3_db', JSON.stringify(dbFito));
-        pintarMapa();
-        cerrarTodo();
-        const a = document.getElementById('aviso'); a.style.display='block'; setTimeout(()=>a.style.display='none', 2000);
-    }
-
-    function pintarMapa() {
+    function repintarMapaFito() {
+        // Buscamos todas las mesas que tengan el prefijo f (de fito) o ft (de fito tunel)
         document.querySelectorAll('.mesa').forEach(m => {
-            const id = m.id.substring(1);
-            m.setAttribute('class', 'mesa');
-            if(dbFito[id]) m.classList.add('fito-' + dbFito[id].est);
+            let idLimpio = m.id;
+            // Solo actuamos si el ID es de los del mapa fito (empiezan por f)
+            if(idLimpio.startsWith('f')) {
+                let dataId = idLimpio.startsWith('ft') ? idLimpio.replace('ft', 'T-') : idLimpio.substring(1);
+                m.setAttribute('class', 'mesa'); // reset
+                if(dbFitosanitaria[dataId] && dbFitosanitaria[dataId].length > 0) {
+                    let ultimo = dbFitosanitaria[dataId][dbFitosanitaria[dataId].length - 1];
+                    m.classList.add('fito-' + ultimo.est);
+                } else {
+                    m.classList.add('fito-blanco');
+                }
+            }
         });
     }
 
-    function cerrarTodo() {
-        document.getElementById('popMenu').style.display = 'none';
-        document.getElementById('popForm').style.display = 'none';
+    function obtenerFitoColor(est) {
+        const c = { amarillo: '#fff176', naranja: '#ffb74d', rojo: '#ef5350', verde: '#81c784', blanco: '#fff' };
+        return c[est] || 'white';
     }
 
-    window.onload = pintarMapa;
+    function cerrarFitoPanel() { document.getElementById('fitoPanelGeneral').style.display = 'none'; }
+    
+    // Al cargar, pintamos el mapa de fito sin molestar al mapa 1
+    window.addEventListener('load', repintarMapaFito);
 </script>
-</body>
-</html>
