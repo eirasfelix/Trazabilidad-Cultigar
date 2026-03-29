@@ -484,7 +484,10 @@
             html += `<tr style="border-bottom:1px solid #444;">
                 <td style="padding:8px;"><b>${r.p}</b><br><small>${r.d}</small></td>
                 <td style="padding:8px; color:${getFitoColor(r.e)}">● ${r.e.toUpperCase()}</td>
-                <td><button onclick="editarFito(${i})" style="padding:4px; cursor:pointer;">✏️</button></td>
+               <td>
+                    <button onclick="editarFito(${i})" style="padding:4px; cursor:pointer;">✏️</button>
+                    <button onclick="eliminarFito(${i})" style="padding:4px; cursor:pointer; background:red; color:white; border:none; border-radius:3px; margin-left:5px;">🗑️</button>
+                </td>
             </tr>`;
         });
         document.getElementById('fitoTablaBody').innerHTML = html || "<tr><td colspan='3' style='padding:10px; text-align:center;'>Sin tratamientos</td></tr>";
@@ -528,7 +531,14 @@
         document.getElementById('f_nreg').value = r.nreg || "";
         document.getElementById('f_obs').value = r.obs || "";
     }
-
+function eliminarFito(i) {
+        if(confirm("¿Estás seguro de que quieres eliminar este registro?")) {
+            let id = document.getElementById('fitoMesaId').value;
+            datosFito[id].splice(i, 1);
+            guardarDatos();
+            renderFitoHistorial();
+        }
+    }
     function actualizarColoresFito() {
         document.querySelectorAll('.mesa').forEach(m => {
             if(m.id.startsWith('ft-')) {
