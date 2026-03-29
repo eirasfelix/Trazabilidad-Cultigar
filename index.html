@@ -533,10 +533,14 @@
     }
 function eliminarFito(i) {
         if(confirm("¿Estás seguro de que quieres eliminar este registro?")) {
-            let id = document.getElementById('fitoMesaId').value;
-            datosFito[id].splice(i, 1);
-            guardarDatos();
+            let id = mActivaFito; // Usamos la mesa que ya está abierta
+            dbFito[id].splice(i, 1); // Cambiamos 'datosFito' por 'dbFito'
+            
+            // Esta línea es la más importante para que se guarde de verdad:
+            localStorage.setItem('db_fito_vPRO', JSON.stringify(dbFito));
+            
             renderFitoHistorial();
+            actualizarColoresFito();
         }
     }
     function actualizarColoresFito() {
