@@ -458,6 +458,10 @@
         document.getElementById('f_prod').value = "";
         document.getElementById('f_dosis').value = "";
         document.getElementById('f_fecha').value = new Date().toISOString().split('T')[0];
+        document.getElementById('f_especie').value = "";
+        document.getElementById('f_aplicador').value = "";
+        document.getElementById('f_nreg').value = "";
+        document.getElementById('f_obs').value = "";
         document.getElementById('fitoFormTit').innerText = "+ NUEVO REGISTRO:";
         renderFitoHistorial();
         document.getElementById('panelFito').style.display = 'block';
@@ -478,11 +482,15 @@
 
     function guardarFito() {
         let idx = parseInt(document.getElementById('fitoEditIdx').value);
-        let reg = {
-            p: document.getElementById('f_prod').value.toUpperCase(),
+        let reg = {p: document.getElementById('f_prod').value.toUpperCase(),
             d: document.getElementById('f_dosis').value,
             e: document.getElementById('f_estado').value,
-            f: document.getElementById('f_fecha').value
+            f: document.getElementById('f_fecha').value,
+            esp: document.getElementById('f_especie').value.toUpperCase(),
+            apl: document.getElementById('f_aplicador').value.toUpperCase(),
+           nreg: document.getElementById('f_nreg').value,
+            obs: document.getElementById('f_obs').value
+            
         };
 
         if(!reg.p) return alert("Pon el nombre del producto");
@@ -504,7 +512,11 @@
         document.getElementById('f_dosis').value = r.d;
         document.getElementById('f_estado').value = r.e;
         document.getElementById('f_fecha').value = r.f;
-        document.getElementById('fitoFormTit').innerText = "📝 EDITANDO REGISTRO:";
+       document.getElementById('fitoFormTit').innerText = "📝 EDITANDO REGISTRO:";
+        document.getElementById('f_especie').value = r.esp || "";
+        document.getElementById('f_aplicador').value = r.apl || "";
+        document.getElementById('f_nreg').value = r.nreg || "";
+        document.getElementById('f_obs').value = r.obs || "";
     }
 
     function actualizarColoresFito() {
