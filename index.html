@@ -43,10 +43,10 @@
         <button class="btn-nube btn-subir" onclick="subirANube()">⬆ SUBIR</button>
         <button class="btn-nube btn-bajar" onclick="cargarDeNube()">⬇ BAJAR</button>
     </div>
-   
+    <div id="resumenStock" class="resumen-stock">Cargando datos...</div>
 </div>
 
-<div class="mapa-real" style="height: 780px; overflow: hidden; margin-bottom: 50px; position: relative; z-index: 1;">
+<div class="mapa-real">
     <svg width="490" height="780" viewBox="0 0 490 780">
         <text x="245" y="25" style="font-size:18px; font-weight:bold; text-anchor:middle; fill:#1a5d1a;">TRAZABILIDAD CULTIGAR</text>
         
@@ -147,7 +147,6 @@
     // Todo el script se mantiene igual, solo añado la función auxiliar ponerReceta
     const GIST_ID = "dc4b1ac9b41655086c76352f03ccfafe";
     let db = JSON.parse(localStorage.getItem('cultigar_pro_final')) || {};
-   let dbFito = JSON.parse(localStorage.getItem('db_fito_vPRO')) || {};
     let mesaActual = null;
     let memoriaCopiada = null; 
     let ultimosDatos = { ref: "", lote: "", sustrato: "", f_enraizado: "" };
@@ -273,12 +272,7 @@
             await fetch(`https://api.github.com/gists/${GIST_ID}`, {
                 method: 'PATCH',
                 headers: { 'Authorization': `token ${token}` },
-             body: JSON.stringify({ 
-                    files: { 
-                        "cultigar_db.json": { content: JSON.stringify(db) },
-                        "cultigar_fito.json": { content: JSON.stringify(dbFito) }
-                    } 
-                })
+                body: JSON.stringify({ files: { "cultigar_db.json": { content: JSON.stringify(db) } } })
             });
         } catch (e) { console.error("Error nube"); }
     }
@@ -289,12 +283,7 @@
             const json = await res.json();
             db = JSON.parse(json.files["cultigar_db.json"].content);
             localStorage.setItem('cultigar_pro_final', JSON.stringify(db));
-            if(json.files["cultigar_fito.json"]) {
-                dbFito = JSON.parse(json.files["cultigar_fito.json"].content);
-                localStorage.setItem('cultigar_fito_db', JSON.stringify(dbFito));
-            }
             actualizarMapa();
-            if(window.actualizarMapaFito) actualizarMapaFito();
         } catch (e) { console.log("Error cargando"); }
     }
 
@@ -310,7 +299,9 @@
                 });
             } else m.classList.remove('ocupada');
         });
-       
+        let res = `<div class="stock-item" style="background:#4CAF50; color:white">TOTAL: ${granTotal}</div>`;
+        for(let r in totales) res += `<div class="stock-item">${r}: ${totales[r]}</div>`;
+        document.getElementById('resumenStock').innerHTML = res || "Vivero Vacío";
     }
 
     function buscar() {
@@ -349,137 +340,3 @@
 </script>
 </body>
 </html>
-
-
-<style>
-    .fito-blanco { fill: white !important; }
-    .fito-amarillo { fill: #fff176 !important; }
-    .fito-naranja { fill: #ffb74d !important; }
-    .fito-rojo { fill: #ef5350 !important; }
-    .fito-verde { fill: #81c784 !important; }
-    .label-fito { font-size: 11px; color: #aaa; margin-top: 10px; display: block; font-weight: bold; }
-    .mesa { cursor: pointer !important; pointer-events: all !important; }
-    .texto-mesa { font-size: 9px; font-weight: bold; pointer-events: none; text-anchor: middle; }
-</style>
-
-<div style="margin-top: 50px; border-top: 6px solid #c62828; background: #eee; padding: 15px; text-align: center; font-family: sans-serif;">
-    <h2 style="margin:0; color:#c62828;">☣ MAPA 2: CONTROL FITOSANITARIO</h2>
-</div>
-
-<div class="mapa-real" style="position: relative; z-index: 5; text-align: center;">
-    <svg width="490" height="780" viewBox="0 0 490 780">
-        <rect id="ft-10-48" class="mesa" x="10" y="70" width="40" height="140" onclick="abrirFito('10-48', 28.5)" /><text x="30" y="200" class="texto-mesa">10-48</text>
-        </svg>
-</div>
-
-<div id="panelFito" style="position: fixed; top: 2%; left: 2%; width: 92%; height: 92%; background: #1a1a1a; color: white; padding: 15px; border-radius: 15px; display: none; border: 4px solid #c62828; z-index: 20000; overflow-y: auto; font-family: sans-serif;">
-    <div style="display:flex; justify-content: space-between; border-bottom: 2px solid red; padding-bottom:10px;">
-        <h2 id="fitoMesaNom">Mesa</h2>
-        <div id="fitoM2" style="background:red; padding:5px 10px; border-radius:5px; font-weight:bold;">0 m²</div>
-    </div>
-
-    <h3 style="font-size:12px; color:#aaa; margin-top:15px;">HISTORIAL DE TRATAMIENTOS:</h3>
-    <table style="width:100%; border-collapse:collapse; font-size:11px; background:#222; margin-bottom: 20px;">
-        <thead><tr style="background:#333; color:red; text-align: left;"><th style="padding:5px;">Producto</th><th style="padding:5px;">Estado</th><th style="padding:5px;">⚙️</th></tr></thead>
-        <tbody id="fitoTablaBody"></tbody>
-    </table>
-
-    <div style="background:#333; padding:15px; border-radius:10px; border: 1px solid #444;">
-        <span class="label-fito">PRODUCTO COMERCIAL</span>
-        <input type="text" id="f_prod" style="width:95%; padding:10px; margin-top:5px; border-radius:5px; border:none;">
-
-        <span class="label-fito">ESTADO / PLAZO SEGURIDAD</span>
-        <select id="f_estado" style="width:98%; padding:10px; margin-top:5px; border-radius:5px;">
-            <option value="blanco">Blanco (Limpio)</option>
-            <option value="amarillo">Amarillo (Tratado)</option>
-            <option value="naranja">Naranja (Precaución)</option>
-            <option value="rojo">Rojo (¡NO TOCAR!)</option>
-            <option value="verde">Verde (Plazo cumplido)</option>
-        </select>
-
-        <span class="label-fito">FECHA APLICACIÓN</span>
-        <input type="date" id="f_fecha" style="width:95%; padding:10px; margin-top:5px; border-radius:5px; border:none;">
-
-        <button onclick="guardarFito()" style="width:100%; background:red; color:white; padding:15px; margin-top:15px; border:none; border-radius:8px; font-weight:bold; cursor:pointer;">💾 GUARDAR REGISTRO</button>
-    </div>
-    
-    <button onclick="document.getElementById('panelFito').style.display='none'" style="width:100%; background:#555; color:white; padding:10px; margin-top:10px; border:none; border-radius:8px; cursor:pointer;">CERRAR</button>
-</div>
-
-<script>
-    // Recuperamos datos de ayer (o los iniciamos vacíos)
-    var dbFito = JSON.parse(localStorage.getItem('db_fito_vPRO')) || {};
-    var mActivaFito = null;
-
-    function abrirFito(id, m2) {
-        mActivaFito = id;
-        document.getElementById('fitoMesaNom').innerText = "Mesa " + id;
-        document.getElementById('fitoM2').innerText = m2 + " m²";
-        
-        // Limpiar campos
-        document.getElementById('f_prod').value = "";
-        document.getElementById('f_fecha').value = new Date().toISOString().split('T')[0];
-        
-        renderFitoHistorial();
-        document.getElementById('panelFito').style.display = 'block';
-    }
-
-    function renderFitoHistorial() {
-        let lista = dbFito[mActivaFito] || [];
-        let html = "";
-        lista.forEach((r, i) => {
-            let colores = { amarillo:'#fff176', naranja:'#ffb74d', rojo:'#ef5350', verde:'#81c784', blanco:'#fff' };
-            html += `<tr style="border-bottom:1px solid #444;">
-                <td style="padding:8px;"><b>${r.p}</b></td>
-                <td style="padding:8px; color:${colores[r.e]}">● ${r.e.toUpperCase()}</td>
-                <td><button onclick="eliminarFito(${i})" style="background:red; color:white; border:none; cursor:pointer;">🗑️</button></td>
-            </tr>`;
-        });
-        document.getElementById('fitoTablaBody').innerHTML = html || "<tr><td colspan='3' style='text-align:center; padding:10px;'>Sin datos</td></tr>";
-    }
-
-    function guardarFito() {
-        let producto = document.getElementById('f_prod').value.toUpperCase();
-        if(!producto) return alert("Introduce el producto");
-
-        let registro = {
-            p: producto,
-            e: document.getElementById('f_estado').value,
-            f: document.getElementById('f_fecha').value
-        };
-
-        if(!dbFito[mActivaFito]) dbFito[mActivaFito] = [];
-        dbFito[mActivaFito].push(registro);
-
-        localStorage.setItem('db_fito_vPRO', JSON.stringify(dbFito));
-        
-        renderFitoHistorial();
-        actualizarColoresFito();
-        alert("Guardado correctamente en " + mActivaFito);
-    }
-
-    function eliminarFito(idx) {
-        if(confirm("¿Eliminar este registro?")) {
-            dbFito[mActivaFito].splice(idx, 1);
-            localStorage.setItem('db_fito_vPRO', JSON.stringify(dbFito));
-            renderFitoHistorial();
-            actualizarColoresFito();
-        }
-    }
-
-    function actualizarColoresFito() {
-        document.querySelectorAll('rect').forEach(rect => {
-            if(rect.id && rect.id.startsWith('ft-')) {
-                let id = rect.id.replace('ft-', '');
-                rect.setAttribute('class', 'mesa fito-blanco'); // Reset
-                if(dbFito[id] && dbFito[id].length > 0) {
-                    let ultimoEstado = dbFito[id][dbFito[id].length - 1].e;
-                    rect.setAttribute('class', 'mesa fito-' + ultimoEstado);
-                }
-            }
-        });
-    }
-
-    // Al cargar la página, pintamos los colores que ya existan
-    setTimeout(actualizarColoresFito, 500);
-</script>
