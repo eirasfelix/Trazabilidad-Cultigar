@@ -43,7 +43,7 @@
         <button class="btn-nube btn-subir" onclick="subirANube()">⬆ SUBIR</button>
         <button class="btn-nube btn-bajar" onclick="cargarDeNube()">⬇ BAJAR</button>
     </div>
-    <div id="resumenStock" class="resumen-stock">Cargando datos...</div>
+   
 </div>
 
 <div class="mapa-real">
@@ -299,9 +299,7 @@
                 });
             } else m.classList.remove('ocupada');
         });
-        let res = `<div class="stock-item" style="background:#4CAF50; color:white">TOTAL: ${granTotal}</div>`;
-        for(let r in totales) res += `<div class="stock-item">${r}: ${totales[r]}</div>`;
-        document.getElementById('resumenStock').innerHTML = res || "Vivero Vacío";
+       
     }
 
     function buscar() {
