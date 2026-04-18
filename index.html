@@ -147,6 +147,7 @@
     // Todo el script se mantiene igual, solo añado la función auxiliar ponerReceta
     const GIST_ID = "dc4b1ac9b41655086c76352f03ccfafe";
     let db = JSON.parse(localStorage.getItem('cultigar_pro_final')) || {};
+   let dbFito = JSON.parse(localStorage.getItem('db_fito_vPRO')) || {};
     let mesaActual = null;
     let memoriaCopiada = null; 
     let ultimosDatos = { ref: "", lote: "", sustrato: "", f_enraizado: "" };
@@ -272,7 +273,12 @@
             await fetch(`https://api.github.com/gists/${GIST_ID}`, {
                 method: 'PATCH',
                 headers: { 'Authorization': `token ${token}` },
-                body: JSON.stringify({ files: { "cultigar_db.json": { content: JSON.stringify(db) } } })
+             body: JSON.stringify({ 
+                    files: { 
+                        "cultigar_db.json": { content: JSON.stringify(db) },
+                        "cultigar_fito.json": { content: JSON.stringify(dbFito) }
+                    } 
+                })
             });
         } catch (e) { console.error("Error nube"); }
     }
@@ -283,7 +289,12 @@
             const json = await res.json();
             db = JSON.parse(json.files["cultigar_db.json"].content);
             localStorage.setItem('cultigar_pro_final', JSON.stringify(db));
+            if(json.files["cultigar_fito.json"]) {
+                dbFito = JSON.parse(json.files["cultigar_fito.json"].content);
+                localStorage.setItem('cultigar_fito_db', JSON.stringify(dbFito));
+            }
             actualizarMapa();
+            if(window.actualizarMapaFito) actualizarMapaFito();
         } catch (e) { console.log("Error cargando"); }
     }
 
@@ -511,6 +522,8 @@
         else dbFito[mActivaFito].push(reg);
 
         localStorage.setItem('db_fito_vPRO', JSON.stringify(dbFito));
+        subirANube();
+        subirANube();
         renderFitoHistorial();
         actualizarColoresFito();
         alert("Guardado correctamente");
