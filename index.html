@@ -320,7 +320,7 @@
         actualizarColoresMapas();
     }
 
-   function mostrarTablaTraza() {
+ function mostrarTablaTraza() {
         let html = "";
         let datos = DB_TRAZA[mesaSeleccionada] || [];
         datos.forEach((r, i) => {
@@ -330,6 +330,7 @@
                 <td>${r.lote}</td>
                 <td>${fechaLimpia}</td>
                 <td style="display:flex; gap:5px;">
+                    <button onclick="editarPlanta(${i})" title="Editar">✏️</button>
                     <button onclick="copiarPlanta(${i})" title="Mover">📦</button>
                     <button onclick="borrarTraza(${i})" title="Borrar">🗑️</button>
                 </td>
@@ -348,12 +349,25 @@
     }
 
     function borrarTraza(index) {
-        if(confirm("¿Seguro que quieres borrar este lote?")) {
+        if(confirm("⚠️ ¿Estás seguro de que quieres BORRAR este lote?")) {
             DB_TRAZA[mesaSeleccionada].splice(index, 1);
             persistir();
             mostrarTablaTraza();
             actualizarColoresMapas();
         }
+    }
+
+    function editarPlanta(index) {
+        let registro = DB_TRAZA[mesaSeleccionada][index];
+        document.getElementById('f_ref').value = registro.ref;
+        document.getElementById('f_lote').value = registro.lote;
+        document.getElementById('f_sus').value = registro.sus || "";
+        document.getElementById('f_fecha').value = registro.fec;
+        
+        // Lo borramos temporalmente para que al dar a "Añadir" no se duplique
+        DB_TRAZA[mesaSeleccionada].splice(index, 1);
+        mostrarTablaTraza();
+        alert("📝 Datos cargados arriba. Modifícalos y pulsa 'AÑADIR REGISTRO' para terminar.");
     }
 
     function persistir() {
@@ -432,7 +446,7 @@
         persistir();
         mostrarTablaTraza();
         actualizarColoresMapas();
-        alert("Lote guardado. Abre otra mesa y pulsa PEGAR.");
+        alert("Lote copiado. Abre otra mesa y pulsa PEGAR.");
     }
 
     function pegarPlanta() {
@@ -461,6 +475,3 @@
         inicializarMapas();
         bajarDatos();
     };
-</script>
-</body>
-</html>
