@@ -320,7 +320,9 @@
         actualizarColoresMapas();
     }
 
-function mostrarTablaTraza() {
+let indexEdicion = null; // Variable para saber si estamos editando
+
+    function mostrarTablaTraza() {
         let html = "";
         let datos = DB_TRAZA[mesaSeleccionada] || [];
         datos.forEach((r, i) => {
@@ -330,7 +332,7 @@ function mostrarTablaTraza() {
                 <td>${r.lote}</td>
                 <td>${fechaLimpia}</td>
                 <td style="display:flex; gap:5px;">
-                    <button onclick="editarPlanta(${i})" title="Editar">✏️</button>
+                    <button onclick="prepararEdicion(${i})" title="Editar">✏️</button>
                     <button onclick="copiarPlanta(${i})" title="Mover">📦</button>
                     <button onclick="borrarTraza(${i})" title="Borrar">🗑️</button>
                 </td>
@@ -340,12 +342,50 @@ function mostrarTablaTraza() {
         actualizarBotonPegar();
     }
 
-    function mostrarTablaFito() {
-        let html = "";
-        (DB_FITO[mesaSeleccionada] || []).forEach(r => {
-            html += `<tr><td>${r.p}</td><td>${r.e.toUpperCase()}</td><td>${r.f}</td></tr>`;
-        });
-        document.getElementById('fitoCuerpoMesa').innerHTML = html;
+    function prepararEdicion(index) {
+        let registro = DB_TRAZA[mesaSeleccionada][index];
+        indexEdicion = index; // Guardamos qué fila estamos editando
+        
+        document.getElementById('f_ref').value = registro.ref;
+        document.getElementById('f_lote').value = registro.lote;
+        document.getElementById('f_sus').value = registro.sus || "";
+        document.getElementById('f_fecha').value = registro.fec;
+        
+        // Cambiamos el color del botón para avisar que estamos editando
+        const btn = document.querySelector('.btn-guardar');
+        btn.style.background = "#f39c12";
+        btn.innerText = "💾 ACTUALIZAR CAMBIOS";
+        
+        alert("📝 Editando fila " + (index + 1) + ". Modifica los datos y pulsa ACTUALIZAR.");
+    }
+
+    function guardarRegistroTrazabilidad() {
+        let nuevoRegistro = {
+            ref: document.getElementById('f_ref').value.toUpperCase(),
+            lote: document.getElementById('f_lote').value,
+            sus: document.getElementById('f_sus').value,
+            fec: document.getElementById('f_fecha').value
+        };
+
+        if (indexEdicion !== null) {
+            // Si estábamos editando, reemplazamos la fila
+            DB_TRAZA[mesaSeleccionada][indexEdicion] = nuevoRegistro;
+            indexEdicion = null; // Resetear
+            const btn = document.querySelector('.btn-guardar');
+            btn.style.background = "var(--verde-cultigar)";
+            btn.innerText = "💾 AÑADIR REGISTRO";
+        } else {
+            // Si no, añadimos uno nuevo
+            if(!DB_TRAZA[mesaSeleccionada]) DB_TRAZA[mesaSeleccionada] = [];
+            DB_TRAZA[mesaSeleccionada].push(nuevoRegistro);
+        }
+
+        persistir();
+        mostrarTablaTraza();
+        actualizarColoresMapas();
+        // Limpiar formulario
+        document.getElementById('f_ref').value = "";
+        document.getElementById('f_lote').value = "";
     }
 
     function borrarTraza(index) {
@@ -357,15 +397,12 @@ function mostrarTablaTraza() {
         }
     }
 
-    function editarPlanta(index) {
-        let registro = DB_TRAZA[mesaSeleccionada][index];
-        document.getElementById('f_ref').value = registro.ref;
-        document.getElementById('f_lote').value = registro.lote;
-        document.getElementById('f_sus').value = registro.sus || "";
-        document.getElementById('f_fecha').value = registro.fec;
-        DB_TRAZA[mesaSeleccionada].splice(index, 1);
-        mostrarTablaTraza();
-        alert("📝 Datos cargados arriba. Modifícalos y pulsa 'AÑADIR REGISTRO' para terminar.");
+    function mostrarTablaFito() {
+        let html = "";
+        (DB_FITO[mesaSeleccionada] || []).forEach(r => {
+            html += `<tr><td>${r.p}</td><td>${r.e.toUpperCase()}</td><td>${r.f}</td></tr>`;
+        });
+        document.getElementById('fitoCuerpoMesa').innerHTML = html;
     }
 
     function persistir() {
@@ -432,6 +469,12 @@ function mostrarTablaTraza() {
     }
 
     function cerrarModales() {
+        indexEdicion = null; // Cancelar edicion si se cierra
+        const btn = document.querySelector('.btn-guardar');
+        if(btn) {
+            btn.style.background = "var(--verde-cultigar)";
+            btn.innerText = "💾 AÑADIR REGISTRO";
+        }
         document.getElementById('overlay').style.display = 'none';
         document.querySelectorAll('.modal').forEach(m => m.style.display = 'none');
     }
