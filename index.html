@@ -320,14 +320,11 @@
         actualizarColoresMapas();
     }
 
-    function mostrarTablaTraza() {
+   function mostrarTablaTraza() {
         let html = "";
         let datos = DB_TRAZA[mesaSeleccionada] || [];
-        
         datos.forEach((r, i) => {
-            // Limpia el "undefined" si la fecha está vacía
             let fechaLimpia = (r.fec && r.fec !== "undefined") ? r.fec : ""; 
-            
             html += `<tr>
                 <td>${r.ref}</td>
                 <td>${r.lote}</td>
@@ -339,10 +336,7 @@
             </tr>`;
         });
         document.getElementById('tablaCuerpoMesa').innerHTML = html || "<tr><td colspan='4' style='text-align:center; padding:10px;'>Mesa vacía</td></tr>";
-        
-        // Llama a la función que mostrará el botón de PEGAR
         actualizarBotonPegar();
-    }
     }
 
     function mostrarTablaFito() {
@@ -354,10 +348,12 @@
     }
 
     function borrarTraza(index) {
-        DB_TRAZA[mesaSeleccionada].splice(index, 1);
-        persistir();
-        mostrarTablaTraza();
-        actualizarColoresMapas();
+        if(confirm("¿Seguro que quieres borrar este lote?")) {
+            DB_TRAZA[mesaSeleccionada].splice(index, 1);
+            persistir();
+            mostrarTablaTraza();
+            actualizarColoresMapas();
+        }
     }
 
     function persistir() {
@@ -367,17 +363,14 @@
     }
 
     function actualizarColoresMapas() {
-        // Mapa Trazabilidad
         document.querySelectorAll('#svg-trazabilidad .mesa').forEach(rect => {
             let id = rect.id.replace('t-', '');
             if(DB_TRAZA[id] && DB_TRAZA[id].length > 0) rect.classList.add('ocupada');
             else rect.classList.remove('ocupada');
         });
-
-        // Mapa Fitos
         document.querySelectorAll('#svg-fito .mesa').forEach(rect => {
             let id = rect.id.replace('f-', '');
-            rect.setAttribute('class', 'mesa'); // Reset
+            rect.setAttribute('class', 'mesa'); 
             if(DB_FITO[id] && DB_FITO[id].length > 0) {
                 let ultimoEstado = DB_FITO[id][DB_FITO[id].length - 1].e;
                 rect.classList.add('fito-' + ultimoEstado);
@@ -385,7 +378,6 @@
         });
     }
 
-    // --- NUBE ---
     async function subirDatos() {
         const token = localStorage.getItem('github_token');
         if(!token) return;
@@ -405,8 +397,10 @@
         try {
             const res = await fetch(`https://api.github.com/gists/${GIST_ID}?cb=${Date.now()}`);
             const data = await res.json();
-            DB_TRAZA = JSON.parse(data.files["cultigar_db.json"].content);
-            DB_FITO = JSON.parse(data.files["cultigar_fito.json"].content);
+            let fT = data.files["cultigar_db.json"] || Object.values(data.files)[0];
+            let fF = data.files["cultigar_fito.json"] || Object.values(data.files)[1];
+            if(fT) DB_TRAZA = JSON.parse(fT.content);
+            if(fF) DB_FITO = JSON.parse(fF.content);
             localStorage.setItem('culti_traza', JSON.stringify(DB_TRAZA));
             localStorage.setItem('culti_fito', JSON.stringify(DB_FITO));
             actualizarColoresMapas();
@@ -419,7 +413,8 @@
         if(!busq) return;
         for(let mesa in DB_TRAZA) {
             if(DB_TRAZA[mesa].some(reg => reg.ref.includes(busq))) {
-                document.getElementById('t-' + mesa).classList.add('resaltado');
+                const el = document.getElementById('t-' + mesa);
+                if(el) el.classList.add('resaltado');
             }
         }
     }
@@ -429,11 +424,6 @@
         document.querySelectorAll('.modal').forEach(m => m.style.display = 'none');
     }
 
-    window.onload = () => {
-        inicializarMapas();
-        bajarDatos();
-    };
-
     let portapapeles = null;
 
     function copiarPlanta(index) {
@@ -442,7 +432,7 @@
         persistir();
         mostrarTablaTraza();
         actualizarColoresMapas();
-        alert("Planta en el portapapeles. Abre otra mesa para PEGAR.");
+        alert("Lote guardado. Abre otra mesa y pulsa PEGAR.");
     }
 
     function pegarPlanta() {
@@ -461,12 +451,16 @@
         if(portapapeles) {
             const btn = document.createElement('div');
             btn.id = 'zona-pegar';
-            btn.innerHTML = `<button class="btn-guardar" style="background:#9b59b6; margin-bottom:15px;" onclick="pegarPlanta()">📋 PEGAR REGISTRO AQUÍ</button>`;
+            btn.innerHTML = `<button class="btn-guardar" style="background:#9b59b6; margin-bottom:15px;" onclick="pegarPlanta()">📋 PEGAR LOTE AQUÍ</button>`;
             const modal = document.getElementById('modalMesa');
             modal.insertBefore(btn, modal.querySelector('table'));
         }
     }
-</script>
 
+    window.onload = () => {
+        inicializarMapas();
+        bajarDatos();
+    };
+</script>
 </body>
 </html>
