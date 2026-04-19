@@ -486,7 +486,49 @@
         }
     }
 
-    function actualizarColoresFito() {
+   // --- NUEVO CEREBRO UNIFICADO (Sustituye lo anterior) ---
+    function abrirFito(id, m2) {
+        mActivaFito = id;
+        document.getElementById('fitoMesaNom').innerText = "Mesa " + id;
+        document.getElementById('fitoM2').innerText = m2 + " m²";
+        document.getElementById('f_prod').value = "";
+        document.getElementById('f_fecha').value = new Date().toISOString().split('T')[0];
+        renderFitoHistorial();
+        document.getElementById('panelFito').style.display = 'block';
+    }
+
+    function renderFitoHistorial() {
+        let lista = dbFito[mActivaFito] || [];
+        let html = "";
+        let colores = { amarillo:'#fff176', naranja:'#ffb74d', rojo:'#ef5350', verde:'#81c784', blanco:'#fff' };
+        lista.forEach((r, i) => {
+            html += `<tr style="border-bottom:1px solid #444;"><td style="padding:8px;"><b>${r.p}</b></td><td style="color:${colores[r.e]}">● ${r.e.toUpperCase()}</td><td><button onclick="eliminarFito(${i})" style="background:red; color:white; border:none; cursor:pointer;">🗑️</button></td></tr>`;
+        });
+        document.getElementById('fitoTablaBody').innerHTML = html || "<tr><td colspan='3' style='text-align:center; padding:10px;'>Sin datos</td></tr>";
+    }
+
+    function guardarFito() {
+        let p = document.getElementById('f_prod').value.toUpperCase();
+        if(!p) return alert("Introduce el producto");
+        if(!dbFito[mActivaFito]) dbFito[mActivaFito] = [];
+        dbFito[mActivaFito].push({ p: p, e: document.getElementById('f_estado').value, f: document.getElementById('f_fecha').value });
+        localStorage.setItem('db_fito_vPRO', JSON.stringify(dbFito));
+        subirANube(); // Sincroniza con GitHub
+        renderFitoHistorial();
+        actualizarMapaFito();
+    }
+
+    function eliminarFito(i) {
+        if(confirm("¿Eliminar?")) {
+            dbFito[mActivaFito].splice(i, 1);
+            localStorage.setItem('db_fito_vPRO', JSON.stringify(dbFito));
+            subirANube();
+            renderFitoHistorial();
+            actualizarMapaFito();
+        }
+    }
+
+    function actualizarMapaFito() {
         document.querySelectorAll('rect').forEach(rect => {
             if(rect.id && rect.id.startsWith('ft-')) {
                 let id = rect.id.replace('ft-', '');
@@ -497,5 +539,10 @@
             }
         });
     }
-    setTimeout(actualizarColoresFito, 500);
+
+    // Ejecutar al cargar para dar color a las mesas de fitos
+    setTimeout(actualizarMapaFito, 800);
 </script>
+
+</body>
+</html>
