@@ -261,13 +261,13 @@
                          <text x="${m.x + m.w/2}" y="${m.y + m.h - 5}" class="texto-id">${m.id}</text>`;
         });
 
-        // 2. Dibujar Túneles (1 al 14)
+     // 2. Dibujar Túneles (1 al 14) - CORREGIDO ID PARA DATOS ANTIGUOS
         for(let i=1; i<=14; i++) {
             let yPos = 70 + (14-i) * 46;
-            trazHtml += `<rect id="t-T${i}" class="mesa" x="395" y="${yPos}" width="75" height="38" onclick="abrirTraza('T${i}')"></rect>
-                         <text x="432" y="${yPos + 22}" class="texto-id">T${i}</text>`;
-            fitoHtml += `<rect id="f-T${i}" class="mesa" x="395" y="${yPos}" width="75" height="38" onclick="abrirFito('T${i}')"></rect>
-                         <text x="432" y="${yPos + 22}" class="texto-id">T${i}</text>`;
+            trazHtml += `<rect id="t-${i}" class="mesa" x="395" y="${yPos}" width="75" height="38" onclick="abrirTraza('${i}')"></rect>
+                         <text x="432" y="${yPos + 22}" class="texto-id">${i}</text>`;
+            fitoHtml += `<rect id="f-${i}" class="mesa" x="395" y="${yPos}" width="75" height="38" onclick="abrirFito('${i}')"></rect>
+                         <text x="432" y="${yPos + 22}" class="texto-id">${i}</text>`;
         }
 
         document.getElementById('svg-trazabilidad').innerHTML = trazHtml;
