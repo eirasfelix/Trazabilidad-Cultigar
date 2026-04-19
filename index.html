@@ -173,7 +173,7 @@
 <div id="modalMesa" class="modal">
     <h2 id="mesaTitulo" style="color: var(--verde-cultigar);">Mesa --</h2>
     <table>
-        <thead><tr><th>Ref</th><th>Lote</th><th>Fecha</th><th>Acción</th></tr></thead>
+       <thead><tr><th>Ref</th><th>Lote</th><th>F. Inicio</th><th>Caja CE</th><th>F. Plant CE</th><th>Acción</th></tr></thead>
         <tbody id="tablaCuerpoMesa"></tbody>
     </table>
     <div class="form-group">
@@ -331,17 +331,7 @@
 let indexEdicion = null;
 
     function mostrarTablaTraza() {
-        // Añadimos las cabeceras para C.E.
-        let html = `<thead>
-            <tr>
-                <th>Ref</th>
-                <th>Lote</th>
-                <th>F. Inicio</th>
-                <th>Caja CE</th>
-                <th>F. Plant CE</th>
-                <th>Acción</th>
-            </tr>
-        </thead><tbody>`;
+       let html = "";
         
         let datos = DB_TRAZA[mesaSeleccionada] || [];
         
