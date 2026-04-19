@@ -192,6 +192,14 @@
         <label>Fecha Inicio</label>
         <input type="date" id="f_fecha">
     </div>
+    <div class="form-group">
+        <label>Nº Caja C.E.</label>
+        <input type="text" id="f_caja_ce" placeholder="Ej: Caja 12">
+    </div>
+    <div class="form-group">
+        <label>Fecha Plantación C.E.</label>
+        <input type="date" id="f_fecha_ce">
+    </div>
     <button class="btn-guardar" style="background: var(--verde-cultigar);" onclick="guardarRegistroTrazabilidad()">💾 AÑADIR REGISTRO</button>
     <button class="btn-guardar btn-cerrar" onclick="cerrarModales()">CERRAR</button>
 </div>
@@ -320,17 +328,34 @@
         actualizarColoresMapas();
     }
 
-let indexEdicion = null; // Variable para saber si estamos editando
+let indexEdicion = null;
 
     function mostrarTablaTraza() {
-        let html = "";
+        // Añadimos las cabeceras para C.E.
+        let html = `<thead>
+            <tr>
+                <th>Ref</th>
+                <th>Lote</th>
+                <th>F. Inicio</th>
+                <th>Caja CE</th>
+                <th>F. Plant CE</th>
+                <th>Acción</th>
+            </tr>
+        </thead><tbody>`;
+        
         let datos = DB_TRAZA[mesaSeleccionada] || [];
+        
         datos.forEach((r, i) => {
             let fechaLimpia = (r.fec && r.fec !== "undefined") ? r.fec : ""; 
+            let cajaCE = r.cajaCE || "-";
+            let fechaCE = (r.fecCE && r.fecCE !== "undefined") ? r.fecCE : "-";
+            
             html += `<tr>
                 <td>${r.ref}</td>
                 <td>${r.lote}</td>
                 <td>${fechaLimpia}</td>
+                <td>${cajaCE}</td>
+                <td>${fechaCE}</td>
                 <td style="display:flex; gap:5px;">
                     <button onclick="prepararEdicion(${i})" title="Editar">✏️</button>
                     <button onclick="copiarPlanta(${i})" title="Mover">📦</button>
@@ -338,25 +363,27 @@ let indexEdicion = null; // Variable para saber si estamos editando
                 </td>
             </tr>`;
         });
-        document.getElementById('tablaCuerpoMesa').innerHTML = html || "<tr><td colspan='4' style='text-align:center; padding:10px;'>Mesa vacía</td></tr>";
+        html += "</tbody>";
+        document.getElementById('tablaCuerpoMesa').innerHTML = html || "<tr><td colspan='6' style='text-align:center; padding:10px;'>Mesa vacía</td></tr>";
         actualizarBotonPegar();
     }
 
     function prepararEdicion(index) {
         let registro = DB_TRAZA[mesaSeleccionada][index];
-        indexEdicion = index; // Guardamos qué fila estamos editando
+        indexEdicion = index;
         
         document.getElementById('f_ref').value = registro.ref;
         document.getElementById('f_lote').value = registro.lote;
         document.getElementById('f_sus').value = registro.sus || "";
         document.getElementById('f_fecha').value = registro.fec;
+        // Carga los nuevos campos en el formulario
+        document.getElementById('f_caja_ce').value = registro.cajaCE || "";
+        document.getElementById('f_fecha_ce').value = registro.fecCE || "";
         
-        // Cambiamos el color del botón para avisar que estamos editando
         const btn = document.querySelector('.btn-guardar');
-        btn.style.background = "#f39c12";
-        btn.innerText = "💾 ACTUALIZAR CAMBIOS";
-        
-        alert("📝 Editando fila " + (index + 1) + ". Modifica los datos y pulsa ACTUALIZAR.");
+        btn.style.background = "#f39c12"; // Naranja edición
+        btn.innerText = "💾 ACTUALIZAR REGISTRO";
+        alert("📝 Editando registro. Modifica y pulsa Actualizar.");
     }
 
     function guardarRegistroTrazabilidad() {
@@ -364,18 +391,18 @@ let indexEdicion = null; // Variable para saber si estamos editando
             ref: document.getElementById('f_ref').value.toUpperCase(),
             lote: document.getElementById('f_lote').value,
             sus: document.getElementById('f_sus').value,
-            fec: document.getElementById('f_fecha').value
+            fec: document.getElementById('f_fecha').value,
+            cajaCE: document.getElementById('f_caja_ce').value, // Guardar Caja
+            fecCE: document.getElementById('f_fecha_ce').value   // Guardar Fecha CE
         };
 
         if (indexEdicion !== null) {
-            // Si estábamos editando, reemplazamos la fila
             DB_TRAZA[mesaSeleccionada][indexEdicion] = nuevoRegistro;
-            indexEdicion = null; // Resetear
+            indexEdicion = null;
             const btn = document.querySelector('.btn-guardar');
             btn.style.background = "var(--verde-cultigar)";
             btn.innerText = "💾 AÑADIR REGISTRO";
         } else {
-            // Si no, añadimos uno nuevo
             if(!DB_TRAZA[mesaSeleccionada]) DB_TRAZA[mesaSeleccionada] = [];
             DB_TRAZA[mesaSeleccionada].push(nuevoRegistro);
         }
@@ -383,13 +410,17 @@ let indexEdicion = null; // Variable para saber si estamos editando
         persistir();
         mostrarTablaTraza();
         actualizarColoresMapas();
-        // Limpiar formulario
+        
+        // Limpiamos todo el formulario
         document.getElementById('f_ref').value = "";
         document.getElementById('f_lote').value = "";
+        document.getElementById('f_sus').value = "";
+        document.getElementById('f_caja_ce').value = "";
+        document.getElementById('f_fecha_ce').value = "";
     }
 
     function borrarTraza(index) {
-        if(confirm("⚠️ ¿Estás seguro de que quieres BORRAR este lote?")) {
+        if(confirm("⚠️ ¿Seguro que quieres borrar este lote?")) {
             DB_TRAZA[mesaSeleccionada].splice(index, 1);
             persistir();
             mostrarTablaTraza();
@@ -446,8 +477,8 @@ let indexEdicion = null; // Variable para saber si estamos editando
         try {
             const res = await fetch(`https://api.github.com/gists/${GIST_ID}?cb=${Date.now()}`);
             const data = await res.json();
-            let fT = data.files["cultigar_db.json"] || Object.values(data.files)[0];
-            let fF = data.files["cultigar_fito.json"] || Object.values(data.files)[1];
+            let fT = data.files["cultigar_db.json"];
+            let fF = data.files["cultigar_fito.json"];
             if(fT) DB_TRAZA = JSON.parse(fT.content);
             if(fF) DB_FITO = JSON.parse(fF.content);
             localStorage.setItem('culti_traza', JSON.stringify(DB_TRAZA));
@@ -469,7 +500,7 @@ let indexEdicion = null; // Variable para saber si estamos editando
     }
 
     function cerrarModales() {
-        indexEdicion = null; // Cancelar edicion si se cierra
+        indexEdicion = null;
         const btn = document.querySelector('.btn-guardar');
         if(btn) {
             btn.style.background = "var(--verde-cultigar)";
@@ -487,7 +518,7 @@ let indexEdicion = null; // Variable para saber si estamos editando
         persistir();
         mostrarTablaTraza();
         actualizarColoresMapas();
-        alert("Lote copiado. Abre otra mesa y pulsa PEGAR.");
+        alert("Lote en portapapeles (incluye datos C.E.).");
     }
 
     function pegarPlanta() {
