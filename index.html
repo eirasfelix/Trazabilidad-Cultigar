@@ -322,10 +322,27 @@
 
     function mostrarTablaTraza() {
         let html = "";
-        (DB_TRAZA[mesaSeleccionada] || []).forEach((r, i) => {
-            html += `<tr><td>${r.ref}</td><td>${r.lote}</td><td>${r.fec}</td><td><button onclick="borrarTraza(${i})">🗑️</button></td></tr>`;
+        let datos = DB_TRAZA[mesaSeleccionada] || [];
+        
+        datos.forEach((r, i) => {
+            // Limpia el "undefined" si la fecha está vacía
+            let fechaLimpia = (r.fec && r.fec !== "undefined") ? r.fec : ""; 
+            
+            html += `<tr>
+                <td>${r.ref}</td>
+                <td>${r.lote}</td>
+                <td>${fechaLimpia}</td>
+                <td style="display:flex; gap:5px;">
+                    <button onclick="copiarPlanta(${i})" title="Mover">📦</button>
+                    <button onclick="borrarTraza(${i})" title="Borrar">🗑️</button>
+                </td>
+            </tr>`;
         });
-        document.getElementById('tablaCuerpoMesa').innerHTML = html;
+        document.getElementById('tablaCuerpoMesa').innerHTML = html || "<tr><td colspan='4' style='text-align:center; padding:10px;'>Mesa vacía</td></tr>";
+        
+        // Llama a la función que mostrará el botón de PEGAR
+        actualizarBotonPegar();
+    }
     }
 
     function mostrarTablaFito() {
@@ -416,6 +433,39 @@
         inicializarMapas();
         bajarDatos();
     };
+
+    let portapapeles = null;
+
+    function copiarPlanta(index) {
+        portapapeles = DB_TRAZA[mesaSeleccionada][index];
+        DB_TRAZA[mesaSeleccionada].splice(index, 1);
+        persistir();
+        mostrarTablaTraza();
+        actualizarColoresMapas();
+        alert("Planta en el portapapeles. Abre otra mesa para PEGAR.");
+    }
+
+    function pegarPlanta() {
+        if(!portapapeles) return;
+        if(!DB_TRAZA[mesaSeleccionada]) DB_TRAZA[mesaSeleccionada] = [];
+        DB_TRAZA[mesaSeleccionada].push(portapapeles);
+        portapapeles = null;
+        persistir();
+        mostrarTablaTraza();
+        actualizarColoresMapas();
+    }
+
+    function actualizarBotonPegar() {
+        const existente = document.getElementById('zona-pegar');
+        if(existente) existente.remove();
+        if(portapapeles) {
+            const btn = document.createElement('div');
+            btn.id = 'zona-pegar';
+            btn.innerHTML = `<button class="btn-guardar" style="background:#9b59b6; margin-bottom:15px;" onclick="pegarPlanta()">📋 PEGAR REGISTRO AQUÍ</button>`;
+            const modal = document.getElementById('modalMesa');
+            modal.insertBefore(btn, modal.querySelector('table'));
+        }
+    }
 </script>
 
 </body>
