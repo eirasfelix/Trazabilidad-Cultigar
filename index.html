@@ -320,7 +320,7 @@
         actualizarColoresMapas();
     }
 
- function mostrarTablaTraza() {
+function mostrarTablaTraza() {
         let html = "";
         let datos = DB_TRAZA[mesaSeleccionada] || [];
         datos.forEach((r, i) => {
@@ -363,8 +363,6 @@
         document.getElementById('f_lote').value = registro.lote;
         document.getElementById('f_sus').value = registro.sus || "";
         document.getElementById('f_fecha').value = registro.fec;
-        
-        // Lo borramos temporalmente para que al dar a "Añadir" no se duplique
         DB_TRAZA[mesaSeleccionada].splice(index, 1);
         mostrarTablaTraza();
         alert("📝 Datos cargados arriba. Modifícalos y pulsa 'AÑADIR REGISTRO' para terminar.");
@@ -475,3 +473,6 @@
         inicializarMapas();
         bajarDatos();
     };
+</script>
+</body>
+</html>
