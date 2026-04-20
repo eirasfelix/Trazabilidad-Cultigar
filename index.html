@@ -49,7 +49,6 @@
             transition: 0.3s;
         }
 
-        /* Contenedores de Mapas */
         .seccion-mapa {
             background: #eee;
             margin: 20px auto;
@@ -73,7 +72,6 @@
             background: white;
         }
 
-        /* Estilos de Mesas */
         .mesa {
             fill: white;
             stroke: #333;
@@ -95,8 +93,7 @@
             text-anchor: middle;
         }
 
-        /* Estados Visuales */
-        .ocupada { fill: #a9dfbf !important; } /* Verde suave */
+        .ocupada { fill: #a9dfbf !important; }
         .resaltado { fill: #f39c12 !important; stroke: #d35400; stroke-width: 4; }
         
         .fito-blanco { fill: #ffffff !important; }
@@ -105,7 +102,6 @@
         .fito-rojo { fill: #e74c3c !important; }
         .fito-verde { fill: #2ecc71 !important; }
 
-        /* Paneles Modales */
         .modal {
             position: fixed;
             top: 50%;
@@ -113,7 +109,7 @@
             transform: translate(-50%, -50%);
             width: 90%;
             max-width: 450px;
-            height: 80%;
+            height: 85%;
             background: #1a1a1a;
             border: 4px solid #444;
             border-radius: 15px;
@@ -130,128 +126,102 @@
             display: none;
             z-index: 1500;
         }
-<div class="form-group">
-        <label>Variedad / Referencia</label>
-        <input type="text" id="f_ref">
-    </div>
 
-    <div style="background: #222; padding: 10px; border-radius: 8px; margin-bottom: 10px;">
-        <div class="form-group" style="display: flex; gap: 10px; margin-bottom: 10px;">
-            <div style="flex: 2;">
-                <label>Lote</label>
-                <input type="text" id="f_lote" style="width: 100%;">
-            </div>
-            <div style="flex: 1;">
-                <label>Bnd</label>
-                <input type="number" id="f_bandejas" placeholder="0" style="width: 100%;">
-            </div>
-            <div style="flex: 1.2;">
-                <label>Pl/Bnd</label>
-                <input type="number" id="f_por_bandeja" value="40" style="width: 100%;">
-            </div>
-        </div>
+        .form-group { margin-bottom: 12px; }
+        .form-group label { display: block; font-size: 12px; color: #aaa; margin-bottom: 4px; }
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 10px;
+            border-radius: 5px;
+            border: none;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
 
-        <div class="form-group" style="display: flex; gap: 10px; margin-bottom: 10px;">
-            <div style="flex: 1;">
-                <label>Sustrato</label>
-                <input type="text" id="f_sus" style="width: 100%;">
-            </div>
-            <div style="flex: 1;">
-                <label>Fecha Inicio</label>
-                <input type="date" id="f_fec" style="width: 100%;">
-            </div>
-        </div>
+        table { width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 13px; }
+        th { border-bottom: 2px solid var(--verde-cultigar); padding: 8px; text-align: left; color: var(--verde-cultigar); }
+        td { padding: 8px; border-bottom: 1px solid #333; }
 
-        <div class="form-group" style="display: flex; gap: 10px; margin-bottom: 15px;">
-            <div style="flex: 1;">
-                <label>Caja C.E.</label>
-                <input type="text" id="f_caja_ce" placeholder="Nº Caja" style="width: 100%;">
-            </div>
-            <div style="flex: 1;">
-                <label>Fecha C.E.</label>
-                <input type="date" id="f_fecha_ce" style="width: 100%;">
-            </div>
-        </div>
+        .btn-guardar { width: 100%; padding: 15px; border: none; border-radius: 8px; font-weight: bold; color: white; cursor: pointer; font-size: 16px; }
+        .btn-cerrar { background: #555; margin-top: 10px; }
+    </style>
+</head>
+<body>
 
-        <button class="btn-guardar" style="background: var(--verde-cultigar);" onclick="guardarRegistroTrazabilidad()">💾 AÑADIR REGISTRO</button>
-    </div>
-
-    <button class="btn-guardar btn-cerrar" onclick="cerrarModales()">CERRAR</button>
+<div class="header-sticky">
+    <input type="text" id="buscador" class="input-busqueda" placeholder="🔍 Buscar Variedad..." onkeyup="ejecutarBusqueda()">
+    <button class="btn-nube" style="background: #27ae60;" onclick="subirDatos()">⬆</button>
+    <button class="btn-nube" style="background: #2980b9;" onclick="bajarDatos()">⬇</button>
 </div>
+
+<div class="seccion-mapa">
+    <h3 class="titulo-mapa" style="color: var(--verde-cultigar);">CULTIGAR: Trazabilidad</h3>
+    <svg width="480" height="780" id="svg-trazabilidad"></svg>
+</div>
+
+<div class="seccion-mapa">
+    <h3 class="titulo-mapa" style="color: var(--rojo-fito);">CULTIGAR: Fitonitarios</h3>
+    <svg width="480" height="780" id="svg-fito"></svg>
+</div>
+
 <div class="overlay" id="overlay" onclick="cerrarModales()"></div>
 
 <div id="modalMesa" class="modal">
     <h2 id="mesaTitulo" style="color: var(--verde-cultigar);">Mesa --</h2>
+    
     <table>
-       <thead><tr><th>Ref</th><th>Lote</th><th>F. Inicio</th><th>Caja CE</th><th>F. Plant CE</th><th>Acción</th></tr></thead>
+        <thead><tr><th>Ref</th><th>Lote</th><th>F. Inicio</th><th>Caja CE</th><th>Acción</th></tr></thead>
         <tbody id="tablaCuerpoMesa"></tbody>
     </table>
-    <div class="form-group">
-        <label>Variedad / Referencia</label>
-        <input type="text" id="f_ref">
-    </div>
-<div class="form-group" style="display: flex; gap: 10px; margin-bottom: 10px;">
-    <div style="flex: 2;">
-        <label>Lote</label>
-        <input type="text" id="f_lote" style="width: 100%;">
-    </div>
-    <div style="flex: 1;">
-        <label>Bnd</label>
-        <input type="number" id="f_bandejas" placeholder="0" style="width: 100%;">
-    </div>
-    <div style="flex: 1.2;">
-        <label>Pl/Bnd</label>
-        <input type="number" id="f_por_bandeja" value="40" style="width: 100%;">
-    </div>
-</div>
 
-<div class="form-group" style="display: flex; gap: 10px; margin-bottom: 10px;">
-    <div style="flex: 1;">
-        <label>Sustrato</label>
-        <input type="text" id="f_sus" style="width: 100%;">
-    </div>
-    <div style="flex: 1;">
-        <label>Fecha Inicio</label>
-        <input type="date" id="f_fec" style="width: 100%;">
-    </div>
-</div>
-<div class="form-group" style="display: flex; gap: 10px; margin-bottom: 15px;">
-        <div style="flex: 1;">
-            <label>Caja C.E.</label>
-            <input type="text" id="f_caja_ce" placeholder="Nº Caja" style="width: 100%;">
+    <div style="background: #222; padding: 15px; border-radius: 10px; border: 1px solid #444;">
+        <div class="form-group">
+            <label>Variedad / Referencia</label>
+            <input type="text" id="f_ref">
         </div>
-        <div style="flex: 1;">
-            <label>Fecha C.E.</label>
-            <input type="date" id="f_fecha_ce" style="width: 100%;">
-        </div>
-    </div>
-</div> <button class="btn-add" onclick="guardarRegistroTrazabilidad()">Añadir Registro</button>
-<hr style="border: 1px solid #444; margin: 20px 0;">
 
-<h3 style="color: #4CAF50;">Registros en esta mesa</h3>
-    <div class="form-group">
-        <label>Sustrato / Receta</label>
-        <input type="text" id="f_sus">
+        <div style="display: flex; gap: 10px;">
+            <div class="form-group" style="flex: 2;">
+                <label>Lote</label>
+                <input type="text" id="f_lote">
+            </div>
+            <div class="form-group" style="flex: 1;">
+                <label>Bnd</label>
+                <input type="number" id="f_bandejas">
+            </div>
+        </div>
+
+        <div style="display: flex; gap: 10px;">
+            <div class="form-group" style="flex: 1;">
+                <label>Sustrato</label>
+                <input type="text" id="f_sus">
+            </div>
+            <div class="form-group" style="flex: 1;">
+                <label>Fecha Inicio</label>
+                <input type="date" id="f_fec">
+            </div>
+        </div>
+
+        <div style="display: flex; gap: 10px;">
+            <div class="form-group" style="flex: 1;">
+                <label>Caja C.E.</label>
+                <input type="text" id="f_caja_ce" placeholder="Nº">
+            </div>
+            <div class="form-group" style="flex: 1;">
+                <label>Fecha C.E.</label>
+                <input type="date" id="f_fecha_ce">
+            </div>
+        </div>
+
+        <button class="btn-guardar" style="background: var(--verde-cultigar);" onclick="guardarRegistroTrazabilidad()">💾 GUARDAR REGISTRO</button>
     </div>
-    <div class="form-group">
-        <label>Fecha Inicio</label>
-        <input type="date" id="f_fecha">
-    </div>
-    <div class="form-group">
-        <label>Nº Caja C.E.</label>
-        <input type="text" id="f_caja_ce" placeholder="Ej: Caja 12">
-    </div>
-    <div class="form-group">
-        <label>Fecha Plantación C.E.</label>
-        <input type="date" id="f_fecha_ce">
-    </div>
-    <button class="btn-guardar" style="background: var(--verde-cultigar);" onclick="guardarRegistroTrazabilidad()">💾 AÑADIR REGISTRO</button>
+
     <button class="btn-guardar btn-cerrar" onclick="cerrarModales()">CERRAR</button>
 </div>
 
 <div id="modalFito" class="modal">
     <h2 id="fitoTitulo" style="color: var(--rojo-fito);">Fito --</h2>
-    <table id="tablaHistorialFito">
+    <table>
         <thead><tr><th>Producto</th><th>Estado</th><th>Fecha</th></tr></thead>
         <tbody id="fitoCuerpoMesa"></tbody>
     </table>
@@ -282,10 +252,9 @@
     let DB_TRAZA = JSON.parse(localStorage.getItem('culti_traza')) || {};
     let DB_FITO = JSON.parse(localStorage.getItem('culti_fito')) || {};
     let mesaSeleccionada = "";
+    let indexEdicion = null;
 
-    // CONFIGURACIÓN DE MESAS SEGÚN CAPTURAS
     const GEOMETRIA = [
-        // Bloque Izquierdo
         {id:'10-48', x:10, y:70, w:40, h:140}, {id:'11-49', x:55, y:70, w:40, h:140},
         {id:'12-50', x:105, y:70, w:40, h:140}, {id:'13-51', x:150, y:70, w:40, h:140},
         {id:'7-45', x:15, y:220, w:40, h:65}, {id:'8-46', x:65, y:220, w:45, h:90},
@@ -293,7 +262,6 @@
         {id:'5-43', x:65, y:325, w:45, h:200}, {id:'6-44', x:125, y:325, w:45, h:200},
         {id:'1-39', x:10, y:540, w:45, h:210}, {id:'2-40', x:65, y:540, w:45, h:210},
         {id:'3-41', x:125, y:580, w:45, h:170},
-        // Bloque Central
         {id:'22-63', x:210, y:70, w:38, h:75}, {id:'23-64', x:255, y:70, w:38, h:75},
         {id:'24-65', x:300, y:70, w:38, h:75}, {id:'22-60', x:210, y:155, w:38, h:100},
         {id:'23-61', x:255, y:155, w:38, h:100}, {id:'24-62', x:300, y:155, w:38, h:100},
@@ -305,16 +273,12 @@
 
     function inicializarMapas() {
         let trazHtml = "", fitoHtml = "";
-        
-        // 1. Dibujar Mesas
         GEOMETRIA.forEach(m => {
             trazHtml += `<rect id="t-${m.id}" class="mesa" x="${m.x}" y="${m.y}" width="${m.w}" height="${m.h}" onclick="abrirTraza('${m.id}')"></rect>
                          <text x="${m.x + m.w/2}" y="${m.y + m.h - 5}" class="texto-id">${m.id}</text>`;
             fitoHtml += `<rect id="f-${m.id}" class="mesa" x="${m.x}" y="${m.y}" width="${m.w}" height="${m.h}" onclick="abrirFito('${m.id}')"></rect>
                          <text x="${m.x + m.w/2}" y="${m.y + m.h - 5}" class="texto-id">${m.id}</text>`;
         });
-
-     // 2. Dibujar Túneles (1 al 14) - CORREGIDO ID PARA DATOS ANTIGUOS
         for(let i=1; i<=14; i++) {
             let yPos = 70 + (14-i) * 46;
             trazHtml += `<rect id="t-${i}" class="mesa" x="395" y="${yPos}" width="75" height="38" onclick="abrirTraza('${i}')"></rect>
@@ -322,17 +286,15 @@
             fitoHtml += `<rect id="f-${i}" class="mesa" x="395" y="${yPos}" width="75" height="38" onclick="abrirFito('${i}')"></rect>
                          <text x="432" y="${yPos + 22}" class="texto-id">${i}</text>`;
         }
-
         document.getElementById('svg-trazabilidad').innerHTML = trazHtml;
         document.getElementById('svg-fito').innerHTML = fitoHtml;
         actualizarColoresMapas();
     }
 
-    // --- FUNCIONES DE APERTURA ---
     function abrirTraza(id) {
         mesaSeleccionada = id;
         document.getElementById('mesaTitulo').innerText = "Mesa " + id;
-        document.getElementById('f_fecha').value = new Date().toISOString().split('T')[0];
+        document.getElementById('f_fec').value = new Date().toISOString().split('T')[0];
         mostrarTablaTraza();
         document.getElementById('overlay').style.display = 'block';
         document.getElementById('modalMesa').style.display = 'block';
@@ -347,22 +309,73 @@
         document.getElementById('modalFito').style.display = 'block';
     }
 
-    // --- GESTIÓN DE DATOS ---
     function guardarRegistroTrazabilidad() {
-        if(!DB_TRAZA[mesaSeleccionada]) DB_TRAZA[mesaSeleccionada] = [];
-      DB_TRAZA[mesaSeleccionada].push({
+        let registro = {
             ref: document.getElementById('f_ref').value.toUpperCase(),
             lote: document.getElementById('f_lote').value,
             bandejas: document.getElementById('f_bandejas').value,
-            porBandeja: document.getElementById('f_por_bandeja').value,
             sus: document.getElementById('f_sus').value,
             fec: document.getElementById('f_fec').value,
             cajaCE: document.getElementById('f_caja_ce').value,
             fecCE: document.getElementById('f_fecha_ce').value
-        });
+        };
+
+        if(!DB_TRAZA[mesaSeleccionada]) DB_TRAZA[mesaSeleccionada] = [];
+        if(indexEdicion !== null) {
+            DB_TRAZA[mesaSeleccionada][indexEdicion] = registro;
+            indexEdicion = null;
+        } else {
+            DB_TRAZA[mesaSeleccionada].push(registro);
+        }
+        
         persistir();
         mostrarTablaTraza();
         actualizarColoresMapas();
+        limpiarFormTraza();
+    }
+
+    function limpiarFormTraza() {
+        ['f_ref','f_lote','f_bandejas','f_sus','f_caja_ce','f_fecha_ce'].forEach(id => document.getElementById(id).value = "");
+        const btn = document.querySelector('#modalMesa .btn-guardar');
+        btn.innerText = "💾 GUARDAR REGISTRO";
+        btn.style.background = "var(--verde-cultigar)";
+    }
+
+    function mostrarTablaTraza() {
+        let html = "";
+        (DB_TRAZA[mesaSeleccionada] || []).forEach((r, i) => {
+            html += `<tr>
+                <td>${r.ref}</td><td>${r.lote}</td><td>${r.fec}</td><td>${r.cajaCE || '-'}</td>
+                <td style="display:flex; gap:5px;">
+                    <button onclick="prepararEdicion(${i})">✏️</button>
+                    <button onclick="borrarTraza(${i})">🗑️</button>
+                </td></tr>`;
+        });
+        document.getElementById('tablaCuerpoMesa').innerHTML = html || "<tr><td colspan='5'>Sin registros</td></tr>";
+    }
+
+    function prepararEdicion(i) {
+        indexEdicion = i;
+        let r = DB_TRAZA[mesaSeleccionada][i];
+        document.getElementById('f_ref').value = r.ref;
+        document.getElementById('f_lote').value = r.lote;
+        document.getElementById('f_bandejas').value = r.bandejas;
+        document.getElementById('f_sus').value = r.sus;
+        document.getElementById('f_fec').value = r.fec;
+        document.getElementById('f_caja_ce').value = r.cajaCE || "";
+        document.getElementById('f_fecha_ce').value = r.fecCE || "";
+        const btn = document.querySelector('#modalMesa .btn-guardar');
+        btn.innerText = "💾 ACTUALIZAR REGISTRO";
+        btn.style.background = "#f39c12";
+    }
+
+    function borrarTraza(i) {
+        if(confirm("¿Borrar registro?")) {
+            DB_TRAZA[mesaSeleccionada].splice(i, 1);
+            persistir();
+            mostrarTablaTraza();
+            actualizarColoresMapas();
+        }
     }
 
     function guardarRegistroFito() {
@@ -377,100 +390,10 @@
         actualizarColoresMapas();
     }
 
-let indexEdicion = null;
-
-    function mostrarTablaTraza() {
-       let html = "";
-        
-        let datos = DB_TRAZA[mesaSeleccionada] || [];
-        
-        datos.forEach((r, i) => {
-            let fechaLimpia = (r.fec && r.fec !== "undefined") ? r.fec : ""; 
-            let cajaCE = r.cajaCE || "-";
-            let fechaCE = (r.fecCE && r.fecCE !== "undefined") ? r.fecCE : "-";
-            
-            html += `<tr>
-                <td>${r.ref}</td>
-                <td>${r.lote}</td>
-                <td>${fechaLimpia}</td>
-                <td>${cajaCE}</td>
-                <td>${fechaCE}</td>
-                <td style="display:flex; gap:5px;">
-                    <button onclick="prepararEdicion(${i})" title="Editar">✏️</button>
-                    <button onclick="copiarPlanta(${i})" title="Mover">📦</button>
-                    <button onclick="borrarTraza(${i})" title="Borrar">🗑️</button>
-                </td>
-            </tr>`;
-        });
-        html += "</tbody>";
-        document.getElementById('tablaCuerpoMesa').innerHTML = html || "<tr><td colspan='6' style='text-align:center; padding:10px;'>Mesa vacía</td></tr>";
-        actualizarBotonPegar();
-    }
-
-    function prepararEdicion(index) {
-        let registro = DB_TRAZA[mesaSeleccionada][index];
-        indexEdicion = index;
-        
-        document.getElementById('f_ref').value = registro.ref;
-        document.getElementById('f_lote').value = registro.lote;
-        document.getElementById('f_sus').value = registro.sus || "";
-        document.getElementById('f_fecha').value = registro.fec;
-        // Carga los nuevos campos en el formulario
-        document.getElementById('f_caja_ce').value = registro.cajaCE || "";
-        document.getElementById('f_fecha_ce').value = registro.fecCE || "";
-        
-        const btn = document.querySelector('.btn-guardar');
-        btn.style.background = "#f39c12"; // Naranja edición
-        btn.innerText = "💾 ACTUALIZAR REGISTRO";
-        alert("📝 Editando registro. Modifica y pulsa Actualizar.");
-    }
-
-    function guardarRegistroTrazabilidad() {
-        let nuevoRegistro = {
-            ref: document.getElementById('f_ref').value.toUpperCase(),
-            lote: document.getElementById('f_lote').value,
-            sus: document.getElementById('f_sus').value,
-            fec: document.getElementById('f_fecha').value,
-            cajaCE: document.getElementById('f_caja_ce').value, // Guardar Caja
-            fecCE: document.getElementById('f_fecha_ce').value   // Guardar Fecha CE
-        };
-
-        if (indexEdicion !== null) {
-            DB_TRAZA[mesaSeleccionada][indexEdicion] = nuevoRegistro;
-            indexEdicion = null;
-            const btn = document.querySelector('.btn-guardar');
-            btn.style.background = "var(--verde-cultigar)";
-            btn.innerText = "💾 AÑADIR REGISTRO";
-        } else {
-            if(!DB_TRAZA[mesaSeleccionada]) DB_TRAZA[mesaSeleccionada] = [];
-            DB_TRAZA[mesaSeleccionada].push(nuevoRegistro);
-        }
-
-        persistir();
-        mostrarTablaTraza();
-        actualizarColoresMapas();
-        
-        // Limpiamos todo el formulario
-        document.getElementById('f_ref').value = "";
-        document.getElementById('f_lote').value = "";
-        document.getElementById('f_sus').value = "";
-        document.getElementById('f_caja_ce').value = "";
-        document.getElementById('f_fecha_ce').value = "";
-    }
-
-    function borrarTraza(index) {
-        if(confirm("⚠️ ¿Seguro que quieres borrar este lote?")) {
-            DB_TRAZA[mesaSeleccionada].splice(index, 1);
-            persistir();
-            mostrarTablaTraza();
-            actualizarColoresMapas();
-        }
-    }
-
     function mostrarTablaFito() {
         let html = "";
         (DB_FITO[mesaSeleccionada] || []).forEach(r => {
-            html += `<tr><td>${r.p}</td><td>${r.e.toUpperCase()}</td><td>${r.f}</td></tr>`;
+            html += `<tr><td>${r.p}</td><td>${r.e}</td><td>${r.f}</td></tr>`;
         });
         document.getElementById('fitoCuerpoMesa').innerHTML = html;
     }
@@ -484,15 +407,13 @@ let indexEdicion = null;
     function actualizarColoresMapas() {
         document.querySelectorAll('#svg-trazabilidad .mesa').forEach(rect => {
             let id = rect.id.replace('t-', '');
-            if(DB_TRAZA[id] && DB_TRAZA[id].length > 0) rect.classList.add('ocupada');
-            else rect.classList.remove('ocupada');
+            rect.classList.toggle('ocupada', DB_TRAZA[id] && DB_TRAZA[id].length > 0);
         });
         document.querySelectorAll('#svg-fito .mesa').forEach(rect => {
             let id = rect.id.replace('f-', '');
-            rect.setAttribute('class', 'mesa'); 
+            rect.setAttribute('class', 'mesa');
             if(DB_FITO[id] && DB_FITO[id].length > 0) {
-                let ultimoEstado = DB_FITO[id][DB_FITO[id].length - 1].e;
-                rect.classList.add('fito-' + ultimoEstado);
+                rect.classList.add('fito-' + DB_FITO[id][DB_FITO[id].length - 1].e);
             }
         });
     }
@@ -516,76 +437,28 @@ let indexEdicion = null;
         try {
             const res = await fetch(`https://api.github.com/gists/${GIST_ID}?cb=${Date.now()}`);
             const data = await res.json();
-            let fT = data.files["cultigar_db.json"];
-            let fF = data.files["cultigar_fito.json"];
-            if(fT) DB_TRAZA = JSON.parse(fT.content);
-            if(fF) DB_FITO = JSON.parse(fF.content);
-            localStorage.setItem('culti_traza', JSON.stringify(DB_TRAZA));
-            localStorage.setItem('culti_fito', JSON.stringify(DB_FITO));
+            if(data.files["cultigar_db.json"]) DB_TRAZA = JSON.parse(data.files["cultigar_db.json"].content);
+            if(data.files["cultigar_fito.json"]) DB_FITO = JSON.parse(data.files["cultigar_fito.json"].content);
             actualizarColoresMapas();
         } catch(e) {}
     }
 
-    function ejecutarBusqueda() {
-        let busq = document.getElementById('buscador').value.toUpperCase();
-        document.querySelectorAll('#svg-trazabilidad .mesa').forEach(m => m.classList.remove('resaltado'));
-        if(!busq) return;
-        for(let mesa in DB_TRAZA) {
-            if(DB_TRAZA[mesa].some(reg => reg.ref.includes(busq))) {
-                const el = document.getElementById('t-' + mesa);
-                if(el) el.classList.add('resaltado');
-            }
-        }
-    }
-
     function cerrarModales() {
-        indexEdicion = null;
-        const btn = document.querySelector('.btn-guardar');
-        if(btn) {
-            btn.style.background = "var(--verde-cultigar)";
-            btn.innerText = "💾 AÑADIR REGISTRO";
-        }
         document.getElementById('overlay').style.display = 'none';
         document.querySelectorAll('.modal').forEach(m => m.style.display = 'none');
+        indexEdicion = null;
     }
 
-    let portapapeles = null;
-
-    function copiarPlanta(index) {
-        portapapeles = DB_TRAZA[mesaSeleccionada][index];
-        DB_TRAZA[mesaSeleccionada].splice(index, 1);
-        persistir();
-        mostrarTablaTraza();
-        actualizarColoresMapas();
-        alert("Lote en portapapeles (incluye datos C.E.).");
-    }
-
-    function pegarPlanta() {
-        if(!portapapeles) return;
-        if(!DB_TRAZA[mesaSeleccionada]) DB_TRAZA[mesaSeleccionada] = [];
-        DB_TRAZA[mesaSeleccionada].push(portapapeles);
-        portapapeles = null;
-        persistir();
-        mostrarTablaTraza();
-        actualizarColoresMapas();
-    }
-
-    function actualizarBotonPegar() {
-        const existente = document.getElementById('zona-pegar');
-        if(existente) existente.remove();
-        if(portapapeles) {
-            const btn = document.createElement('div');
-            btn.id = 'zona-pegar';
-            btn.innerHTML = `<button class="btn-guardar" style="background:#9b59b6; margin-bottom:15px;" onclick="pegarPlanta()">📋 PEGAR LOTE AQUÍ</button>`;
-            const modal = document.getElementById('modalMesa');
-            modal.insertBefore(btn, modal.querySelector('table'));
+    function ejecutarBusqueda() {
+        let busq = document.getElementById('buscador').value.toUpperCase();
+        document.querySelectorAll('.mesa').forEach(m => m.classList.remove('resaltado'));
+        if(!busq) return;
+        for(let m in DB_TRAZA) {
+            if(DB_TRAZA[m].some(r => r.ref.includes(busq))) document.getElementById('t-'+m)?.classList.add('resaltado');
         }
     }
 
-    window.onload = () => {
-        inicializarMapas();
-        bajarDatos();
-    };
+    window.onload = () => { inicializarMapas(); bajarDatos(); };
 </script>
 </body>
 </html>
