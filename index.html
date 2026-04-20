@@ -171,27 +171,54 @@
 <div class="overlay" id="overlay" onclick="cerrarModales()"></div>
 
 <div id="modalMesa" class="modal">
-    <h2 id="mesaTitulo" style="color: var(--verde-cultigar);">Mesa --</h2>
+    <h2 id="mesaTitulo" style="color: var(--verde-cultigar); font-size: 18px;">Mesa --</h2>
     <table>
-        <thead><tr><th>Ref</th><th>Lote</th><th>Fecha</th><th>Acción</th></tr></thead>
+        <thead><tr><th>Ref</th><th>Lote</th><th>Bnd</th><th>Acción</th></tr></thead>
         <tbody id="tablaCuerpoMesa"></tbody>
     </table>
+    
     <div class="form-group">
         <label>Variedad / Referencia</label>
         <input type="text" id="f_ref">
     </div>
+    
     <div class="form-group">
         <label>Lote</label>
         <input type="text" id="f_lote">
     </div>
+
+    <div style="display: flex; gap: 10px;">
+        <div class="form-group" style="flex: 1;">
+            <label>Nº Bandejas</label>
+            <input type="number" id="f_num_bandejas">
+        </div>
+        <div class="form-group" style="flex: 1;">
+            <label>Tipo de Bandeja</label>
+            <input type="text" id="f_tipo_bandeja" list="opciones_bandeja" placeholder="Ej: 40">
+            <datalist id="opciones_bandeja">
+                <option value="40">
+                <option value="60">
+                <option value="84">
+            </datalist>
+        </div>
+    </div>
+
+    <div style="display: flex; gap: 10px;">
+        <div class="form-group" style="flex: 1;">
+            <label>Nº Caja C.E.</label>
+            <input type="text" id="f_caja_ce">
+        </div>
+        <div class="form-group" style="flex: 1;">
+            <label>Fecha C.E.</label>
+            <input type="date" id="f_fecha_ce">
+        </div>
+    </div>
+
     <div class="form-group">
-        <label>Sustrato / Receta</label>
+        <label>Sustrato / Receta (Opcional)</label>
         <input type="text" id="f_sus">
     </div>
-    <div class="form-group">
-        <label>Fecha Inicio</label>
-        <input type="date" id="f_fecha">
-    </div>
+
     <button class="btn-guardar" style="background: var(--verde-cultigar);" onclick="guardarRegistroTrazabilidad()">💾 AÑADIR REGISTRO</button>
     <button class="btn-guardar btn-cerrar" onclick="cerrarModales()">CERRAR</button>
 </div>
@@ -229,10 +256,9 @@
     let DB_TRAZA = JSON.parse(localStorage.getItem('culti_traza')) || {};
     let DB_FITO = JSON.parse(localStorage.getItem('culti_fito')) || {};
     let mesaSeleccionada = "";
+    let indexEdicion = null;
 
-    // CONFIGURACIÓN DE MESAS SEGÚN CAPTURAS
     const GEOMETRIA = [
-        // Bloque Izquierdo
         {id:'10-48', x:10, y:70, w:40, h:140}, {id:'11-49', x:55, y:70, w:40, h:140},
         {id:'12-50', x:105, y:70, w:40, h:140}, {id:'13-51', x:150, y:70, w:40, h:140},
         {id:'7-45', x:15, y:220, w:40, h:65}, {id:'8-46', x:65, y:220, w:45, h:90},
@@ -240,7 +266,6 @@
         {id:'5-43', x:65, y:325, w:45, h:200}, {id:'6-44', x:125, y:325, w:45, h:200},
         {id:'1-39', x:10, y:540, w:45, h:210}, {id:'2-40', x:65, y:540, w:45, h:210},
         {id:'3-41', x:125, y:580, w:45, h:170},
-        // Bloque Central
         {id:'22-63', x:210, y:70, w:38, h:75}, {id:'23-64', x:255, y:70, w:38, h:75},
         {id:'24-65', x:300, y:70, w:38, h:75}, {id:'22-60', x:210, y:155, w:38, h:100},
         {id:'23-61', x:255, y:155, w:38, h:100}, {id:'24-62', x:300, y:155, w:38, h:100},
@@ -252,16 +277,12 @@
 
     function inicializarMapas() {
         let trazHtml = "", fitoHtml = "";
-        
-        // 1. Dibujar Mesas
         GEOMETRIA.forEach(m => {
             trazHtml += `<rect id="t-${m.id}" class="mesa" x="${m.x}" y="${m.y}" width="${m.w}" height="${m.h}" onclick="abrirTraza('${m.id}')"></rect>
                          <text x="${m.x + m.w/2}" y="${m.y + m.h - 5}" class="texto-id">${m.id}</text>`;
             fitoHtml += `<rect id="f-${m.id}" class="mesa" x="${m.x}" y="${m.y}" width="${m.w}" height="${m.h}" onclick="abrirFito('${m.id}')"></rect>
                          <text x="${m.x + m.w/2}" y="${m.y + m.h - 5}" class="texto-id">${m.id}</text>`;
         });
-
-     // 2. Dibujar Túneles (1 al 14) - CORREGIDO ID PARA DATOS ANTIGUOS
         for(let i=1; i<=14; i++) {
             let yPos = 70 + (14-i) * 46;
             trazHtml += `<rect id="t-${i}" class="mesa" x="395" y="${yPos}" width="75" height="38" onclick="abrirTraza('${i}')"></rect>
@@ -269,17 +290,13 @@
             fitoHtml += `<rect id="f-${i}" class="mesa" x="395" y="${yPos}" width="75" height="38" onclick="abrirFito('${i}')"></rect>
                          <text x="432" y="${yPos + 22}" class="texto-id">${i}</text>`;
         }
-
         document.getElementById('svg-trazabilidad').innerHTML = trazHtml;
         document.getElementById('svg-fito').innerHTML = fitoHtml;
         actualizarColoresMapas();
     }
 
-    // --- FUNCIONES DE APERTURA ---
     function abrirTraza(id) {
         mesaSeleccionada = id;
-        document.getElementById('mesaTitulo').innerText = "Mesa " + id;
-        document.getElementById('f_fecha').value = new Date().toISOString().split('T')[0];
         mostrarTablaTraza();
         document.getElementById('overlay').style.display = 'block';
         document.getElementById('modalMesa').style.display = 'block';
@@ -294,18 +311,95 @@
         document.getElementById('modalFito').style.display = 'block';
     }
 
-    // --- GESTIÓN DE DATOS ---
+    function mostrarTablaTraza() {
+        let html = "";
+        let datos = DB_TRAZA[mesaSeleccionada] || [];
+        let totalBnd = 0;
+        let totalPlt = 0;
+
+        datos.forEach((r, i) => {
+            let bnd = parseInt(r.num_bandejas) || 0;
+            let tipo = parseInt(r.tipo_bandeja) || 0;
+            totalBnd += bnd;
+            totalPlt += (bnd * tipo);
+
+            html += `<tr>
+                <td>${r.ref}</td>
+                <td>${r.lote}</td>
+                <td>${bnd}</td>
+                <td style="display:flex; gap:5px;">
+                    <button onclick="prepararEdicion(${i})" title="Editar">✏️</button>
+                    <button onclick="copiarPlanta(${i})" title="Mover">📦</button>
+                    <button onclick="borrarTraza(${i})" title="Borrar">🗑️</button>
+                </td>
+            </tr>`;
+        });
+
+        // Actualizar título con totales
+        document.getElementById('mesaTitulo').innerHTML = `Mesa ${mesaSeleccionada} <span style="font-size:14px; color:#fff; margin-left:10px;">(📦 ${totalBnd} Bnd | 🌱 ${totalPlt} Plt)</span>`;
+        
+        document.getElementById('tablaCuerpoMesa').innerHTML = html || "<tr><td colspan='4' style='text-align:center; padding:10px;'>Mesa vacía</td></tr>";
+        actualizarBotonPegar();
+    }
+
+    function prepararEdicion(index) {
+        let registro = DB_TRAZA[mesaSeleccionada][index];
+        indexEdicion = index;
+        
+        document.getElementById('f_ref').value = registro.ref;
+        document.getElementById('f_lote').value = registro.lote;
+        document.getElementById('f_num_bandejas').value = registro.num_bandejas || "";
+        document.getElementById('f_tipo_bandeja').value = registro.tipo_bandeja || "";
+        document.getElementById('f_caja_ce').value = registro.caja_ce || "";
+        document.getElementById('f_fecha_ce').value = registro.fecha_ce || "";
+        document.getElementById('f_sus').value = registro.sus || "";
+        
+        const btn = document.querySelector('.btn-guardar');
+        btn.style.background = "#f39c12";
+        btn.innerText = "💾 ACTUALIZAR CAMBIOS";
+    }
+
     function guardarRegistroTrazabilidad() {
-        if(!DB_TRAZA[mesaSeleccionada]) DB_TRAZA[mesaSeleccionada] = [];
-        DB_TRAZA[mesaSeleccionada].push({
+        let nuevoRegistro = {
             ref: document.getElementById('f_ref').value.toUpperCase(),
             lote: document.getElementById('f_lote').value,
-            sus: document.getElementById('f_sus').value,
-            fec: document.getElementById('f_fecha').value
-        });
+            num_bandejas: document.getElementById('f_num_bandejas').value,
+            tipo_bandeja: document.getElementById('f_tipo_bandeja').value,
+            caja_ce: document.getElementById('f_caja_ce').value,
+            fecha_ce: document.getElementById('f_fecha_ce').value,
+            sus: document.getElementById('f_sus').value
+        };
+
+        if (indexEdicion !== null) {
+            DB_TRAZA[mesaSeleccionada][indexEdicion] = nuevoRegistro;
+            indexEdicion = null;
+            const btn = document.querySelector('.btn-guardar');
+            btn.style.background = "var(--verde-cultigar)";
+            btn.innerText = "💾 AÑADIR REGISTRO";
+        } else {
+            if(!DB_TRAZA[mesaSeleccionada]) DB_TRAZA[mesaSeleccionada] = [];
+            DB_TRAZA[mesaSeleccionada].push(nuevoRegistro);
+        }
+
         persistir();
         mostrarTablaTraza();
         actualizarColoresMapas();
+        limpiarFormularioTraza();
+    }
+
+    function limpiarFormularioTraza() {
+        ['f_ref', 'f_lote', 'f_num_bandejas', 'f_tipo_bandeja', 'f_caja_ce', 'f_fecha_ce', 'f_sus'].forEach(id => {
+            document.getElementById(id).value = "";
+        });
+    }
+
+    function borrarTraza(index) {
+        if(confirm("⚠️ ¿Borrar este lote?")) {
+            DB_TRAZA[mesaSeleccionada].splice(index, 1);
+            persistir();
+            mostrarTablaTraza();
+            actualizarColoresMapas();
+        }
     }
 
     function guardarRegistroFito() {
@@ -318,83 +412,6 @@
         persistir();
         mostrarTablaFito();
         actualizarColoresMapas();
-    }
-
-let indexEdicion = null; // Variable para saber si estamos editando
-
-    function mostrarTablaTraza() {
-        let html = "";
-        let datos = DB_TRAZA[mesaSeleccionada] || [];
-        datos.forEach((r, i) => {
-            let fechaLimpia = (r.fec && r.fec !== "undefined") ? r.fec : ""; 
-            html += `<tr>
-                <td>${r.ref}</td>
-                <td>${r.lote}</td>
-                <td>${fechaLimpia}</td>
-                <td style="display:flex; gap:5px;">
-                    <button onclick="prepararEdicion(${i})" title="Editar">✏️</button>
-                    <button onclick="copiarPlanta(${i})" title="Mover">📦</button>
-                    <button onclick="borrarTraza(${i})" title="Borrar">🗑️</button>
-                </td>
-            </tr>`;
-        });
-        document.getElementById('tablaCuerpoMesa').innerHTML = html || "<tr><td colspan='4' style='text-align:center; padding:10px;'>Mesa vacía</td></tr>";
-        actualizarBotonPegar();
-    }
-
-    function prepararEdicion(index) {
-        let registro = DB_TRAZA[mesaSeleccionada][index];
-        indexEdicion = index; // Guardamos qué fila estamos editando
-        
-        document.getElementById('f_ref').value = registro.ref;
-        document.getElementById('f_lote').value = registro.lote;
-        document.getElementById('f_sus').value = registro.sus || "";
-        document.getElementById('f_fecha').value = registro.fec;
-        
-        // Cambiamos el color del botón para avisar que estamos editando
-        const btn = document.querySelector('.btn-guardar');
-        btn.style.background = "#f39c12";
-        btn.innerText = "💾 ACTUALIZAR CAMBIOS";
-        
-        alert("📝 Editando fila " + (index + 1) + ". Modifica los datos y pulsa ACTUALIZAR.");
-    }
-
-    function guardarRegistroTrazabilidad() {
-        let nuevoRegistro = {
-            ref: document.getElementById('f_ref').value.toUpperCase(),
-            lote: document.getElementById('f_lote').value,
-            sus: document.getElementById('f_sus').value,
-            fec: document.getElementById('f_fecha').value
-        };
-
-        if (indexEdicion !== null) {
-            // Si estábamos editando, reemplazamos la fila
-            DB_TRAZA[mesaSeleccionada][indexEdicion] = nuevoRegistro;
-            indexEdicion = null; // Resetear
-            const btn = document.querySelector('.btn-guardar');
-            btn.style.background = "var(--verde-cultigar)";
-            btn.innerText = "💾 AÑADIR REGISTRO";
-        } else {
-            // Si no, añadimos uno nuevo
-            if(!DB_TRAZA[mesaSeleccionada]) DB_TRAZA[mesaSeleccionada] = [];
-            DB_TRAZA[mesaSeleccionada].push(nuevoRegistro);
-        }
-
-        persistir();
-        mostrarTablaTraza();
-        actualizarColoresMapas();
-        // Limpiar formulario
-        document.getElementById('f_ref').value = "";
-        document.getElementById('f_lote').value = "";
-    }
-
-    function borrarTraza(index) {
-        if(confirm("⚠️ ¿Estás seguro de que quieres BORRAR este lote?")) {
-            DB_TRAZA[mesaSeleccionada].splice(index, 1);
-            persistir();
-            mostrarTablaTraza();
-            actualizarColoresMapas();
-        }
     }
 
     function mostrarTablaFito() {
@@ -428,8 +445,9 @@ let indexEdicion = null; // Variable para saber si estamos editando
     }
 
     async function subirDatos() {
-        const token = localStorage.getItem('github_token');
+        const token = localStorage.getItem('github_token') || prompt("Introduce Token GitHub para Sincronizar:");
         if(!token) return;
+        localStorage.setItem('github_token', token);
         try {
             await fetch(`https://api.github.com/gists/${GIST_ID}`, {
                 method: 'PATCH',
@@ -446,10 +464,8 @@ let indexEdicion = null; // Variable para saber si estamos editando
         try {
             const res = await fetch(`https://api.github.com/gists/${GIST_ID}?cb=${Date.now()}`);
             const data = await res.json();
-            let fT = data.files["cultigar_db.json"] || Object.values(data.files)[0];
-            let fF = data.files["cultigar_fito.json"] || Object.values(data.files)[1];
-            if(fT) DB_TRAZA = JSON.parse(fT.content);
-            if(fF) DB_FITO = JSON.parse(fF.content);
+            if(data.files["cultigar_db.json"]) DB_TRAZA = JSON.parse(data.files["cultigar_db.json"].content);
+            if(data.files["cultigar_fito.json"]) DB_FITO = JSON.parse(data.files["cultigar_fito.json"].content);
             localStorage.setItem('culti_traza', JSON.stringify(DB_TRAZA));
             localStorage.setItem('culti_fito', JSON.stringify(DB_FITO));
             actualizarColoresMapas();
@@ -469,7 +485,7 @@ let indexEdicion = null; // Variable para saber si estamos editando
     }
 
     function cerrarModales() {
-        indexEdicion = null; // Cancelar edicion si se cierra
+        indexEdicion = null;
         const btn = document.querySelector('.btn-guardar');
         if(btn) {
             btn.style.background = "var(--verde-cultigar)";
@@ -477,17 +493,17 @@ let indexEdicion = null; // Variable para saber si estamos editando
         }
         document.getElementById('overlay').style.display = 'none';
         document.querySelectorAll('.modal').forEach(m => m.style.display = 'none');
+        limpiarFormularioTraza();
     }
 
     let portapapeles = null;
-
     function copiarPlanta(index) {
         portapapeles = DB_TRAZA[mesaSeleccionada][index];
         DB_TRAZA[mesaSeleccionada].splice(index, 1);
         persistir();
         mostrarTablaTraza();
         actualizarColoresMapas();
-        alert("Lote copiado. Abre otra mesa y pulsa PEGAR.");
+        alert("Lote copiado. Ábrelo en otra mesa.");
     }
 
     function pegarPlanta() {
