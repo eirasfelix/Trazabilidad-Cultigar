@@ -167,7 +167,7 @@
 <div class="overlay" id="overlay" onclick="cerrarModales()"></div>
 
 <div id="modalMesa" class="modal">
-    <h2 id="mesaTitulo" style="color: var(--verde-cultigar);">Mesa --</h2>
+  <h2 id="mesaTitulo" style="color: var(--verde-cultigar); display: flex; align-items: center; gap: 15px; font-size: 1.3rem; margin-bottom: 10px;">Mesa --</h2>
     
     <table>
         <thead><tr><th>Ref</th><th>Lote</th><th>F. Inicio</th><th>Caja CE</th><th>Acción</th></tr></thead>
@@ -341,16 +341,44 @@
         btn.style.background = "var(--verde-cultigar)";
     }
 
-    function mostrarTablaTraza() {
-        let html = "";
-        (DB_TRAZA[mesaSeleccionada] || []).forEach((r, i) => {
-            html += `<tr>
-                <td>${r.ref}</td><td>${r.lote}</td><td>${r.fec}</td><td>${r.cajaCE || '-'}</td>
-                <td style="display:flex; gap:5px;">
-                    <button onclick="prepararEdicion(${i})">✏️</button>
-                    <button onclick="borrarTraza(${i})">🗑️</button>
-                </td></tr>`;
-        });
+  function mostrarTablaTraza() {
+    let html = "";
+    let datos = DB_TRAZA[mesaSeleccionada] || [];
+    
+    // Variables para sumar los totales
+    let totalBandejas = 0;
+    let totalPlantas = 0;
+
+    datos.forEach((r, i) => {
+        // Convertimos a número lo que viene de los inputs de tus imágenes
+        let bnd = parseInt(r.bandejas) || 0;
+        let plXbnd = parseInt(r.porBandeja) || 40; 
+        
+        totalBandejas += bnd;
+        totalPlantas += (bnd * plXbnd);
+
+        html += `<tr>
+            <td>${r.ref}</td>
+            <td>${r.lote}</td>
+            <td>${r.fec}</td>
+            <td>${r.cajaCE || '-'}</td>
+            <td>${r.fecCE || '-'}</td>
+            <td style="display:flex; gap:5px;">
+                <button onclick="prepararEdicion(${i})">✏️</button>
+                <button onclick="borrarTraza(${i})">🗑️</button>
+            </td>
+        </tr>`;
+    });
+
+    // ESTO ACTUALIZA EL TÍTULO QUE VEO EN TU image_4ce7a0.png
+    const titulo = document.getElementById('mesaTitulo');
+    titulo.innerHTML = `Mesa ${mesaSeleccionada} 
+        <span style="color: #eee; font-size: 0.85rem; background: #34495e; padding: 4px 12px; border-radius: 20px; border: 1px solid #555; font-weight: normal; margin-left: 10px;">
+            📦 ${totalBandejas} Bnd | 🌱 ${totalPlantas} Pl.
+        </span>`;
+
+    document.getElementById('tablaCuerpoMesa').innerHTML = html || "<tr><td colspan='6' style='text-align:center;'>Mesa vacía</td></tr>";
+}
         document.getElementById('tablaCuerpoMesa').innerHTML = html || "<tr><td colspan='5'>Sin registros</td></tr>";
     }
 
