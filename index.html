@@ -180,10 +180,41 @@
         <label>Variedad / Referencia</label>
         <input type="text" id="f_ref">
     </div>
-    <div class="form-group">
+ <div class="form-group" style="display: flex; gap: 10px; margin-bottom: 15px;">
+    <div style="flex: 2;">
         <label>Lote</label>
-        <input type="text" id="f_lote">
+        <input type="text" id="f_lote" style="width: 100%;">
     </div>
+    <div style="flex: 1;">
+        <label>Bnd</label>
+        <input type="number" id="f_bandejas" placeholder="0" style="width: 100%;">
+    </div>
+    <div style="flex: 1.5;">
+        <label>Tipo Bnd</label>
+        <select id="f_por_bandeja" style="width:100%; height: 42px; background: #333; color: white; border: 1px solid #555; border-radius: 4px;">
+            <option value="40">40 Alv.</option>
+            <option value="50">50 Alv.</option>
+            <option value="60">60 Alv.</option>
+            <option value="12">12 Alv.</option>
+            <option value="1">Individual</option>
+        </select>
+    </div>
+</div>
+    <div style="flex: 1;">
+        <label>Bnd</label>
+        <input type="number" id="f_bandejas" placeholder="0">
+    </div>
+    <div style="flex: 1.5;">
+        <label>Alvéolos</label>
+        <select id="f_por_bandeja" style="width:100%; height: 42px; background: #333; color: white; border: 1px solid #555; border-radius: 4px;">
+            <option value="40">40 Alv.</option>
+            <option value="50">50 Alv.</option>
+            <option value="60">60 Alv.</option>
+            <option value="12">12 Alv.</option>
+            <option value="1">Individual</option>
+        </select>
+    </div>
+</div>
     <div class="form-group">
         <label>Sustrato / Receta</label>
         <input type="text" id="f_sus">
@@ -308,6 +339,8 @@
         DB_TRAZA[mesaSeleccionada].push({
             ref: document.getElementById('f_ref').value.toUpperCase(),
             lote: document.getElementById('f_lote').value,
+            bandejas: document.getElementById('f_bandejas').value,
+            porBandeja: document.getElementById('f_por_bandeja').value,
             sus: document.getElementById('f_sus').value,
             fec: document.getElementById('f_fecha').value
         });
