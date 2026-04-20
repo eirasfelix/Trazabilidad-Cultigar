@@ -130,44 +130,54 @@
             display: none;
             z-index: 1500;
         }
+<div class="form-group">
+        <label>Variedad / Referencia</label>
+        <input type="text" id="f_ref">
+    </div>
 
-        .form-group { margin-bottom: 15px; }
-        .form-group label { display: block; font-size: 12px; color: #aaa; margin-bottom: 5px; }
-        .form-group input, .form-group select {
-            width: 100%;
-            padding: 10px;
-            border-radius: 5px;
-            border: none;
-            font-size: 16px;
-            box-sizing: border-box;
-        }
+    <div style="background: #222; padding: 10px; border-radius: 8px; margin-bottom: 10px;">
+        <div class="form-group" style="display: flex; gap: 10px; margin-bottom: 10px;">
+            <div style="flex: 2;">
+                <label>Lote</label>
+                <input type="text" id="f_lote" style="width: 100%;">
+            </div>
+            <div style="flex: 1;">
+                <label>Bnd</label>
+                <input type="number" id="f_bandejas" placeholder="0" style="width: 100%;">
+            </div>
+            <div style="flex: 1.2;">
+                <label>Pl/Bnd</label>
+                <input type="number" id="f_por_bandeja" value="40" style="width: 100%;">
+            </div>
+        </div>
 
-        table { width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 13px; }
-        th { border-bottom: 2px solid var(--verde-cultigar); padding: 8px; text-align: left; color: var(--verde-cultigar); }
-        td { padding: 8px; border-bottom: 1px solid #333; }
+        <div class="form-group" style="display: flex; gap: 10px; margin-bottom: 10px;">
+            <div style="flex: 1;">
+                <label>Sustrato</label>
+                <input type="text" id="f_sus" style="width: 100%;">
+            </div>
+            <div style="flex: 1;">
+                <label>Fecha Inicio</label>
+                <input type="date" id="f_fec" style="width: 100%;">
+            </div>
+        </div>
 
-        .btn-guardar { width: 100%; padding: 15px; border: none; border-radius: 8px; font-weight: bold; color: white; cursor: pointer; font-size: 16px; }
-        .btn-cerrar { background: #555; margin-top: 10px; }
-    </style>
-</head>
-<body>
+        <div class="form-group" style="display: flex; gap: 10px; margin-bottom: 15px;">
+            <div style="flex: 1;">
+                <label>Caja C.E.</label>
+                <input type="text" id="f_caja_ce" placeholder="Nº Caja" style="width: 100%;">
+            </div>
+            <div style="flex: 1;">
+                <label>Fecha C.E.</label>
+                <input type="date" id="f_fecha_ce" style="width: 100%;">
+            </div>
+        </div>
 
-<div class="header-sticky">
-    <input type="text" id="buscador" class="input-busqueda" placeholder="🔍 Buscar Variedad..." onkeyup="ejecutarBusqueda()">
-    <button class="btn-nube" style="background: #27ae60;" onclick="subirDatos()">⬆</button>
-    <button class="btn-nube" style="background: #2980b9;" onclick="bajarDatos()">⬇</button>
+        <button class="btn-guardar" style="background: var(--verde-cultigar);" onclick="guardarRegistroTrazabilidad()">💾 AÑADIR REGISTRO</button>
+    </div>
+
+    <button class="btn-guardar btn-cerrar" onclick="cerrarModales()">CERRAR</button>
 </div>
-
-<div class="seccion-mapa">
-    <h3 class="titulo-mapa" style="color: var(--verde-cultigar);">CULTIGAR: Trazabilidad</h3>
-    <svg width="480" height="780" id="svg-trazabilidad"></svg>
-</div>
-
-<div class="seccion-mapa">
-    <h3 class="titulo-mapa" style="color: var(--rojo-fito);">CULTIGAR: Fitosonitarios</h3>
-    <svg width="480" height="780" id="svg-fito"></svg>
-</div>
-
 <div class="overlay" id="overlay" onclick="cerrarModales()"></div>
 
 <div id="modalMesa" class="modal">
