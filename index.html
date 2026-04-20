@@ -180,11 +180,73 @@
         <label>Variedad / Referencia</label>
         <input type="text" id="f_ref">
     </div>
- <div class="form-group" style="display: flex; gap: 10px; margin-bottom: 15px;">
+<div class="form-group" style="display: flex; gap: 10px; margin-bottom: 10px;">
     <div style="flex: 2;">
         <label>Lote</label>
         <input type="text" id="f_lote" style="width: 100%;">
     </div>
+    <div style="flex: 1;">
+        <label>Bnd</label>
+        <input type="number" id="f_bandejas" placeholder="0" style="width: 100%;">
+    </div>
+    <div style="flex: 1.2;">
+        <label>Pl/Bnd</label>
+        <input type="number" id="f_por_bandeja" value="40" style="width: 100%;">
+    </div>
+</div>
+
+<div class="form-group" style="display: flex; gap: 10px; margin-bottom: 10px;">
+    <div style="flex: 1;">
+        <label>Sustrato</label>
+        <input type="text" id="f_sus" style="width: 100%;">
+    </div>
+    <div style="flex: 1;">
+        <label>Fecha Inicio</label>
+        <input type="date" id="f_fec" style="width: 100%;">
+    </div>
+</div>
+<div class="form-group" style="display: flex; gap: 10px; margin-bottom: 15px;">
+    <div style="flex: 1;">
+        <label>Caja C.E.</label>
+        <input type="text" id="f_caja_ce" placeholder="Nº Caja" style="width: 100%;">
+    </div>
+    <div style="flex: 1;">
+        <label>Fecha C.E.</label>
+        <input type="date" id="f_fecha_ce" style="width: 100%;">
+    </div>
+</div>
+<div class="form-group" style="display: flex; gap: 10px; margin-bottom: 10px;">
+    <div style="flex: 1;">
+        <label>Caja C.E.</label>
+        <input type="text" id="f_caja_ce" style="width: 100%;">
+    </div>
+    <div style="flex: 1;">
+        <label>Fecha C.E.</label>
+        <input type="date" id="f_fecha_ce" style="width: 100%;">
+    </div>
+</div>
+
+<div class="form-group" style="display: flex; gap: 10px; margin-bottom: 10px;">
+    <div style="flex: 1;">
+        <label>Sustrato</label>
+        <input type="text" id="f_sus" style="width: 100%;">
+    </div>
+    <div style="flex: 1;">
+        <label>Fecha Inicio</label>
+        <input type="date" id="f_fec" style="width: 100%;">
+    </div>
+</div>
+
+<div class="form-group" style="display: flex; gap: 10px; margin-bottom: 15px;">
+    <div style="flex: 1;">
+        <label>Caja C.E.</label>
+        <input type="text" id="f_caja_ce" placeholder="Nº Caja" style="width: 100%;">
+    </div>
+    <div style="flex: 1;">
+        <label>Fecha C.E.</label>
+        <input type="date" id="f_fecha_ce" style="width: 100%;">
+    </div>
+</div>
     <div style="flex: 1;">
         <label>Bnd</label>
         <input type="number" id="f_bandejas" placeholder="0" style="width: 100%;">
@@ -336,13 +398,15 @@
     // --- GESTIÓN DE DATOS ---
     function guardarRegistroTrazabilidad() {
         if(!DB_TRAZA[mesaSeleccionada]) DB_TRAZA[mesaSeleccionada] = [];
-        DB_TRAZA[mesaSeleccionada].push({
+      DB_TRAZA[mesaSeleccionada].push({
             ref: document.getElementById('f_ref').value.toUpperCase(),
             lote: document.getElementById('f_lote').value,
             bandejas: document.getElementById('f_bandejas').value,
             porBandeja: document.getElementById('f_por_bandeja').value,
             sus: document.getElementById('f_sus').value,
-            fec: document.getElementById('f_fecha').value
+            fec: document.getElementById('f_fec').value,
+            cajaCE: document.getElementById('f_caja_ce').value,
+            fecCE: document.getElementById('f_fecha_ce').value
         });
         persistir();
         mostrarTablaTraza();
