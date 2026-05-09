@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>CULTIGAR SISTEMA INTEGRAL - Trazabilidad y Logística</title>
+    <title>CULTIGAR SISTEMA INTEGRAL - Producción y Logística</title>
     <style>
         :root {
             --bg-dark: #1a1a1a;
@@ -13,220 +13,259 @@
             --peligro-rojo: #e74c3c;
             --texto: #ecf0f1;
             --blanco: #ffffff;
+            --card-bg: #2d2d2d;
         }
 
         body { 
-            font-family: 'Segoe UI', Tahoma, sans-serif; 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
             background: var(--bg-dark); 
             color: var(--texto); 
             margin: 0; 
-            padding-bottom: 50px;
+            padding-bottom: 60px;
+            overflow-x: hidden;
         }
 
-        /* CABECERA STICKY */
+        /* CABECERA ESTILO APP */
         .header-sticky {
             position: sticky;
             top: 0;
-            background: white;
-            padding: 10px;
+            background: var(--blanco);
+            padding: 12px;
             z-index: 1000;
             display: flex;
-            gap: 10px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            gap: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+            align-items: center;
         }
 
         .input-busqueda {
             flex-grow: 1;
-            padding: 12px;
-            border-radius: 8px;
+            padding: 14px;
+            border-radius: 10px;
             border: 2px solid #ddd;
             font-size: 16px;
+            outline: none;
         }
 
+        .input-busqueda:focus { border-color: var(--verde-cultigar); }
+
         .btn-nube {
-            padding: 10px 20px;
+            padding: 12px 18px;
             border: none;
-            border-radius: 8px;
+            border-radius: 10px;
             cursor: pointer;
             font-weight: bold;
             color: white;
-            transition: 0.3s;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
-        /* CONTENEDORES DE MAPAS */
+        /* SECCIONES DE MAPAS */
         .seccion-mapa {
-            background: #eee;
+            background: #f0f0f0;
             margin: 20px auto;
-            padding: 15px;
+            padding: 20px;
             width: 95%;
-            max-width: 500px;
-            border-radius: 15px;
-            border: 3px solid #333;
+            max-width: 550px;
+            border-radius: 20px;
+            border: 4px solid #333;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
         }
 
         .titulo-mapa {
             text-align: center;
             padding: 10px;
-            margin: 0;
-            font-weight: bold;
+            margin: 0 0 15px 0;
+            font-weight: 800;
             text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 1.2rem;
         }
 
         svg {
             display: block;
             margin: auto;
             background: white;
-            border-radius: 5px;
+            border-radius: 8px;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.1);
         }
 
-        /* ESTILOS DE MESAS */
-        .mesa { cursor: pointer; stroke: #333; stroke-width: 1.5; transition: all 0.2s; }
-        .mesa:hover { stroke-width: 3; }
+        /* MESAS Y ESTADOS */
+        .mesa { 
+            cursor: pointer; 
+            stroke: #444; 
+            stroke-width: 1.5; 
+            transition: all 0.2s ease; 
+        }
         
-        /* ESTADOS MAPA 1 */
-        .ocupada { fill: #a9dfbf !important; }
-        .resaltado { fill: #f39c12 !important; stroke: #d35400; stroke-width: 4; }
+        .ocupada { fill: #a9dfbf !important; } /* Verde suave producción */
+        .resaltado { fill: #f1c40f !important; stroke: #f39c12; stroke-width: 5; }
         
-        /* ESTADOS MAPA 2 (LOGÍSTICA) */
+        /* LOGÍSTICA */
         .mesa-con-pedido { fill: var(--azul-logistica) !important; }
         .mesa-rejuntada { fill: var(--verde-cultigar) !important; }
         
-        @keyframes parpadeo {
+        @keyframes parpadeoAlerta {
             0% { fill: #fff; }
             50% { fill: var(--alerta-naranja); }
             100% { fill: #fff; }
         }
-        .alerta-proximo { animation: parpadeo 1.5s infinite; }
+        .alerta-proximo { animation: parpadeoAlerta 1s infinite; }
 
-        /* BORDES FITO (MAPA 2) */
-        .borde-fito-rojo { stroke: var(--peligro-rojo) !important; stroke-width: 6 !important; }
-        .borde-fito-verde { stroke: var(--verde-cultigar) !important; stroke-width: 6 !important; }
+        /* BORDES FITO */
+        .borde-fito-rojo { stroke: var(--peligro-rojo) !important; stroke-width: 7 !important; }
+        .borde-fito-verde { stroke: var(--verde-cultigar) !important; stroke-width: 7 !important; }
 
-        .texto-id { font-size: 9px; font-weight: bold; fill: black; pointer-events: none; text-anchor: middle; }
-        .texto-plantas { font-size: 8px; fill: #d35400; font-weight: bold; pointer-events: none; text-anchor: middle; }
+        .texto-id { font-size: 10px; font-weight: bold; fill: #2c3e50; pointer-events: none; text-anchor: middle; }
+        .texto-plantas { font-size: 9px; fill: #e67e22; font-weight: 900; pointer-events: none; text-anchor: middle; }
 
-        /* MODALES */
+        /* MODALES TÁCTILES */
         .modal {
             position: fixed;
             top: 50%; left: 50%;
             transform: translate(-50%, -50%);
-            width: 95%; height: 85%;
-            background: #2d2d2d;
-            border-radius: 20px;
+            width: 95%; height: 90%;
+            background: var(--card-bg);
+            border-radius: 25px;
             display: none;
             z-index: 2000;
-            padding: 20px;
+            padding: 25px;
             overflow-y: auto;
             box-sizing: border-box;
+            box-shadow: 0 0 50px rgba(0,0,0,0.8);
         }
 
         .overlay {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.8);
+            background: rgba(0,0,0,0.85);
             display: none;
             z-index: 1500;
+            backdrop-filter: blur(5px);
         }
 
-        .tabs { display: flex; gap: 5px; margin-bottom: 20px; }
-        .tab { flex: 1; padding: 15px; background: #444; text-align: center; border-radius: 10px; cursor: pointer; }
-        .tab.active { background: var(--azul-logistica); font-weight: bold; }
-
-        .form-group { margin-bottom: 15px; }
-        label { display: block; font-size: 12px; color: #aaa; margin-bottom: 5px; }
-        input, select {
-            width: 100%; padding: 12px; border-radius: 8px; border: none;
-            background: #1a1a1a; color: white; font-size: 16px; box-sizing: border-box;
+        .tabs { display: flex; gap: 8px; margin-bottom: 25px; }
+        .tab { 
+            flex: 1; padding: 18px; background: #444; text-align: center; 
+            border-radius: 12px; cursor: pointer; font-weight: bold; font-size: 15px;
         }
+        .tab.active { background: var(--azul-logistica); color: white; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+
+        .form-group { margin-bottom: 18px; }
+        label { display: block; font-size: 13px; color: #aaa; margin-bottom: 8px; font-weight: bold; }
+        input {
+            width: 100%; padding: 16px; border-radius: 12px; border: 2px solid #444;
+            background: #1a1a1a; color: white; font-size: 18px; box-sizing: border-box;
+            outline: none;
+        }
+        input:focus { border-color: var(--azul-logistica); }
 
         .btn-guardar {
-            width: 100%; padding: 18px; border-radius: 10px; border: none;
-            font-size: 16px; font-weight: bold; color: white; cursor: pointer; margin-bottom: 10px;
+            width: 100%; padding: 20px; border-radius: 15px; border: none;
+            font-size: 18px; font-weight: bold; color: white; cursor: pointer; 
+            margin-bottom: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.2);
         }
 
-        table { width: 100%; border-collapse: collapse; margin-bottom: 15px; font-size: 13px; }
-        th { border-bottom: 2px solid var(--verde-cultigar); padding: 8px; text-align: left; }
-        td { padding: 8px; border-bottom: 1px solid #444; }
+        /* TABLAS PRODUCCIÓN */
+        .tabla-contenedor { width: 100%; overflow-x: auto; margin-bottom: 20px; }
+        table { width: 100%; border-collapse: collapse; background: #333; border-radius: 10px; overflow: hidden; }
+        th { background: #444; color: var(--verde-cultigar); padding: 12px; text-align: left; font-size: 14px; }
+        td { padding: 12px; border-bottom: 1px solid #444; font-size: 14px; }
+        .btn-borrar { background: var(--peligro-rojo); color: white; border: none; padding: 8px 12px; border-radius: 6px; }
 
-        .historial-item { background: #1a1a1a; padding: 10px; border-radius: 8px; margin-bottom: 5px; font-size: 12px; }
+        /* HISTORIAL */
+        .historial-item { 
+            background: #1a1a1a; padding: 15px; border-radius: 12px; 
+            margin-bottom: 10px; border-left: 5px solid var(--azul-logistica);
+            font-size: 14px;
+        }
     </style>
 </head>
 <body>
 
 <div class="header-sticky">
-    <input type="text" id="buscador" class="input-busqueda" placeholder="🔍 Buscar Variedad..." onkeyup="ejecutarBusqueda()">
-    <button class="btn-nube" style="background: var(--verde-cultigar);" onclick="subirDatos()">⬆</button>
-    <button class="btn-nube" style="background: var(--azul-logistica);" onclick="bajarDatos()">⬇</button>
-    <button class="btn-nube" style="background: #555;" onclick="abrirHistorial()">📋</button>
+    <input type="text" id="buscador" class="input-busqueda" placeholder="🔍 Buscar planta o lote..." onkeyup="ejecutarBusqueda()">
+    <button class="btn-nube" style="background: var(--verde-cultigar);" onclick="subirDatos()" title="Subir a la nube">⬆</button>
+    <button class="btn-nube" style="background: var(--azul-logistica);" onclick="bajarDatos()" title="Bajar de la nube">⬇</button>
+    <button class="btn-nube" style="background: #666;" onclick="abrirHistorial()" title="Historial">📋</button>
 </div>
 
 <div class="seccion-mapa">
-    <h3 class="titulo-mapa" style="color: var(--verde-cultigar);">Mapa 1: Producción</h3>
+    <h3 class="titulo-mapa" style="color: var(--verde-cultigar);">Mapa 1: Estado Producción</h3>
     <svg width="480" height="780" id="svg-trazabilidad"></svg>
 </div>
 
 <div class="seccion-mapa">
-    <h3 class="titulo-mapa" style="color: var(--azul-logistica);">Mapa 2: Logística y Ventas</h3>
+    <h3 class="titulo-mapa" style="color: var(--azul-logistica);">Mapa 2: Salidas y Fitos</h3>
     <svg width="480" height="780" id="svg-logistica"></svg>
 </div>
 
 <div class="overlay" id="overlay" onclick="cerrarModales()"></div>
 
 <div id="modalMesa1" class="modal">
-    <h2 id="tituloM1" style="color: var(--verde-cultigar);">Mesa --</h2>
-    <table>
-        <thead><tr><th>Ref</th><th>Lote</th><th>Bnd</th><th>Acción</th></tr></thead>
-        <tbody id="cuerpoM1"></tbody>
-    </table>
-    <div class="form-group"><label>Referencia</label><input type="text" id="m1_ref"></div>
-    <div class="form-group"><label>Lote</label><input type="text" id="m1_lote"></div>
-    <div style="display: flex; gap: 10px;">
-        <div class="form-group" style="flex:1;"><label>Bnd</label><input type="number" id="m1_bnd"></div>
-        <div class="form-group" style="flex:1;"><label>Alv</label><input type="number" id="m1_alv" value="40"></div>
+    <h2 id="tituloM1" style="color: var(--verde-cultigar); margin:0 0 15px 0;">Mesa --</h2>
+    <div class="tabla-contenedor">
+        <table>
+            <thead><tr><th>Variedad</th><th>Lote</th><th>Bnd</th><th></th></tr></thead>
+            <tbody id="cuerpoM1"></tbody>
+        </table>
     </div>
-    <button class="btn-guardar" style="background: var(--verde-cultigar);" onclick="guardarM1()">💾 AÑADIR A PRODUCCIÓN</button>
-    <button class="btn-guardar" style="background: #555;" onclick="cerrarModales()">CERRAR</button>
+    <hr style="border-color:#444; margin: 20px 0;">
+    <div class="form-group"><label>Nueva Variedad</label><input type="text" id="m1_ref" placeholder="Ej: CASTAÑO 111"></div>
+    <div class="form-group"><label>Lote de Origen</label><input type="text" id="m1_lote" placeholder="Ej: L-204"></div>
+    <div style="display:flex; gap:10px;">
+        <div class="form-group" style="flex:1;"><label>Bandejas</label><input type="number" id="m1_bnd" placeholder="0"></div>
+        <div class="form-group" style="flex:1;"><label>Alveolos</label><input type="number" id="m1_alv" value="40"></div>
+    </div>
+    <button class="btn-guardar" style="background: var(--verde-cultigar);" onclick="guardarM1()">💾 AÑADIR REGISTRO</button>
+    <button class="btn-guardar" style="background: #555;" onclick="cerrarModales()">VOLVER AL MAPA</button>
 </div>
 
 <div id="modalMesa2" class="modal">
     <div class="tabs">
-        <div id="tab-v" class="tab active" onclick="switchTab('v')">📦 PEDIDO</div>
-        <div id="tab-f" class="tab" onclick="switchTab('f')">🛡️ FITO</div>
+        <div id="tab-v" class="tab active" onclick="switchTab('v')">📦 LOGÍSTICA</div>
+        <div id="tab-f" class="tab" onclick="switchTab('f')">🛡️ FITOS</div>
     </div>
     
     <div id="sec-ventas">
-        <h2 id="tituloM2" style="margin:0 0 10px 0;">Mesa --</h2>
-        <div class="form-group"><label>Cliente (Manual)</label><input type="text" id="m2_cliente"></div>
-        <div class="form-group"><label>Fecha Entrega (Aviso 7 días)</label><input type="date" id="m2_fecha"></div>
-        <div style="display: flex; gap: 10px;">
-            <div class="form-group" style="flex:1;"><label>Bnd Final (Rejunte)</label><input type="number" id="m2_bnd"></div>
-            <div class="form-group" style="flex:1;"><label>Lote Maestro</label><input type="text" id="m2_lote"></div>
+        <h2 id="tituloM2" style="margin:0 0 15px 0;">Mesa --</h2>
+        <div class="form-group"><label>Cliente Destino</label><input type="text" id="m2_cliente" placeholder="Escribir nombre del cliente..."></div>
+        <div class="form-group"><label>Fecha Prevista de Carga</label><input type="date" id="m2_fecha"></div>
+        <div style="display:flex; gap:10px;">
+            <div class="form-group" style="flex:1;"><label>Bnd. Finales</label><input type="number" id="m2_bnd" placeholder="Tras rejuntar"></div>
+            <div class="form-group" style="flex:1;"><label>Lote Salida</label><input type="text" id="m2_lote" placeholder="Lote o MIX"></div>
         </div>
         <button class="btn-guardar" style="background: var(--verde-cultigar);" onclick="guardarM2()">💾 FINALIZAR REJUNTE</button>
-        <button class="btn-guardar" style="background: var(--peligro-rojo);" onclick="vaciarMesa2()">🚚 CARGAR PEDIDO (HISTORIAL)</button>
+        <button class="btn-guardar" style="background: var(--peligro-rojo);" onclick="vaciarMesa2()">🚚 MARCAR CARGA COMPLETADA</button>
     </div>
 
     <div id="sec-fito" style="display:none;">
-        <div class="form-group"><label>Producto y Nº Reg</label><input type="text" id="f_prod" placeholder="Nombre - Registro"></div>
-        <div class="form-group"><label>Aplicador / Equipo</label><input type="text" id="f_user" placeholder="Nombre - Equipo"></div>
-        <div class="form-group"><label>Dosis / Superficie</label><input type="text" id="f_dosis"></div>
-        <div class="form-group"><label>Días Seguridad</label><input type="number" id="f_seg" value="0"></div>
+        <div class="form-group"><label>Tratamiento y Nº Registro</label><input type="text" id="f_prod" placeholder="Nombre comercial - Reg"></div>
+        <div class="form-group"><label>Aplicador y Maquinaria</label><input type="text" id="f_user" placeholder="Nombre - Equipo"></div>
+        <div class="form-group"><label>Dosis / Superficie</label><input type="text" id="f_dosis" placeholder="Ej: 200ml/Hl - 12 mesas"></div>
+        <div class="form-group"><label>Días de Plazo Seguridad</label><input type="number" id="f_seg" value="0"></div>
         <button class="btn-guardar" style="background: #8e44ad;" onclick="guardarFito()">🛡️ REGISTRAR TRATAMIENTO</button>
     </div>
-    <button class="btn-guardar" style="background: #555;" onclick="cerrarModales()">CERRAR</button>
+    <button class="btn-guardar" style="background: #555;" onclick="cerrarModales()">VOLVER AL MAPA</button>
 </div>
 
 <div id="modalHistorial" class="modal">
-    <h2>HISTÓRICO ANUAL</h2>
-    <h3 style="color:var(--azul-logistica)">Ventas/Salidas</h3>
+    <h2 style="margin-top:0; border-bottom: 2px solid #444; padding-bottom: 10px;">ARCHIVO HISTÓRICO</h2>
+    <h3 style="color:var(--azul-logistica); margin-bottom: 10px;">Salidas / Clientes</h3>
     <div id="histVentas"></div>
-    <h3 style="color:var(--peligro-rojo)">Tratamientos Fito</h3>
+    <h3 style="color:var(--peligro-rojo); margin-top: 20px; margin-bottom: 10px;">Cuaderno Fito</h3>
     <div id="histFitos"></div>
-    <button class="btn-guardar" style="background: #555;" onclick="cerrarModales()">CERRAR</button>
+    <button class="btn-guardar" style="background: #555;" onclick="cerrarModales()">CERRAR ARCHIVO</button>
 </div>
 
 <script>
+    // CONFIGURACIÓN DE ACCESO NUBE
     const GIST_ID = "dc4b1ac9b41655086c76352f03ccfafe";
+    const GIST_TOKEN = "ghp_mSAnFofj7K8tLqfO4vI1YVOf8n3Xn515Vshj"; 
+
+    // BASE DE DATOS LOCAL
     let DB_M1 = JSON.parse(localStorage.getItem('db_m1')) || {};
     let DB_M2 = JSON.parse(localStorage.getItem('db_m2')) || {};
     let H_VENTAS = JSON.parse(localStorage.getItem('h_ventas')) || [];
@@ -252,47 +291,65 @@
 
     function inicializar() {
         let h1 = "", h2 = "";
-        const mesasExtra = Array.from({length:14}, (_,i) => (i+1).toString());
+        const extras = Array.from({length:14}, (_,i) => (i+1).toString());
         
-        GEOMETRIA.concat(mesasExtra.map(id => ({id, isExtra: true}))).forEach(m => {
+        GEOMETRIA.concat(extras.map(id => ({id, isExtra: true}))).forEach(m => {
             let x, y, w, h;
             if(m.isExtra) {
                 w = 75; h = 38; x = 395; y = 70 + (14 - parseInt(m.id)) * 46;
             } else {
                 x = m.x; y = m.y; w = m.w; h = m.h;
             }
-            h1 += `<rect id="m1-${m.id}" class="mesa" x="${x}" y="${y}" width="${w}" height="${h}" fill="white" onclick="abrirM1('${m.id}')"></rect><text x="${x+w/2}" y="${y+h-5}" class="texto-id">${m.id}</text>`;
-            h2 += `<rect id="m2-${m.id}" class="mesa" x="${x}" y="${y}" width="${w}" height="${h}" fill="white" onclick="abrirM2('${m.id}')"></rect><text x="${x+w/2}" y="${y+12}" class="texto-id">${m.id}</text><text id="pts-${m.id}" x="${x+w/2}" y="${y+24}" class="texto-plantas"></text>`;
+            h1 += `<rect id="m1-${m.id}" class="mesa" x="${x}" y="${y}" width="${w}" height="${h}" fill="white" onclick="abrirM1('${m.id}')"></rect>
+                   <text x="${x+w/2}" y="${y+h-5}" class="texto-id">${m.id}</text>`;
+            h2 += `<rect id="m2-${m.id}" class="mesa" x="${x}" y="${y}" width="${w}" height="${h}" fill="white" onclick="abrirM2('${m.id}')"></rect>
+                   <text x="${x+w/2}" y="${y+12}" class="texto-id">${m.id}</text>
+                   <text id="pts-${m.id}" x="${x+w/2}" y="${y+26}" class="texto-plantas"></text>`;
         });
         document.getElementById('svg-trazabilidad').innerHTML = h1;
         document.getElementById('svg-logistica').innerHTML = h2;
         actualizarMapas();
     }
 
+    // FUNCIONES MAPA 1
     function abrirM1(id) {
         mesaSel = id;
-        document.getElementById('tituloM1').innerText = "Mesa " + id;
-        let html = "", totalBnd = 0;
-        (DB_M1[id] || []).forEach((r, i) => {
-            totalBnd += parseInt(r.bnd);
-            html += `<tr><td>${r.ref}</td><td>${r.lote}</td><td>${r.bnd}</td><td><button onclick="borrarM1(${i})">🗑️</button></td></tr>`;
-        });
-        document.getElementById('cuerpoM1').innerHTML = html || "<tr><td colspan='4'>Vacia</td></tr>";
+        document.getElementById('tituloM1').innerText = "PRODUCCIÓN - Mesa " + id;
+        renderTablaM1();
         document.getElementById('overlay').style.display = 'block';
         document.getElementById('modalMesa1').style.display = 'block';
     }
 
-    function guardarM1() {
-        if(!DB_M1[mesaSel]) DB_M1[mesaSel] = [];
-        DB_M1[mesaSel].push({ ref: document.getElementById('m1_ref').value.toUpperCase(), lote: document.getElementById('m1_lote').value, bnd: document.getElementById('m1_bnd').value, alv: document.getElementById('m1_alv').value });
-        persistir(); abrirM1(mesaSel);
+    function renderTablaM1() {
+        let html = "";
+        (DB_M1[mesaSel] || []).forEach((r, i) => {
+            html += `<tr><td>${r.ref}</td><td>${r.lote}</td><td>${r.bnd}</td><td><button class="btn-borrar" onclick="borrarM1(${i})">X</button></td></tr>`;
+        });
+        document.getElementById('cuerpoM1').innerHTML = html || "<tr><td colspan='4'>No hay plantas registradas</td></tr>";
     }
 
-    function borrarM1(i) { DB_M1[mesaSel].splice(i,1); persistir(); abrirM1(mesaSel); }
+    function guardarM1() {
+        const ref = document.getElementById('m1_ref').value.toUpperCase();
+        if(!ref) return alert("Escribe la variedad");
+        if(!DB_M1[mesaSel]) DB_M1[mesaSel] = [];
+        DB_M1[mesaSel].push({
+            ref: ref,
+            lote: document.getElementById('m1_lote').value,
+            bnd: document.getElementById('m1_bnd').value,
+            alv: document.getElementById('m1_alv').value
+        });
+        persistir(); renderTablaM1();
+    }
 
+    function borrarM1(i) {
+        DB_M1[mesaSel].splice(i, 1);
+        persistir(); renderTablaM1();
+    }
+
+    // FUNCIONES MAPA 2
     function abrirM2(id) {
         mesaSel = id;
-        document.getElementById('tituloM2').innerText = "Mesa " + id;
+        document.getElementById('tituloM2').innerText = "LOGÍSTICA - Mesa " + id;
         const d = DB_M2[id] || {};
         document.getElementById('m2_cliente').value = d.cliente || "";
         document.getElementById('m2_fecha').value = d.fecha || "";
@@ -304,13 +361,27 @@
     }
 
     function guardarM2() {
-        DB_M2[mesaSel] = { ...DB_M2[mesaSel], cliente: document.getElementById('m2_cliente').value.toUpperCase(), fecha: document.getElementById('m2_fecha').value, bnd: document.getElementById('m2_bnd').value, lote: document.getElementById('m2_lote').value, rejuntado: true };
+        DB_M2[mesaSel] = {
+            ...DB_M2[mesaSel],
+            cliente: document.getElementById('m2_cliente').value.toUpperCase(),
+            fecha: document.getElementById('m2_fecha').value,
+            bnd: document.getElementById('m2_bnd').value,
+            lote: document.getElementById('m2_lote').value,
+            rejuntado: true
+        };
         persistir(); cerrarModales();
     }
 
     function guardarFito() {
         const seg = parseInt(document.getElementById('f_seg').value) || 0;
-        const f = { fecha: new Date().toLocaleDateString(), vence: new Date(Date.now() + seg*86400000).toISOString(), prod: document.getElementById('f_prod').value, mesa: mesaSel };
+        const f = {
+            fecha: new Date().toLocaleDateString(),
+            vence: new Date(Date.now() + seg * 86400000).toISOString(),
+            prod: document.getElementById('f_prod').value,
+            user: document.getElementById('f_user').value,
+            dosis: document.getElementById('f_dosis').value,
+            mesa: mesaSel
+        };
         H_FITOS.push(f);
         if(!DB_M2[mesaSel]) DB_M2[mesaSel] = {};
         DB_M2[mesaSel].fito_vence = f.vence;
@@ -318,33 +389,47 @@
     }
 
     function vaciarMesa2() {
-        if(DB_M2[mesaSel]) { H_VENTAS.push({...DB_M2[mesaSel], mesa: mesaSel, fecha_v: new Date().toLocaleDateString()}); delete DB_M2[mesaSel]; persistir(); cerrarModales(); }
+        if(!confirm("¿Confirmas que la planta ha salido del vivero? Se guardará en el historial.")) return;
+        if(DB_M2[mesaSel]) {
+            H_VENTAS.push({...DB_M2[mesaSel], mesa: mesaSel, fecha_v: new Date().toLocaleDateString()});
+            delete DB_M2[mesaSel];
+            persistir(); cerrarModales();
+        }
     }
 
+    // ACTUALIZACIÓN VISUAL
     function actualizarMapas() {
         const hoy = new Date();
-        GEOMETRIA.concat(Array.from({length:14}, (_,i)=>(i+1).toString()).map(id=>({id}))).forEach(m => {
-            // MAPA 1
-            const r1 = document.getElementById('m1-' + m.id);
-            if(r1) r1.setAttribute('class', 'mesa' + (DB_M1[m.id]?.length ? ' ocupada' : ''));
-            // MAPA 2
-            const r2 = document.getElementById('m2-' + m.id);
-            const t2 = document.getElementById('pts-' + m.id);
+        const todosLosIds = GEOMETRIA.map(m=>m.id).concat(Array.from({length:14},(_,i)=>(i+1).toString()));
+        
+        todosLosIds.forEach(id => {
+            const r1 = document.getElementById('m1-' + id);
+            if(r1) r1.setAttribute('class', 'mesa' + (DB_M1[id]?.length ? ' ocupada' : ''));
+            
+            const r2 = document.getElementById('m2-' + id);
+            const t2 = document.getElementById('pts-' + id);
             if(r2) {
-                const d = DB_M2[m.id];
+                const d = DB_M2[id];
                 r2.setAttribute('class', 'mesa');
-                t2.innerText = "";
+                if(t2) t2.innerText = "";
                 if(d) {
                     if(d.rejuntado) r2.classList.add('mesa-rejuntada');
                     else if(d.cliente) r2.classList.add('mesa-con-pedido');
-                    if(d.fecha && !d.rejuntado && ((new Date(d.fecha)-hoy)/(1000*60*60*24)) <= 7) r2.classList.add('alerta-proximo');
-                    if(d.bnd) t2.innerText = "[" + (d.bnd * 40) + "]"; // Ajustar si alveolos cambia
-                    if(d.fito_vence) r2.classList.add(new Date(d.fito_vence) > hoy ? 'borde-fito-rojo' : 'borde-fito-verde');
+                    
+                    if(d.fecha && !d.rejuntado) {
+                        const diff = (new Date(d.fecha) - hoy) / (1000*60*60*24);
+                        if(diff <= 7) r2.classList.add('alerta-proximo');
+                    }
+                    if(d.bnd && t2) t2.innerText = "[" + (d.bnd * 40) + "]";
+                    if(d.fito_vence) {
+                        r2.classList.add(new Date(d.fito_vence) > hoy ? 'borde-fito-rojo' : 'borde-fito-verde');
+                    }
                 }
             }
         });
     }
 
+    // PERSISTENCIA LOCAL
     function persistir() {
         localStorage.setItem('db_m1', JSON.stringify(DB_M1));
         localStorage.setItem('db_m2', JSON.stringify(DB_M2));
@@ -353,27 +438,59 @@
         actualizarMapas();
     }
 
+    // NUBE GIST
+    async function subirDatos() {
+        try {
+            const body = { files: { "vivero_integral.json": { content: JSON.stringify({ m1: DB_M1, m2: DB_M2, hv: H_VENTAS, hf: H_FITOS }) } } };
+            const res = await fetch(`https://api.github.com/gists/${GIST_ID}`, {
+                method: "PATCH",
+                headers: { Authorization: `token ${GIST_TOKEN}`, "Content-Type": "application/json" },
+                body: JSON.stringify(body)
+            });
+            if(res.ok) alert("✅ DATOS GUARDADOS EN LA NUBE");
+        } catch (e) { alert("Error al subir"); }
+    }
+
+    async function bajarDatos() {
+        try {
+            const res = await fetch(`https://api.github.com/gists/${GIST_ID}`);
+            const data = await res.json();
+            const content = JSON.parse(data.files["vivero_integral.json"].content);
+            DB_M1 = content.m1; DB_M2 = content.m2; H_VENTAS = content.hv; H_FITOS = content.hf;
+            persistir(); alert("✅ DATOS RECUPERADOS");
+        } catch (e) { alert("Error al bajar"); }
+    }
+
+    // BUSCADOR
+    function ejecutarBusqueda() {
+        const q = document.getElementById('buscador').value.toUpperCase();
+        const ids = GEOMETRIA.map(m=>m.id).concat(Array.from({length:14},(_,i)=>(i+1).toString()));
+        ids.forEach(id => {
+            const r1 = document.getElementById('m1-' + id);
+            if(r1) {
+                r1.classList.remove('resaltado');
+                if(q && DB_M1[id]?.some(p => p.ref.includes(q) || p.lote.includes(q))) r1.classList.add('resaltado');
+            }
+        });
+    }
+
+    // UTILIDADES
     function switchTab(t) {
         document.getElementById('sec-ventas').style.display = t==='v'?'block':'none';
         document.getElementById('sec-fito').style.display = t==='f'?'block':'none';
         document.getElementById('tab-v').className = 'tab'+(t==='v'?' active':'');
         document.getElementById('tab-f').className = 'tab'+(t==='f'?' active':'');
     }
-
     function cerrarModales() { document.querySelectorAll('.modal, .overlay').forEach(e => e.style.display='none'); }
-    
     function abrirHistorial() {
         let hv = "", hf = "";
-        H_VENTAS.forEach(x => hv += `<div class="historial-item"><b>${x.fecha_v}</b>: Mesa ${x.mesa} -> ${x.cliente} (${x.bnd} bnd)</div>`);
-        H_FITOS.forEach(x => hf += `<div class="historial-item"><b>${x.fecha}</b>: Mesa ${x.mesa} -> ${x.prod}</div>`);
-        document.getElementById('histVentas').innerHTML = hv || "Vacio";
-        document.getElementById('histFitos').innerHTML = hf || "Vacio";
+        H_VENTAS.forEach(x => hv += `<div class="historial-item"><b>${x.fecha_v}</b>: Mesa ${x.mesa} → ${x.cliente} (${x.bnd} bnd, Lote: ${x.lote})</div>`);
+        H_FITOS.forEach(x => hf += `<div class="historial-item"><b>${x.fecha}</b>: Mesa ${x.mesa} → ${x.prod} (${x.user}, Dosis: ${x.dosis})</div>`);
+        document.getElementById('histVentas').innerHTML = hv || "No hay ventas registradas";
+        document.getElementById('histFitos').innerHTML = hf || "No hay tratamientos registrados";
         document.getElementById('overlay').style.display = 'block';
         document.getElementById('modalHistorial').style.display = 'block';
     }
-
-    async function subirDatos() { /* Lógica de Gist igual que antes */ }
-    async function bajarDatos() { /* Lógica de Gist igual que antes */ }
 
     window.onload = inicializar;
 </script>
