@@ -1,4 +1,405 @@
-<!DOCTYPE html><html><head><meta charset="UTF-8"><title>SISTEMA CULTIGAR</title><style>
-:root{--bg:#2c3e50;--verde:#27ae60;--rojo:#c0392b;--azul:#2980b9;--purpura:#af7ac5;--v-claro:#a9dfbf}body{font-family:sans-serif;background:var(--bg);margin:0;color:#fff;padding-bottom:50px}.header-sticky{position:sticky;top:0;background:#fff;padding:10px;z-index:1000;display:flex;gap:10px;box-shadow:0 4px 10px rgba(0,0,0,.3)}.input-busqueda{flex-grow:1;padding:12px;border-radius:8px;border:2px solid #ddd;font-size:16px;color:#333}.seccion-mapa{background:#eee;margin:20px auto;padding:15px;width:480px;border-radius:10px;border:3px solid #000}.titulo-mapa{text-align:center;color:#333;margin:0 0 10px;font-weight:700;text-transform:uppercase}svg{display:block;margin:auto;background:#fff}.mesa{fill:#fff;stroke:#333;stroke-width:1.5;cursor:pointer;transition:.2s}.mesa:hover{stroke-width:3}.ocupada{fill:var(--v-claro)!important}.mesa-pedido{fill:var(--azul)!important}.mesa-multi{fill:var(--purpura)!important}.mesa-rejuntada{fill:var(--verde)!important}.resaltado{fill:#f39c12!important;stroke:#d35400;stroke-width:4}.borde-fito-peligro{stroke:var(--rojo)!important;stroke-width:6!important}.borde-fito-ok{stroke:var(--verde)!important;stroke-width:6!important}.modal{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:90%;max-width:450px;height:85%;background:#1a1a1a;border:4px solid #444;border-radius:15px;display:none;z-index:2000;padding:20px;overflow-y:auto;color:#fff}.overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.8);display:none;z-index:1500}.tab-btn{flex:1;padding:12px;background:#333;border:none;color:#fff;cursor:pointer;font-weight:700;border-radius:5px}.tab-btn.active{background:var(--azul)}table{width:100%;border-collapse:collapse;margin-top:10px;font-size:12px;background:#222}td,th{border:1px solid #444;padding:8px;text-align:left}th{color:var(--verde)}.form-group{margin-bottom:10px}.form-group label{display:block;font-size:11px;color:#aaa;margin-bottom:4px}.form-group input{width:100%;padding:10px;border-radius:5px;border:1px solid #444;background:#222;color:#fff;box-sizing:border-box}.btn-accion{width:100%;padding:12px;border:none;border-radius:8px;font-weight:700;color:#fff;cursor:pointer;margin-top:5px}.texto-id{font-size:10px;font-weight:700;fill:#000;pointer-events:none;text-anchor:middle}
-</style></head><body><div class="header-sticky"><input type="text" id="buscador" class="input-busqueda" placeholder="🔍 Buscar Variedad..." onkeyup="ejecutarBusqueda()"><button onclick="subirDatos()" style="background:var(--verde);color:#fff;border:none;padding:10px;border-radius:5px;cursor:pointer;font-weight:700">⬆️ NUBE</button><button onclick="bajarDatos()" style="background:var(--azul);color:#fff;border:none;padding:10px;border-radius:5px;cursor:pointer;font-weight:700">⬇️ NUBE</button></div><div class="seccion-mapa"><h3 class="titulo-mapa">MAPA 1: TRAZABILIDAD</h3><svg width="450" height="780" id="svg1"></svg></div><div class="seccion-mapa"><h3 class="titulo-mapa" style="color:var(--azul)">MAPA 2: LOGÍSTICA Y FITOS</h3><svg width="450" height="780" id="svg2"></svg></div><div class="overlay" id="ov" onclick="cerrar()"></div><div id="m1" class="modal"><h2 id="t1" style="color:var(--verde)">Mesa --</h2><table><thead><tr><th>Ref</th><th>Lote</th><th>Bnd</th><th>X</th></tr></thead><tbody id="tb1"></tbody></table><div class="form-group"><label>Variedad</label><input type="text" id="i1_ref"></div><div class="form-group"><label>Lote</label><input type="text" id="i1_lot"></div><div class="form-group"><label>Bandejas</label><input type="number" id="i1_num"></div><button class="btn-accion" style="background:var(--verde)" onclick="save1()">💾 GUARDAR TRAZA</button><button class="btn-accion" style="background:#555" onclick="cerrar()">CERRAR</button></div><div id="m2" class="modal"><div style="display:flex;gap:5px;margin-bottom:15px"><button id="btL" class="tab-btn active" onclick="tab('log')">📦 LOGÍSTICA</button><button id="btF" class="tab-btn" onclick="tab('fit')">🛡️ FITO</button></div><div id="pL"><h2 id="t2" style="color:var(--azul)">Mesa --</h2><table><thead><tr><th>Cliente</th><th>Bnd</th><th>Lote</th><th>X</th></tr></thead><tbody id="tb2"></tbody></table><div class="form-group"><label>Cliente</label><input type="text" id="i2_cli"></div><div class="form-group"><label>Bandejas</label><input type="number" id="i2_bnd"></div><div class="form-group"><label>Lote</label><input type="text" id="i2_lot"></div><div style="display:flex;gap:5px"><button class="btn-accion" style="background:var(--azul);flex:2" onclick="save2()">💾 AÑADIR</button><button id="bRej" class="btn-accion" style="flex:1;background:#555" onclick="togRej()">⬜ REJUNTAR</button></div></div><div id="pF" style="display:none"><h2 style="color:var(--rojo)">Fito</h2><div class="form-group"><label>Producto</label><input type="text" id="if_pro"></div><div class="form-group"><label>Plazo (Días)</label><input type="number" id="if_pla"></div><button class="btn-accion" style="background:#8e44ad" onclick="saveF()">🛡️ REGISTRAR</button><table><thead><tr><th>Fecha</th><th>Prod</th><th>Vence</th></tr></thead><tbody id="tbF"></tbody></table></div><button class="btn-accion" style="background:#555;margin-top:15px" onclick="cerrar()">CERRAR</button></div><script>
-const GIST_ID="dc4b1ac9b41655086c76352f03ccfafe";let D1=JSON.parse(localStorage.getItem('c_traza'))||{},D2=JSON.parse(localStorage.getItem('c_log'))||{},DF=JSON.parse(localStorage.getItem('c_fito'))||{},mSel="";const COOR=[{id:'10-48',x:10,y:70,w:40,h:140},{id:'11-49',x:55,y:70,w:40,h:140},{id:'12-50',x:105,y:70,w:40,h:140},{id:'13-51',x:150,y:70,w:40,h:140},{id:'7-45',x:15,y:220,w:40,h:65},{id:'8-46',x:65,y:220,w:45,h:90},{id:'9-47',x:135,y:220,w:38,h:90},{id:'4-42',x:10,y:325,w:45,h:200},{id:'5-43',x:65,y:325,w:45,h:200},{id:'6-44',x:125,y:325,w:45,h:200},{id:'1-39',x:10,y:540,w:45,h:210},{id:'2-40',x:65,y:540,w:45,h:210},{id:'3-41',x:125,y:580,w:45,h:170},{id:'22-63',x:210,y:70,w:38,h:75},{id:'23-64',x:255,y:70,w:38,h:75},{id:'24-65',x:300,y:70,w:38,h:75},{id:'22-60',x:210,y:155,w:38,h:100},{id:'23-61',x:255,y:155,w:38,h:100},{id:'24-62',x:300,y:155,w:38,h:100},{id:'18-56',x:215,y:360,w:35,h:110},{id:'19-57',x:255,y:325,w:38,h:200},{id:'20-58',x:300,y:325,w:38,h:200},{id:'21-59',x:345,y:325,w:38,h:200},{id:'14-52',x:210,y:540,w:38,h:145},{id:'15-53',x:255,y:540,w:38,h:145},{id:'16-54',x:300,y:540,w:38,h:145},{id:'17-55',x:345,y:540,w:38,h:145}];function init(){let h1="",h2="";COOR.forEach(m=>{h1+=`<rect id="t-${m.id}" class="mesa" x="${m.x}" y="${m.y}" width="${m.w}" height="${m.h}" onclick="op1('${m.id}')"></rect><text x="${m.x+m.w/2}" y="${m.y+m.h-5}" class="texto-id">${m.id}</text>`;h2+=`<rect id="f-${m.id}" class="mesa" x="${m.x}" y="${m.y}" width="${m.w}" height="${m.h}" onclick="op2('${m.id}')"></rect><text x="${m.x+m.w/2}" y="${m.y+12}" class="texto-id">${m.id}</text>`});for(let i=1;i<=14;i++){let y=70+(14-i)*46;h1+=`<rect id="t-${i}" class="mesa" x="385" y="${y}" width="70" height="40" onclick="op1('${i}')"></rect><text x="420" y="${y+25}" class="texto-id">${i}</text>`;h2+=`<rect id="f-${i}" class="mesa" x="385" y="${y}" width="70" height="40" onclick="op2('${i}')"></rect><text x="420" y="${y+25}" class="texto-id">${i}</text>`}document.getElementById('svg1').innerHTML=h1;document.getElementById('svg2').innerHTML=h2;updCol()}function op1(id){mSel=id;document.getElementById('t1').innerText="Mesa "+id;show1();document.getElementById('ov').style.display='block';document.getElementById('m1').style.display='block'}function show1(){let h="";(D1[mSel]||[]).forEach((r,i)=>h+=`<tr><td>${r.ref}</td><td>${r.lote}</td><td>${r.num}</td><td><button onclick="del1(${i})">🗑️</button></td></tr>`);document.getElementById('tb1').innerHTML=h}function save1(){if(!D1[mSel])D1[mSel]=[];D1[mSel].push({ref:document.getElementById('i1_ref').value.toUpperCase(),lote:document.getElementById('i1_lot').value,num:document.getElementById('i1_num').value});document.getElementById('i1_ref').value="";show1();updCol();per()}function del1(i){D1[mSel].splice(i,1);if(!D1[mSel].length)delete D1[mSel];show1();updCol();per()}function op2(id){mSel=id;document.getElementById('t2').innerText="Mesa "+id;tab('log');show2();showF();document.getElementById('ov').style.display='block';document.getElementById('m2').style.display='block'}function tab(t){document.getElementById('pL').style.display=t==='log'?'block':'none';document.getElementById('pF').style.display=t==='fit'?'block':'none';document.getElementById('btL').className='tab-btn '+(t==='log'?'active':'');document.getElementById('btF').className='tab-btn '+(t==='fit'?'active':'')}function save2(){if(!D2[mSel])D2[mSel]={pedidos:[],rejuntado:!1};D2[mSel].pedidos.push({cli:document.getElementById('i2_cli').value.toUpperCase(),bnd:document.getElementById('i2_bnd').value,lot:document.getElementById('i2_lot').value});document.getElementById('i2_cli').value="";show2();updCol();per()}function show2(){let h="";let p=D2[mSel]?.pedidos||[];p.forEach((x,i)=>h+=`<tr><td>${x.cli}</td><td>${x.bnd}</td><td>${x.lot}</td><td><button onclick="del2(${i})">🗑️</button></td></tr>`);document.getElementById('tb2').innerHTML=h;let r=D2[mSel]?.rejuntado;document.getElementById('bRej').innerText=r?"✅ REJUNTADO":"⬜ REJUNTAR";document.getElementById('bRej').style.background=r?"var(--verde)":"#555"}function togRej(){if(!D2[mSel])return;D2[mSel].rejuntado=!D2[mSel].rejuntado;show2();updCol();per()}function del2(i){D2[mSel].pedidos.splice(i,1);if(!D2[mSel].pedidos.length)delete D2[mSel];show2();updCol();per()}function saveF(){if(!DF[mSel])DF[mSel]=[];let d=new Date(),v=new Date();v.setDate(d.getDate()+parseInt(document.getElementById('if_pla').value||0));DF[mSel].push({p:document.getElementById('if_pro').value.toUpperCase(),f:d.toLocaleDateString(),v:v.toISOString()});showF();updCol();per()}function showF(){let h="",hoy=new Date();(DF[mSel]||[]).forEach(x=>{let dias=Math.ceil((new Date(x.v)-hoy)/(1000*60*60*24));h+=`<tr><td>${x.f}</td><td>${x.p}</td><td style="color:${dias>0?'red':'green'}">${dias>0?dias+'d':'OK'}</td></tr>`});document.getElementById('tbF').innerHTML=h}function updCol(){let hoy=new Date();document.querySelectorAll('.mesa').forEach(el=>{let id=el.id.split('-')[1];if(el.id.startsWith('t-'))el.classList.toggle('ocupada',D1[id]?.length>0);else{el.classList.remove('mesa-pedido','mesa-multi','mesa-rejuntada','borde-fito-peligro','borde-fito-ok');let l=D2[id];if(l&&l.pedidos.length>0){if(l.rejuntado)el.classList.add('mesa-rejuntada');else if(l.pedidos.length>1)el.classList.add('mesa-multi');else el.classList.add('mesa-pedido')}let f=DF[id];if(f&&f.length>0)el.classList.add(new Date(f[f.length-1].v)>hoy?'borde-fito-peligro':'borde-fito-ok')}})}function per(){localStorage.setItem('c_traza',JSON.stringify(D1));localStorage.setItem('c_log',JSON.stringify(D2));localStorage.setItem('c_fito',JSON.stringify(DF))}async function subirDatos(){let t=localStorage.getItem('github_token');if(!t)return alert("Falta Token");try{await fetch(`https://api.github.com/gists/${GIST_ID}`,{method:'PATCH',headers:{Authorization:`token ${t}`},body:JSON.stringify({files:{"traza.json":{content:JSON.stringify(D1)},"log.json":{content:JSON.stringify(D2)},"fito.json":{content:JSON.stringify(DF)}}})});alert("SUBIDO")}catch(e){alert("Error")}}async function bajarDatos(){try{let r=await fetch(`https://api.github.com/gists/${GIST_ID}?cb=${Date.now()}`),d=await r.json();D1=JSON.parse(d.files["traza.json"].content);D2=JSON.parse(d.files["log.json"].content);DF=JSON.parse(d.files["fito.json"].content);updCol();alert("DESCARGADO")}catch(e){alert("Error")}}function ejecutarBusqueda(){let b=document.getElementById('buscador').value.toUpperCase();document.querySelectorAll('#svg1 .mesa').forEach(m=>m.classList.remove('resaltado'));if(!b)return;for(let m in D1)if(D1[m].some(r=>r.ref.includes(b)))document.getElementById('t-'+m)?.classList.add('resaltado')}function cerrar(){document.querySelectorAll('.modal').forEach(m=>m.style.display='none');document.getElementById('ov').style.display='none'}window.onload=init;</script></body></html>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CULTIGAR - SISTEMA INTEGRAL PRO</title>
+    <style>
+        :root {
+            --bg-dark: #2c3e50;
+            --verde-cultigar: #27ae60;
+            --rojo-fito: #c0392b;
+            --azul-log: #2980b9;
+            --purpura: #af7ac5;
+            --blanco: #ffffff;
+        }
+
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background: var(--bg-dark); 
+            margin: 0; 
+            color: white;
+            padding-bottom: 50px;
+        }
+
+        .header-sticky {
+            position: sticky;
+            top: 0;
+            background: white;
+            padding: 10px;
+            z-index: 1000;
+            display: flex;
+            gap: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+
+        .input-busqueda {
+            flex-grow: 1;
+            padding: 12px;
+            border-radius: 8px;
+            border: 2px solid #ddd;
+            font-size: 16px;
+            color: #333;
+        }
+
+        .btn-nube {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            color: white;
+            transition: 0.3s;
+        }
+
+        .seccion-mapa {
+            background: #eee;
+            margin: 20px auto;
+            padding: 15px;
+            width: 500px;
+            border-radius: 10px;
+            border: 3px solid #000;
+        }
+
+        .titulo-mapa {
+            text-align: center;
+            padding: 10px;
+            margin: 0;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        svg {
+            display: block;
+            margin: auto;
+            background: white;
+        }
+
+        .mesa {
+            fill: white;
+            stroke: #333;
+            stroke-width: 1.5;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .mesa:hover {
+            stroke: #000;
+            stroke-width: 3;
+        }
+
+        .texto-id {
+            font-size: 10px;
+            font-weight: bold;
+            fill: black;
+            pointer-events: none;
+            text-anchor: middle;
+        }
+
+        /* Estados Visuales */
+        .ocupada { fill: #a9dfbf !important; }
+        .resaltado { fill: #f39c12 !important; stroke: #d35400; stroke-width: 4; }
+
+        /* Modales */
+        .modal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 90%;
+            max-width: 450px;
+            height: 85%;
+            background: #1a1a1a;
+            border: 4px solid #444;
+            border-radius: 15px;
+            display: none;
+            z-index: 2000;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8);
+            display: none;
+            z-index: 1500;
+        }
+
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; font-size: 12px; color: #aaa; margin-bottom: 5px; }
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #444;
+            background: #222;
+            color: white;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+
+        table { width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 13px; }
+        th { border-bottom: 2px solid var(--verde-cultigar); padding: 8px; text-align: left; color: var(--verde-cultigar); }
+        td { padding: 8px; border-bottom: 1px solid #333; }
+
+        .btn-guardar { width: 100%; padding: 15px; border: none; border-radius: 8px; font-weight: bold; color: white; cursor: pointer; font-size: 16px; margin-bottom: 5px; }
+        .btn-cerrar { background: #555; margin-top: 10px; }
+    </style>
+</head>
+<body>
+
+<div class="header-sticky">
+    <input type="text" id="buscador" class="input-busqueda" placeholder="🔍 Buscar Variedad..." onkeyup="ejecutarBusqueda()">
+    <button class="btn-nube" style="background: #27ae60;" onclick="subirDatos()">⬆</button>
+    <button class="btn-nube" style="background: #2980b9;" onclick="bajarDatos()">⬇</button>
+</div>
+
+<div class="seccion-mapa">
+    <h3 class="titulo-mapa" style="color: var(--verde-cultigar);">Mapa 1: Trazabilidad</h3>
+    <svg width="480" height="780" id="svg-trazabilidad"></svg>
+</div>
+
+<div class="seccion-mapa">
+    <h3 class="titulo-mapa" style="color: var(--azul-log);">Mapa 2: Logística y Fitos</h3>
+    <svg width="480" height="780" id="svg-fito"></svg>
+</div>
+
+<div class="overlay" id="overlay" onclick="cerrarModales()"></div>
+
+<div id="modalMesa" class="modal">
+    <h2 id="mesaTitulo" style="color: var(--verde-cultigar); font-size: 18px;">Mesa --</h2>
+    <table>
+        <thead><tr><th>Ref</th><th>Lote</th><th>Bnd</th><th>Acción</th></tr></thead>
+        <tbody id="tablaCuerpoMesa"></tbody>
+    </table>
+    <div class="form-group"><label>Variedad</label><input type="text" id="f_ref"></div>
+    <div class="form-group"><label>Lote</label><input type="text" id="f_lote"></div>
+    <div style="display: flex; gap: 10px;">
+        <div class="form-group" style="flex: 1;"><label>Nº Bnd</label><input type="number" id="f_num_bandejas"></div>
+        <div class="form-group" style="flex: 1;"><label>Tipo</label><input type="text" id="f_tipo_bandeja" list="op_bnd">
+            <datalist id="op_bnd"><option value="40"><option value="60"><option value="84"></datalist>
+        </div>
+    </div>
+    <button class="btn-guardar" style="background: var(--verde-cultigar);" onclick="guardarRegistroTrazabilidad()">💾 GUARDAR TRAZA</button>
+    <button class="btn-guardar btn-cerrar" onclick="cerrarModales()">CERRAR</button>
+</div>
+
+<div id="modalFito" class="modal">
+    <div style="display:flex; gap:5px; margin-bottom:15px;">
+        <button id="btLog" class="btn-guardar" style="background:#2980b9; flex:1; padding:10px;" onclick="switchTab('log')">📦 LOGÍSTICA</button>
+        <button id="btFit" class="btn-guardar" style="background:#555; flex:1; padding:10px;" onclick="switchTab('fit')">🛡️ FITOS</button>
+    </div>
+    
+    <div id="panelLog">
+        <h2 id="logTitulo" style="color: #2980b9; font-size: 18px;">Logística - Mesa --</h2>
+        <table><thead><tr><th>Cliente</th><th>Bnd</th><th>Lote</th><th>🗑️</th></tr></thead><tbody id="logCuerpoMesa"></tbody></table>
+        <div class="form-group"><label>Cliente</label><input type="text" id="l_cli"></div>
+        <div class="form-group"><label>Bandejas</label><input type="number" id="l_bnd"></div>
+        <div class="form-group"><label>Lote</label><input type="text" id="l_lot"></div>
+        <div style="display:flex; gap:5px;">
+            <button class="btn-guardar" style="background:#2980b9; flex:2;" onclick="guardarLog()">💾 AÑADIR</button>
+            <button id="btnRejuntar" class="btn-guardar" style="background:#555; flex:1;" onclick="toggleRejuntar()">⬜ REJUNTAR</button>
+        </div>
+    </div>
+
+    <div id="panelFit" style="display:none;">
+        <h2 style="color: var(--rojo-fito); font-size: 18px;">Fitos - Plazos</h2>
+        <div class="form-group"><label>Producto</label><input type="text" id="fi_prod_new"></div>
+        <div class="form-group"><label>Plazo Seguridad (Días)</label><input type="number" id="fi_plazo"></div>
+        <button class="btn-guardar" style="background:var(--rojo-fito);" onclick="guardarFitoPro()">🛡️ REGISTRAR</button>
+        <table><thead><tr><th>Fecha</th><th>Prod</th><th>Vence</th></tr></thead><tbody id="fitoCuerpoMesaPro"></tbody></table>
+    </div>
+    <button class="btn-guardar btn-cerrar" onclick="cerrarModales()">CERRAR</button>
+</div>
+
+<script>
+    const GIST_ID = "dc4b1ac9b41655086c76352f03ccfafe";
+    let DB_TRAZA = JSON.parse(localStorage.getItem('culti_traza')) || {};
+    let DB_FITO = JSON.parse(localStorage.getItem('culti_fito')) || {};
+    let mesaSeleccionada = "";
+    let indexEdicion = null;
+
+    const GEOMETRIA = [
+        {id:'10-48', x:10, y:70, w:40, h:140}, {id:'11-49', x:55, y:70, w:40, h:140},
+        {id:'12-50', x:105, y:70, w:40, h:140}, {id:'13-51', x:150, y:70, w:40, h:140},
+        {id:'7-45', x:15, y:220, w:40, h:65}, {id:'8-46', x:65, y:220, w:45, h:90},
+        {id:'9-47', x:135, y:220, w:38, h:90}, {id:'4-42', x:10, y:325, w:45, h:200},
+        {id:'5-43', x:65, y:325, w:45, h:200}, {id:'6-44', x:125, y:325, w:45, h:200},
+        {id:'1-39', x:10, y:540, w:45, h:210}, {id:'2-40', x:65, y:540, w:45, h:210},
+        {id:'3-41', x:125, y:580, w:45, h:170},
+        {id:'22-63', x:210, y:70, w:38, h:75}, {id:'23-64', x:255, y:70, w:38, h:75},
+        {id:'24-65', x:300, y:70, w:38, h:75}, {id:'22-60', x:210, y:155, w:38, h:100},
+        {id:'23-61', x:255, y:155, w:38, h:100}, {id:'24-62', x:300, y:155, w:38, h:100},
+        {id:'18-56', x:215, y:360, w:35, h:110}, {id:'19-57', x:255, y:325, w:38, h:200},
+        {id:'20-58', x:300, y:325, w:38, h:200}, {id:'21-59', x:345, y:325, w:38, h:200},
+        {id:'14-52', x:210, y:540, w:38, h:145}, {id:'15-53', x:255, y:540, w:38, h:145},
+        {id:'16-54', x:300, y:540, w:38, h:145}, {id:'17-55', x:345, y:540, w:38, h:145}
+    ];
+
+    function inicializarMapas() {
+        let trazHtml = "", fitoHtml = "";
+        GEOMETRIA.forEach(m => {
+            trazHtml += `<rect id="t-${m.id}" class="mesa" x="${m.x}" y="${m.y}" width="${m.w}" height="${m.h}" onclick="abrirTraza('${m.id}')"></rect><text x="${m.x + m.w/2}" y="${m.y + m.h - 5}" class="texto-id">${m.id}</text>`;
+            fitoHtml += `<rect id="f-${m.id}" class="mesa" x="${m.x}" y="${m.y}" width="${m.w}" height="${m.h}" onclick="abrirFito('${m.id}')"></rect><text x="${m.x + m.w/2}" y="${m.y + m.h - 5}" class="texto-id">${m.id}</text>`;
+        });
+        for(let i=1; i<=14; i++) {
+            let yPos = 70 + (14-i) * 46;
+            trazHtml += `<rect id="t-${i}" class="mesa" x="395" y="${yPos}" width="75" height="38" onclick="abrirTraza('${i}')"></rect><text x="432" y="${yPos + 22}" class="texto-id">${i}</text>`;
+            fitoHtml += `<rect id="f-${i}" class="mesa" x="395" y="${yPos}" width="75" height="38" onclick="abrirFito('${i}')"></rect><text x="432" y="${yPos + 22}" class="texto-id">${i}</text>`;
+        }
+        document.getElementById('svg-trazabilidad').innerHTML = trazHtml;
+        document.getElementById('svg-fito').innerHTML = fitoHtml;
+        actualizarColoresMapas();
+    }
+
+    // FUNCIONES MAPA 1 (TRAZABILIDAD)
+    function abrirTraza(id) {
+        mesaSeleccionada = id;
+        mostrarTablaTraza();
+        document.getElementById('overlay').style.display = 'block';
+        document.getElementById('modalMesa').style.display = 'block';
+    }
+
+    function mostrarTablaTraza() {
+        let html = "";
+        let datos = DB_TRAZA[mesaSeleccionada] || [];
+        datos.forEach((r, i) => {
+            html += `<tr><td>${r.ref}</td><td>${r.lote}</td><td>${r.num_bandejas}</td><td><button onclick="borrarTraza(${i})">🗑️</button></td></tr>`;
+        });
+        document.getElementById('mesaTitulo').innerText = "Mesa " + mesaSeleccionada;
+        document.getElementById('tablaCuerpoMesa').innerHTML = html || "<tr><td colspan='4'>Mesa vacía</td></tr>";
+    }
+
+    function guardarRegistroTrazabilidad() {
+        let nuevo = { ref: document.getElementById('f_ref').value.toUpperCase(), lote: document.getElementById('f_lote').value, num_bandejas: document.getElementById('f_num_bandejas').value, tipo_bandeja: document.getElementById('f_tipo_bandeja').value };
+        if(!DB_TRAZA[mesaSeleccionada]) DB_TRAZA[mesaSeleccionada] = [];
+        DB_TRAZA[mesaSeleccionada].push(nuevo);
+        persistir(); mostrarTablaTraza(); actualizarColoresMapas();
+    }
+
+    function borrarTraza(i) {
+        DB_TRAZA[mesaSeleccionada].splice(i, 1);
+        persistir(); mostrarTablaTraza(); actualizarColoresMapas();
+    }
+
+    // FUNCIONES MAPA 2 (LOGÍSTICA + FITOS)
+    function switchTab(t) {
+        document.getElementById('panelLog').style.display = t === 'log' ? 'block' : 'none';
+        document.getElementById('panelFit').style.display = t === 'fit' ? 'block' : 'none';
+        document.getElementById('btLog').style.background = t === 'log' ? '#2980b9' : '#555';
+        document.getElementById('btFit').style.background = t === 'fit' ? '#c0392b' : '#555';
+    }
+
+    function abrirFito(id) {
+        mesaSeleccionada = id;
+        document.getElementById('logTitulo').innerText = "Logística - Mesa " + id;
+        switchTab('log'); mostrarLog(); mostrarFitoPro();
+        document.getElementById('overlay').style.display = 'block';
+        document.getElementById('modalFito').style.display = 'block';
+    }
+
+    function guardarLog() {
+        if(!DB_FITO[mesaSeleccionada] || !DB_FITO[mesaSeleccionada].pedidos) DB_FITO[mesaSeleccionada] = { pedidos: [], rejuntado: false, fito: [] };
+        DB_FITO[mesaSeleccionada].pedidos.push({ cli: document.getElementById('l_cli').value.toUpperCase(), bnd: document.getElementById('l_bnd').value, lot: document.getElementById('l_lot').value });
+        document.getElementById('l_cli').value = ""; persistir(); mostrarLog(); actualizarColoresMapas();
+    }
+
+    function mostrarLog() {
+        let html = "";
+        let data = DB_FITO[mesaSeleccionada] || { pedidos: [] };
+        (data.pedidos || []).forEach((p, i) => { html += `<tr><td>${p.cli}</td><td>${p.bnd}</td><td>${p.lot}</td><td><button onclick="borrarLog(${i})">🗑️</button></td></tr>`; });
+        document.getElementById('logCuerpoMesa').innerHTML = html || "<tr><td colspan='4'>Sin pedidos</td></tr>";
+        document.getElementById('btnRejuntar').style.background = data.rejuntado ? "#27ae60" : "#555";
+    }
+
+    function toggleRejuntar() {
+        if(!DB_FITO[mesaSeleccionada]) DB_FITO[mesaSeleccionada] = { pedidos: [], rejuntado: false, fito: [] };
+        DB_FITO[mesaSeleccionada].rejuntado = !DB_FITO[mesaSeleccionada].rejuntado;
+        persistir(); mostrarLog(); actualizarColoresMapas();
+    }
+
+    function borrarLog(i) { DB_FITO[mesaSeleccionada].pedidos.splice(i, 1); persistir(); mostrarLog(); actualizarColoresMapas(); }
+
+    function guardarFitoPro() {
+        if(!DB_FITO[mesaSeleccionada] || !DB_FITO[mesaSeleccionada].fito) DB_FITO[mesaSeleccionada] = { pedidos: [], rejuntado: false, fito: [] };
+        let hoy = new Date(); let venc = new Date(); venc.setDate(hoy.getDate() + parseInt(document.getElementById('fi_plazo').value || 0));
+        DB_FITO[mesaSeleccionada].fito.push({ p: document.getElementById('fi_prod_new').value.toUpperCase(), f: hoy.toLocaleDateString(), v: venc.toISOString() });
+        persistir(); mostrarFitoPro(); actualizarColoresMapas();
+    }
+
+    function mostrarFitoPro() {
+        let html = ""; let hoy = new Date();
+        let regs = (DB_FITO[mesaSeleccionada] && DB_FITO[mesaSeleccionada].fito) ? DB_FITO[mesaSeleccionada].fito : [];
+        regs.forEach(r => {
+            let dias = Math.ceil((new Date(r.v) - hoy) / (1000 * 60 * 60 * 24));
+            html += `<tr><td>${r.f}</td><td>${r.p}</td><td style="color:${dias>0?'red':'green'}">${dias>0?dias+'d':'OK'}</td></tr>`;
+        });
+        document.getElementById('fitoCuerpoMesaPro').innerHTML = html;
+    }
+
+    function actualizarColoresMapas() {
+        document.querySelectorAll('#svg-trazabilidad .mesa').forEach(r => {
+            let id = r.id.replace('t-', ''); r.classList.toggle('ocupada', DB_TRAZA[id]?.length > 0);
+        });
+        let hoy = new Date();
+        document.querySelectorAll('#svg-fito .mesa').forEach(rect => {
+            let id = rect.id.replace('f-', ''); let data = DB_FITO[id];
+            rect.style.fill = "#ffffff"; rect.style.stroke = "#333"; rect.style.strokeWidth = "1.5";
+            if(data) {
+                if(data.pedidos?.length > 0) rect.style.fill = data.rejuntado ? "#27ae60" : (data.pedidos.length > 1 ? "#af7ac5" : "#2980b9");
+                if(data.fito?.length > 0) {
+                    let last = data.fito[data.fito.length-1];
+                    rect.style.stroke = new Date(last.v) > hoy ? "#c0392b" : "#27ae60"; rect.style.strokeWidth = "5";
+                }
+            }
+        });
+    }
+
+    function persistir() {
+        localStorage.setItem('culti_traza', JSON.stringify(DB_TRAZA));
+        localStorage.setItem('culti_fito', JSON.stringify(DB_FITO));
+        subirDatos();
+    }
+
+    async function subirDatos() {
+        const token = localStorage.getItem('github_token');
+        if(!token) return;
+        try {
+            await fetch(`https://api.github.com/gists/${GIST_ID}`, {
+                method: 'PATCH',
+                headers: { 'Authorization': `token ${token}` },
+                body: JSON.stringify({ files: { 
+                    "cultigar_db.json": { content: JSON.stringify(DB_TRAZA) },
+                    "cultigar_fito.json": { content: JSON.stringify(DB_FITO) }
+                }})
+            });
+        } catch(e) {}
+    }
+
+    async function bajarDatos() {
+        try {
+            const res = await fetch(`https://api.github.com/gists/${GIST_ID}?cb=${Date.now()}`);
+            const data = await res.json();
+            if(data.files["cultigar_db.json"]) DB_TRAZA = JSON.parse(data.files["cultigar_db.json"].content);
+            if(data.files["cultigar_fito.json"]) DB_FITO = JSON.parse(data.files["cultigar_fito.json"].content);
+            actualizarColoresMapas();
+        } catch(e) {}
+    }
+
+    function ejecutarBusqueda() {
+        let b = document.getElementById('buscador').value.toUpperCase();
+        document.querySelectorAll('#svg-trazabilidad .mesa').forEach(m => m.classList.remove('resaltado'));
+        if(!b) return;
+        for(let m in DB_TRAZA) if(DB_TRAZA[m].some(r => r.ref.includes(b))) document.getElementById('t-'+m)?.classList.add('resaltado');
+    }
+
+    function cerrarModales() {
+        document.getElementById('overlay').style.display = 'none';
+        document.querySelectorAll('.modal').forEach(m => m.style.display = 'none');
+    }
+
+    window.onload = () => { inicializarMapas(); bajarDatos(); };
+</script>
+</body>
+</html>
