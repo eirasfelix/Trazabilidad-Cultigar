@@ -9,6 +9,7 @@
             --bg-dark: #2c3e50;
             --verde-cultigar: #27ae60;
             --rojo-fito: #c0392b;
+            --azul-log: #2980b9;
             --blanco: #ffffff;
         }
 
@@ -95,15 +96,32 @@
             text-anchor: middle;
         }
 
-        /* Estados Visuales */
-        .ocupada { fill: #a9dfbf !important; } /* Verde suave */
+        .texto-plantas {
+            font-size: 9px;
+            fill: #e67e22;
+            font-weight: bold;
+            pointer-events: none;
+            text-anchor: middle;
+        }
+
+        /* Estados Visuales Mapa 1 */
+        .ocupada { fill: #a9dfbf !important; }
         .resaltado { fill: #f39c12 !important; stroke: #d35400; stroke-width: 4; }
         
-        .fito-blanco { fill: #ffffff !important; }
-        .fito-amarillo { fill: #f1c40f !important; }
-        .fito-naranja { fill: #e67e22 !important; }
-        .fito-rojo { fill: #e74c3c !important; }
-        .fito-verde { fill: #2ecc71 !important; }
+        /* Estados Visuales Mapa 2 (Logística) */
+        .mesa-pedido { fill: #d6eaf8 !important; } /* Azul clarito */
+        .mesa-rejuntada { fill: var(--verde-cultigar) !important; } /* Rejunte listo */
+        
+        @keyframes parpadeo {
+            0% { opacity: 1; }
+            50% { fill: #f39c12; }
+            100% { opacity: 1; }
+        }
+        .alerta-entrega { animation: parpadeo 1s infinite; }
+
+        /* Bordes de Fito */
+        .borde-fito-peligro { stroke: var(--rojo-fito) !important; stroke-width: 6 !important; }
+        .borde-fito-ok { stroke: var(--verde-cultigar) !important; stroke-width: 6 !important; }
 
         /* Paneles Modales */
         .modal {
@@ -113,7 +131,7 @@
             transform: translate(-50%, -50%);
             width: 90%;
             max-width: 450px;
-            height: 80%;
+            height: 85%;
             background: #1a1a1a;
             border: 4px solid #444;
             border-radius: 15px;
@@ -131,6 +149,23 @@
             z-index: 1500;
         }
 
+        /* Tabs para el modal de Fito/Logística */
+        .tabs-fito {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 15px;
+        }
+        .tab-btn {
+            flex: 1;
+            padding: 10px;
+            background: #333;
+            border: none;
+            color: white;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        .tab-btn.active { background: var(--azul-log); }
+
         .form-group { margin-bottom: 15px; }
         .form-group label { display: block; font-size: 12px; color: #aaa; margin-bottom: 5px; }
         .form-group input, .form-group select {
@@ -146,8 +181,17 @@
         th { border-bottom: 2px solid var(--verde-cultigar); padding: 8px; text-align: left; color: var(--verde-cultigar); }
         td { padding: 8px; border-bottom: 1px solid #333; }
 
-        .btn-guardar { width: 100%; padding: 15px; border: none; border-radius: 8px; font-weight: bold; color: white; cursor: pointer; font-size: 16px; }
+        .btn-guardar { width: 100%; padding: 15px; border: none; border-radius: 8px; font-weight: bold; color: white; cursor: pointer; font-size: 16px; margin-bottom: 5px; }
         .btn-cerrar { background: #555; margin-top: 10px; }
+        
+        .historial-item {
+            background: #222;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 8px;
+            border-left: 4px solid var(--azul-log);
+            font-size: 12px;
+        }
     </style>
 </head>
 <body>
@@ -156,6 +200,7 @@
     <input type="text" id="buscador" class="input-busqueda" placeholder="🔍 Buscar Variedad..." onkeyup="ejecutarBusqueda()">
     <button class="btn-nube" style="background: #27ae60;" onclick="subirDatos()">⬆</button>
     <button class="btn-nube" style="background: #2980b9;" onclick="bajarDatos()">⬇</button>
+    <button class="btn-nube" style="background: #666;" onclick="abrirHistorialGeneral()">📋</button>
 </div>
 
 <div class="seccion-mapa">
@@ -164,7 +209,7 @@
 </div>
 
 <div class="seccion-mapa">
-    <h3 class="titulo-mapa" style="color: var(--rojo-fito);">Mapa 2: Fitosonitarios</h3>
+    <h3 class="titulo-mapa" style="color: var(--azul-log);">Mapa 2: Logística y Fitos</h3>
     <svg width="480" height="780" id="svg-fito"></svg>
 </div>
 
@@ -176,85 +221,67 @@
         <thead><tr><th>Ref</th><th>Lote</th><th>Bnd</th><th>Acción</th></tr></thead>
         <tbody id="tablaCuerpoMesa"></tbody>
     </table>
-    
-    <div class="form-group">
-        <label>Variedad / Referencia</label>
-        <input type="text" id="f_ref">
-    </div>
-    
-    <div class="form-group">
-        <label>Lote</label>
-        <input type="text" id="f_lote">
-    </div>
-
+    <div class="form-group"><label>Variedad / Referencia</label><input type="text" id="f_ref"></div>
+    <div class="form-group"><label>Lote</label><input type="text" id="f_lote"></div>
     <div style="display: flex; gap: 10px;">
-        <div class="form-group" style="flex: 1;">
-            <label>Nº Bandejas</label>
-            <input type="number" id="f_num_bandejas">
-        </div>
-        <div class="form-group" style="flex: 1;">
-            <label>Tipo de Bandeja</label>
-            <input type="text" id="f_tipo_bandeja" list="opciones_bandeja" placeholder="Ej: 40">
-            <datalist id="opciones_bandeja">
-                <option value="40">
-                <option value="60">
-                <option value="84">
-            </datalist>
+        <div class="form-group" style="flex: 1;"><label>Nº Bandejas</label><input type="number" id="f_num_bandejas"></div>
+        <div class="form-group" style="flex: 1;"><label>Tipo de Bandeja</label><input type="text" id="f_tipo_bandeja" list="opciones_bandeja" placeholder="Ej: 40">
+            <datalist id="opciones_bandeja"><option value="40"><option value="60"><option value="84"></datalist>
         </div>
     </div>
-
     <div style="display: flex; gap: 10px;">
-        <div class="form-group" style="flex: 1;">
-            <label>Nº Caja C.E.</label>
-            <input type="text" id="f_caja_ce">
-        </div>
-        <div class="form-group" style="flex: 1;">
-            <label>Fecha C.E.</label>
-            <input type="date" id="f_fecha_ce">
-        </div>
+        <div class="form-group" style="flex: 1;"><label>Nº Caja C.E.</label><input type="text" id="f_caja_ce"></div>
+        <div class="form-group" style="flex: 1;"><label>Fecha C.E.</label><input type="date" id="f_fecha_ce"></div>
     </div>
-
-    <div class="form-group">
-        <label>Sustrato / Receta (Opcional)</label>
-        <input type="text" id="f_sus">
-    </div>
-
+    <div class="form-group"><label>Sustrato / Receta</label><input type="text" id="f_sus"></div>
     <button class="btn-guardar" style="background: var(--verde-cultigar);" onclick="guardarRegistroTrazabilidad()">💾 AÑADIR REGISTRO</button>
     <button class="btn-guardar btn-cerrar" onclick="cerrarModales()">CERRAR</button>
 </div>
 
 <div id="modalFito" class="modal">
-    <h2 id="fitoTitulo" style="color: var(--rojo-fito);">Fito --</h2>
-    <table id="tablaHistorialFito">
-        <thead><tr><th>Producto</th><th>Estado</th><th>Fecha</th></tr></thead>
-        <tbody id="fitoCuerpoMesa"></tbody>
-    </table>
-    <div class="form-group">
-        <label>Producto Aplicado</label>
-        <input type="text" id="fi_prod">
+    <div class="tabs-fito">
+        <button id="btnTabLog" class="tab-btn active" onclick="cambiarTabFito('log')">📦 LOGÍSTICA</button>
+        <button id="btnTabFito" class="tab-btn" onclick="cambiarTabFito('fito')">🛡️ FITO</button>
     </div>
-    <div class="form-group">
-        <label>Estado / Semáforo</label>
-        <select id="fi_estado">
-            <option value="blanco">⚪ Blanco (Sin tratar)</option>
-            <option value="amarillo">🟡 Amarillo (Tratado)</option>
-            <option value="naranja">🟠 Naranja (Plazo de seguridad)</option>
-            <option value="rojo">🔴 Rojo (¡ENTRADA PROHIBIDA!)</option>
-            <option value="verde">🟢 Verde (Apto para envío)</option>
-        </select>
+
+    <div id="panelLogistica">
+        <h2 id="logTitulo" style="color: var(--azul-log); font-size: 18px; margin: 0 0 15px 0;">Logística Mesa --</h2>
+        <div class="form-group"><label>Cliente / Destinatario</label><input type="text" id="l_cliente" placeholder="Nombre del cliente"></div>
+        <div class="form-group"><label>Fecha Prevista de Carga</label><input type="date" id="l_fecha"></div>
+        <div style="display: flex; gap: 10px;">
+            <div class="form-group" style="flex: 1;"><label>Bnd Rejuntadas</label><input type="number" id="l_bnd"></div>
+            <div class="form-group" style="flex: 1;"><label>Lote Final</label><input type="text" id="l_lote"></div>
+        </div>
+        <button class="btn-guardar" style="background: var(--verde-cultigar);" onclick="guardarLogistica()">💾 FINALIZAR REJUNTE</button>
+        <button class="btn-guardar" style="background: var(--rojo-fito);" onclick="cargarPlanta()">🚚 MARCAR COMO CARGADO</button>
     </div>
-    <div class="form-group">
-        <label>Fecha de Aplicación</label>
-        <input type="date" id="fi_fecha">
+
+    <div id="panelFito" style="display: none;">
+        <h2 id="fitoTitulo" style="color: var(--rojo-fito); font-size: 18px; margin: 0 0 15px 0;">Fito Mesa --</h2>
+        <div class="form-group"><label>Producto y Nº Registro</label><input type="text" id="fi_prod" placeholder="Ej: Karate King - 25.123"></div>
+        <div class="form-group"><label>Aplicador y Equipo</label><input type="text" id="fi_user" placeholder="Ej: Juan - Carretilla"></div>
+        <div class="form-group"><label>Dosis / Superficie</label><input type="text" id="fi_dosis" placeholder="Ej: 200ml/hl"></div>
+        <div class="form-group"><label>Días Plazo Seguridad</label><input type="number" id="fi_plazo" value="0"></div>
+        <button class="btn-guardar" style="background: #8e44ad;" onclick="guardarRegistroFito()">🛡️ REGISTRAR TRATAMIENTO</button>
+        <div id="historialFitoMesa" style="margin-top: 15px;"></div>
     </div>
-    <button class="btn-guardar" style="background: var(--rojo-fito);" onclick="guardarRegistroFito()">💾 REGISTRAR TRATAMIENTO</button>
+    
+    <button class="btn-guardar btn-cerrar" onclick="cerrarModales()">CERRAR</button>
+</div>
+
+<div id="modalHistorial" class="modal">
+    <h2 style="color: var(--azul-log);">ARCHIVO HISTÓRICO</h2>
+    <div id="listaHistorial"></div>
     <button class="btn-guardar btn-cerrar" onclick="cerrarModales()">CERRAR</button>
 </div>
 
 <script>
     const GIST_ID = "dc4b1ac9b41655086c76352f03ccfafe";
     let DB_TRAZA = JSON.parse(localStorage.getItem('culti_traza')) || {};
+    let DB_LOG = JSON.parse(localStorage.getItem('culti_log')) || {}; // Nueva DB para logística
     let DB_FITO = JSON.parse(localStorage.getItem('culti_fito')) || {};
+    let H_GENERAL = JSON.parse(localStorage.getItem('culti_hist')) || []; // Historial de salidas
+    
     let mesaSeleccionada = "";
     let indexEdicion = null;
 
@@ -281,20 +308,23 @@
             trazHtml += `<rect id="t-${m.id}" class="mesa" x="${m.x}" y="${m.y}" width="${m.w}" height="${m.h}" onclick="abrirTraza('${m.id}')"></rect>
                          <text x="${m.x + m.w/2}" y="${m.y + m.h - 5}" class="texto-id">${m.id}</text>`;
             fitoHtml += `<rect id="f-${m.id}" class="mesa" x="${m.x}" y="${m.y}" width="${m.w}" height="${m.h}" onclick="abrirFito('${m.id}')"></rect>
-                         <text x="${m.x + m.w/2}" y="${m.y + m.h - 5}" class="texto-id">${m.id}</text>`;
+                         <text x="${m.x + m.w/2}" y="${m.y + 12}" class="texto-id">${m.id}</text>
+                         <text id="txt-plt-${m.id}" x="${m.x + m.w/2}" y="${m.y + 24}" class="texto-plantas"></text>`;
         });
         for(let i=1; i<=14; i++) {
             let yPos = 70 + (14-i) * 46;
             trazHtml += `<rect id="t-${i}" class="mesa" x="395" y="${yPos}" width="75" height="38" onclick="abrirTraza('${i}')"></rect>
                          <text x="432" y="${yPos + 22}" class="texto-id">${i}</text>`;
             fitoHtml += `<rect id="f-${i}" class="mesa" x="395" y="${yPos}" width="75" height="38" onclick="abrirFito('${i}')"></rect>
-                         <text x="432" y="${yPos + 22}" class="texto-id">${i}</text>`;
+                         <text x="432" y="${yPos + 12}" class="texto-id">${i}</text>
+                         <text id="txt-plt-${i}" x="432" y="${yPos + 26}" class="texto-plantas"></text>`;
         }
         document.getElementById('svg-trazabilidad').innerHTML = trazHtml;
         document.getElementById('svg-fito').innerHTML = fitoHtml;
         actualizarColoresMapas();
     }
 
+    // MAPA 1 (INTOCADO)
     function abrirTraza(id) {
         mesaSeleccionada = id;
         mostrarTablaTraza();
@@ -302,65 +332,24 @@
         document.getElementById('modalMesa').style.display = 'block';
     }
 
-    function abrirFito(id) {
-        mesaSeleccionada = id;
-        document.getElementById('fitoTitulo').innerText = "Tratamientos Mesa " + id;
-        document.getElementById('fi_fecha').value = new Date().toISOString().split('T')[0];
-        mostrarTablaFito();
-        document.getElementById('overlay').style.display = 'block';
-        document.getElementById('modalFito').style.display = 'block';
-    }
-
     function mostrarTablaTraza() {
         let html = "";
         let datos = DB_TRAZA[mesaSeleccionada] || [];
-        let totalBnd = 0;
-        let totalPlt = 0;
-
+        let totalBnd = 0, totalPlt = 0;
         datos.forEach((r, i) => {
             let bnd = parseInt(r.num_bandejas) || 0;
             let tipo = parseInt(r.tipo_bandeja) || 0;
-            totalBnd += bnd;
-            totalPlt += (bnd * tipo);
-
-            html += `<tr>
-                <td>${r.ref}</td>
-                <td>${r.lote}</td>
-                <td>${bnd}</td>
-                <td style="display:flex; gap:5px;">
-                    <button onclick="prepararEdicion(${i})" title="Editar">✏️</button>
-                    <button onclick="copiarPlanta(${i})" title="Mover">📦</button>
-                    <button onclick="borrarTraza(${i})" title="Borrar">🗑️</button>
-                </td>
-            </tr>`;
+            totalBnd += bnd; totalPlt += (bnd * tipo);
+            html += `<tr><td>${r.ref}</td><td>${r.lote}</td><td>${bnd}</td><td style="display:flex; gap:5px;">
+                <button onclick="prepararEdicion(${i})">✏️</button><button onclick="copiarPlanta(${i})">📦</button><button onclick="borrarTraza(${i})">🗑️</button>
+                </td></tr>`;
         });
-
-        // Actualizar título con totales
-        document.getElementById('mesaTitulo').innerHTML = `Mesa ${mesaSeleccionada} <span style="font-size:14px; color:#fff; margin-left:10px;">(📦 ${totalBnd} Bnd | 🌱 ${totalPlt} Plt)</span>`;
-        
-        document.getElementById('tablaCuerpoMesa').innerHTML = html || "<tr><td colspan='4' style='text-align:center; padding:10px;'>Mesa vacía</td></tr>";
-        actualizarBotonPegar();
-    }
-
-    function prepararEdicion(index) {
-        let registro = DB_TRAZA[mesaSeleccionada][index];
-        indexEdicion = index;
-        
-        document.getElementById('f_ref').value = registro.ref;
-        document.getElementById('f_lote').value = registro.lote;
-        document.getElementById('f_num_bandejas').value = registro.num_bandejas || "";
-        document.getElementById('f_tipo_bandeja').value = registro.tipo_bandeja || "";
-        document.getElementById('f_caja_ce').value = registro.caja_ce || "";
-        document.getElementById('f_fecha_ce').value = registro.fecha_ce || "";
-        document.getElementById('f_sus').value = registro.sus || "";
-        
-        const btn = document.querySelector('.btn-guardar');
-        btn.style.background = "#f39c12";
-        btn.innerText = "💾 ACTUALIZAR CAMBIOS";
+        document.getElementById('mesaTitulo').innerHTML = `Mesa ${mesaSeleccionada} <span style="font-size:12px; color:#aaa;">(${totalBnd} Bnd | ${totalPlt} Plt)</span>`;
+        document.getElementById('tablaCuerpoMesa').innerHTML = html || "<tr><td colspan='4'>Vacía</td></tr>";
     }
 
     function guardarRegistroTrazabilidad() {
-        let nuevoRegistro = {
+        let reg = {
             ref: document.getElementById('f_ref').value.toUpperCase(),
             lote: document.getElementById('f_lote').value,
             num_bandejas: document.getElementById('f_num_bandejas').value,
@@ -369,92 +358,158 @@
             fecha_ce: document.getElementById('f_fecha_ce').value,
             sus: document.getElementById('f_sus').value
         };
-
-        if (indexEdicion !== null) {
-            DB_TRAZA[mesaSeleccionada][indexEdicion] = nuevoRegistro;
-            indexEdicion = null;
-            const btn = document.querySelector('.btn-guardar');
-            btn.style.background = "var(--verde-cultigar)";
-            btn.innerText = "💾 AÑADIR REGISTRO";
-        } else {
-            if(!DB_TRAZA[mesaSeleccionada]) DB_TRAZA[mesaSeleccionada] = [];
-            DB_TRAZA[mesaSeleccionada].push(nuevoRegistro);
-        }
-
-        persistir();
-        mostrarTablaTraza();
-        actualizarColoresMapas();
-        limpiarFormularioTraza();
+        if(indexEdicion !== null) { DB_TRAZA[mesaSeleccionada][indexEdicion] = reg; indexEdicion = null; }
+        else { if(!DB_TRAZA[mesaSeleccionada]) DB_TRAZA[mesaSeleccionada] = []; DB_TRAZA[mesaSeleccionada].push(reg); }
+        persistir(); mostrarTablaTraza(); actualizarColoresMapas(); limpiarFormularioTraza();
     }
 
-    function limpiarFormularioTraza() {
-        ['f_ref', 'f_lote', 'f_num_bandejas', 'f_tipo_bandeja', 'f_caja_ce', 'f_fecha_ce', 'f_sus'].forEach(id => {
-            document.getElementById(id).value = "";
-        });
+    // MAPA 2 (LOGÍSTICA Y FITO MEJORADO)
+    function abrirFito(id) {
+        mesaSeleccionada = id;
+        document.getElementById('logTitulo').innerText = "Logística Mesa " + id;
+        document.getElementById('fitoTitulo').innerText = "Fito Mesa " + id;
+        
+        const log = DB_LOG[id] || {};
+        document.getElementById('l_cliente').value = log.cliente || "";
+        document.getElementById('l_fecha').value = log.fecha || "";
+        document.getElementById('l_bnd').value = log.bnd || "";
+        document.getElementById('l_lote').value = log.lote || "";
+        
+        cambiarTabFito('log');
+        renderHistorialFitoMesa();
+        document.getElementById('overlay').style.display = 'block';
+        document.getElementById('modalFito').style.display = 'block';
     }
 
-    function borrarTraza(index) {
-        if(confirm("⚠️ ¿Borrar este lote?")) {
-            DB_TRAZA[mesaSeleccionada].splice(index, 1);
-            persistir();
-            mostrarTablaTraza();
-            actualizarColoresMapas();
-        }
+    function cambiarTabFito(tab) {
+        document.getElementById('panelLogistica').style.display = tab === 'log' ? 'block' : 'none';
+        document.getElementById('panelFito').style.display = tab === 'fito' ? 'block' : 'none';
+        document.getElementById('btnTabLog').className = 'tab-btn' + (tab === 'log' ? ' active' : '');
+        document.getElementById('btnTabFito').className = 'tab-btn' + (tab === 'fito' ? ' active' : '');
+    }
+
+    function guardarLogistica() {
+        DB_LOG[mesaSeleccionada] = {
+            cliente: document.getElementById('l_cliente').value.toUpperCase(),
+            fecha: document.getElementById('l_fecha').value,
+            bnd: document.getElementById('l_bnd').value,
+            lote: document.getElementById('l_lote').value,
+            rejuntado: true
+        };
+        persistir(); cerrarModales();
     }
 
     function guardarRegistroFito() {
         if(!DB_FITO[mesaSeleccionada]) DB_FITO[mesaSeleccionada] = [];
+        const plazo = parseInt(document.getElementById('fi_plazo').value) || 0;
+        const fechaApp = new Date();
+        const v_seguridad = new Date();
+        v_seguridad.setDate(fechaApp.getDate() + plazo);
+
         DB_FITO[mesaSeleccionada].push({
             p: document.getElementById('fi_prod').value.toUpperCase(),
-            e: document.getElementById('fi_estado').value,
-            f: document.getElementById('fi_fecha').value
+            u: document.getElementById('fi_user').value,
+            d: document.getElementById('fi_dosis').value,
+            f: fechaApp.toLocaleDateString(),
+            vence: v_seguridad.toISOString()
         });
-        persistir();
-        mostrarTablaFito();
-        actualizarColoresMapas();
+        persistir(); renderHistorialFitoMesa(); actualizarColoresMapas();
     }
 
-    function mostrarTablaFito() {
-        let html = "";
+    function cargarPlanta() {
+        if(!confirm("¿Confirmar CARGA? Se enviará al historial y vaciará la mesa.")) return;
+        const info = DB_LOG[mesaSeleccionada];
+        if(info) {
+            H_GENERAL.unshift({ ...info, mesa: mesaSeleccionada, f_salida: new Date().toLocaleDateString() });
+            delete DB_LOG[mesaSeleccionada];
+            // También podemos vaciar el Mapa 1 si quieres que sea automático al cargar
+            // delete DB_TRAZA[mesaSeleccionada]; 
+            persistir(); cerrarModales();
+        }
+    }
+
+    function renderHistorialFitoMesa() {
+        let html = "<h4>Historial Fito:</h4>";
         (DB_FITO[mesaSeleccionada] || []).forEach(r => {
-            html += `<tr><td>${r.p}</td><td>${r.e.toUpperCase()}</td><td>${r.f}</td></tr>`;
+            html += `<div class="historial-item" style="border-left-color: var(--rojo-fito)">
+                <b>${r.f}</b>: ${r.p}<br><small>${r.u} | ${r.d}</small></div>`;
         });
-        document.getElementById('fitoCuerpoMesa').innerHTML = html;
+        document.getElementById('historialFitoMesa').innerHTML = html;
     }
 
-    function persistir() {
-        localStorage.setItem('culti_traza', JSON.stringify(DB_TRAZA));
-        localStorage.setItem('culti_fito', JSON.stringify(DB_FITO));
-        subirDatos();
+    function abrirHistorialGeneral() {
+        let html = "";
+        H_GENERAL.forEach(h => {
+            html += `<div class="historial-item">
+                <b>${h.f_salida}</b> - Mesa ${h.mesa}<br>
+                Cliente: ${h.cliente} | Lote: ${h.lote} | Bnd: ${h.bnd}</div>`;
+        });
+        document.getElementById('listaHistorial').innerHTML = html || "Sin registros";
+        document.getElementById('overlay').style.display = 'block';
+        document.getElementById('modalHistorial').style.display = 'block';
     }
 
+    // PERSISTENCIA Y COLORES
     function actualizarColoresMapas() {
+        const hoy = new Date();
+        const sieteDias = new Date();
+        sieteDias.setDate(hoy.getDate() + 7);
+
+        // Mapa 1
         document.querySelectorAll('#svg-trazabilidad .mesa').forEach(rect => {
             let id = rect.id.replace('t-', '');
-            if(DB_TRAZA[id] && DB_TRAZA[id].length > 0) rect.classList.add('ocupada');
-            else rect.classList.remove('ocupada');
+            rect.classList.toggle('ocupada', (DB_TRAZA[id]?.length > 0));
         });
+
+        // Mapa 2
         document.querySelectorAll('#svg-fito .mesa').forEach(rect => {
             let id = rect.id.replace('f-', '');
-            rect.setAttribute('class', 'mesa'); 
-            if(DB_FITO[id] && DB_FITO[id].length > 0) {
-                let ultimoEstado = DB_FITO[id][DB_FITO[id].length - 1].e;
-                rect.classList.add('fito-' + ultimoEstado);
+            rect.setAttribute('class', 'mesa');
+            const log = DB_LOG[id];
+            const fitos = DB_FITO[id] || [];
+            const txt = document.getElementById('txt-plt-' + id);
+
+            if(txt) txt.innerText = log?.bnd ? "[" + (log.bnd * 40) + "]" : "";
+
+            if(log) {
+                if(log.rejuntado) rect.classList.add('mesa-rejuntada');
+                else if(log.cliente) rect.classList.add('mesa-pedido');
+                
+                if(log.fecha && !log.rejuntado) {
+                    const fCarga = new Date(log.fecha);
+                    if(fCarga <= sieteDias) rect.classList.add('alerta-entrega');
+                }
+            }
+
+            // Borde Fito
+            if(fitos.length > 0) {
+                const ultimo = fitos[fitos.length - 1];
+                const vencimiento = new Date(ultimo.vence);
+                rect.classList.add(vencimiento > hoy ? 'borde-fito-peligro' : 'borde-fito-ok');
             }
         });
     }
 
+    function persistir() {
+        localStorage.setItem('culti_traza', JSON.stringify(DB_TRAZA));
+        localStorage.setItem('culti_log', JSON.stringify(DB_LOG));
+        localStorage.setItem('culti_fito', JSON.stringify(DB_FITO));
+        localStorage.setItem('culti_hist', JSON.stringify(H_GENERAL));
+        subirDatos();
+    }
+
     async function subirDatos() {
-        const token = localStorage.getItem('github_token') || prompt("Introduce Token GitHub para Sincronizar:");
-        if(!token) return;
-        localStorage.setItem('github_token', token);
+        const token = localStorage.getItem('github_token') || prompt("Token GitHub:");
+        if(!token) return; localStorage.setItem('github_token', token);
         try {
             await fetch(`https://api.github.com/gists/${GIST_ID}`, {
                 method: 'PATCH',
                 headers: { 'Authorization': `token ${token}` },
                 body: JSON.stringify({ files: { 
                     "cultigar_db.json": { content: JSON.stringify(DB_TRAZA) },
-                    "cultigar_fito.json": { content: JSON.stringify(DB_FITO) }
+                    "cultigar_log.json": { content: JSON.stringify(DB_LOG) },
+                    "cultigar_fito.json": { content: JSON.stringify(DB_FITO) },
+                    "cultigar_hist.json": { content: JSON.stringify(H_GENERAL) }
                 }})
             });
         } catch(e) {}
@@ -465,9 +520,9 @@
             const res = await fetch(`https://api.github.com/gists/${GIST_ID}?cb=${Date.now()}`);
             const data = await res.json();
             if(data.files["cultigar_db.json"]) DB_TRAZA = JSON.parse(data.files["cultigar_db.json"].content);
+            if(data.files["cultigar_log.json"]) DB_LOG = JSON.parse(data.files["cultigar_log.json"].content);
             if(data.files["cultigar_fito.json"]) DB_FITO = JSON.parse(data.files["cultigar_fito.json"].content);
-            localStorage.setItem('culti_traza', JSON.stringify(DB_TRAZA));
-            localStorage.setItem('culti_fito', JSON.stringify(DB_FITO));
+            if(data.files["cultigar_hist.json"]) H_GENERAL = JSON.parse(data.files["cultigar_hist.json"].content);
             actualizarColoresMapas();
         } catch(e) {}
     }
@@ -476,62 +531,32 @@
         let busq = document.getElementById('buscador').value.toUpperCase();
         document.querySelectorAll('#svg-trazabilidad .mesa').forEach(m => m.classList.remove('resaltado'));
         if(!busq) return;
-        for(let mesa in DB_TRAZA) {
-            if(DB_TRAZA[mesa].some(reg => reg.ref.includes(busq))) {
-                const el = document.getElementById('t-' + mesa);
+        for(let m in DB_TRAZA) {
+            if(DB_TRAZA[m].some(r => r.ref.includes(busq))) {
+                const el = document.getElementById('t-' + m);
                 if(el) el.classList.add('resaltado');
             }
         }
     }
 
+    function prepararEdicion(i) {
+        let r = DB_TRAZA[mesaSeleccionada][i]; indexEdicion = i;
+        document.getElementById('f_ref').value = r.ref; document.getElementById('f_lote').value = r.lote;
+        document.getElementById('f_num_bandejas').value = r.num_bandejas; document.getElementById('f_tipo_bandeja').value = r.tipo_bandeja;
+    }
+
+    function borrarTraza(i) { if(confirm("¿Borrar?")) { DB_TRAZA[mesaSeleccionada].splice(i,1); persistir(); mostrarTablaTraza(); actualizarColoresMapas(); } }
+    
+    function limpiarFormularioTraza() {
+        ['f_ref', 'f_lote', 'f_num_bandejas', 'f_tipo_bandeja', 'f_caja_ce', 'f_fecha_ce', 'f_sus'].forEach(id => document.getElementById(id).value = "");
+    }
+
     function cerrarModales() {
-        indexEdicion = null;
-        const btn = document.querySelector('.btn-guardar');
-        if(btn) {
-            btn.style.background = "var(--verde-cultigar)";
-            btn.innerText = "💾 AÑADIR REGISTRO";
-        }
         document.getElementById('overlay').style.display = 'none';
         document.querySelectorAll('.modal').forEach(m => m.style.display = 'none');
-        limpiarFormularioTraza();
     }
 
-    let portapapeles = null;
-    function copiarPlanta(index) {
-        portapapeles = DB_TRAZA[mesaSeleccionada][index];
-        DB_TRAZA[mesaSeleccionada].splice(index, 1);
-        persistir();
-        mostrarTablaTraza();
-        actualizarColoresMapas();
-        alert("Lote copiado. Ábrelo en otra mesa.");
-    }
-
-    function pegarPlanta() {
-        if(!portapapeles) return;
-        if(!DB_TRAZA[mesaSeleccionada]) DB_TRAZA[mesaSeleccionada] = [];
-        DB_TRAZA[mesaSeleccionada].push(portapapeles);
-        portapapeles = null;
-        persistir();
-        mostrarTablaTraza();
-        actualizarColoresMapas();
-    }
-
-    function actualizarBotonPegar() {
-        const existente = document.getElementById('zona-pegar');
-        if(existente) existente.remove();
-        if(portapapeles) {
-            const btn = document.createElement('div');
-            btn.id = 'zona-pegar';
-            btn.innerHTML = `<button class="btn-guardar" style="background:#9b59b6; margin-bottom:15px;" onclick="pegarPlanta()">📋 PEGAR LOTE AQUÍ</button>`;
-            const modal = document.getElementById('modalMesa');
-            modal.insertBefore(btn, modal.querySelector('table'));
-        }
-    }
-
-    window.onload = () => {
-        inicializarMapas();
-        bajarDatos();
-    };
+    window.onload = () => { inicializarMapas(); bajarDatos(); };
 </script>
 </body>
 </html>
