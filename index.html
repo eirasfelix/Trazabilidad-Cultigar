@@ -151,7 +151,6 @@
         .btn-cerrar { background: #555; margin-top: 10px; }
         .btn-accion { padding: 5px; cursor: pointer; border: none; border-radius: 3px; }
 
-        /* Estilo específico para los campos en paralelo */
         .flex-row { display: flex; gap: 10px; }
         .flex-row .form-group { flex: 1; }
     </style>
@@ -242,7 +241,7 @@
             </div>
         </div>
 
-        <button class="btn-guardar" style="background:var(--rojo-fito);" onclick="guardarFitoPro()">🛡️ REGISTRAR TRATAMIENTO</button>
+        <button id="btnGuardarFito" class="btn-guardar" style="background:var(--rojo-fito);" onclick="guardarFitoPro()">🛡️ REGISTRAR TRATAMIENTO</button>
         
         <h2 style="color: #aaa; font-size: 14px; margin-top:20px;">Historial de la Mesa</h2>
         <div style="overflow-x: auto;">
@@ -261,6 +260,7 @@
     let DB_FITO = JSON.parse(localStorage.getItem('culti_fito')) || {};
     let mesaSeleccionada = "";
     let indexEdicion = null;
+    let indexFitoEdicion = null;
     let portapapeles = null;
 
     const GEOMETRIA = [
@@ -305,7 +305,7 @@
     function cerrarModales() {
         document.getElementById('overlay').style.display = 'none';
         document.querySelectorAll('.modal').forEach(m => m.style.display = 'none');
-        indexEdicion = null; limpiarForms();
+        indexEdicion = null; indexFitoEdicion = null; limpiarForms();
     }
 
     function limpiarForms() {
@@ -315,7 +315,7 @@
         document.getElementById('fi_nomcom').value = ""; document.getElementById('fi_nreg').value = "";
         document.getElementById('fi_aplicador').value = ""; document.getElementById('fi_equipo').value = "";
         document.getElementById('fi_dosis').value = ""; document.getElementById('fi_m2').value = "";
-        document.getElementById('fi_plazo').value = "";
+        document.getElementById('fi_plazo').value = ""; document.getElementById('fi_color_manual').value = "AUTO";
     }
 
     function persistir() {
@@ -379,7 +379,7 @@
     }
 
     function abrirFito(id) {
-        mesaSeleccionada = id; indexEdicion = null;
+        mesaSeleccionada = id; indexEdicion = null; indexFitoEdicion = null;
         document.getElementById('logTitulo').innerText = (id.startsWith('C') ? "Carro " : "Mesa ") + id;
         if(id.startsWith('C')) {
             document.getElementById('tabsFito').style.display = 'none';
@@ -462,7 +462,6 @@
         document.getElementById('btFit').style.background = t === 'fit' ? '#c0392b' : '#555';
     }
 
-    // --- SECCIÓN FITOS MEJORADA ---
     function guardarFitoPro() {
         if(!DB_FITO[mesaSeleccionada]) DB_FITO[mesaSeleccionada] = { pedidos: [], fito: [] };
         if(!DB_FITO[mesaSeleccionada].fito) DB_FITO[mesaSeleccionada].fito = [];
@@ -483,8 +482,15 @@
             v: venc.toISOString()
         };
 
-        DB_FITO[mesaSeleccionada].fito.push(nuevoRegistro);
+        if(indexFitoEdicion !== null) {
+            DB_FITO[mesaSeleccionada].fito[indexFitoEdicion] = nuevoRegistro;
+            indexFitoEdicion = null;
+        } else {
+            DB_FITO[mesaSeleccionada].fito.push(nuevoRegistro);
+        }
+
         persistir(); mostrarFitoPro(); actualizarColoresMapas();
+        limpiarForms();
     }
 
     function mostrarFitoPro() {
@@ -498,10 +504,29 @@
                 <td style="color:${dias>0?'red':'green'}">${dias>0?dias+'d':'OK'}</td>
                 <td>${r.aplicador}</td>
                 <td>${r.m2}</td>
-                <td><button class="btn-accion" onclick="borrarFito(${idx})">🗑️</button></td>
+                <td style="display:flex; gap:3px;">
+                    <button class="btn-accion" onclick="editarFito(${idx})">✏️</button>
+                    <button class="btn-accion" onclick="borrarFito(${idx})">🗑️</button>
+                </td>
             </tr>`;
         });
         document.getElementById('fitoCuerpoMesaPro').innerHTML = html;
+    }
+
+    function editarFito(idx) {
+        let r = DB_FITO[mesaSeleccionada].fito[idx];
+        indexFitoEdicion = idx;
+        document.getElementById('fi_nomcom').value = r.nomcom;
+        document.getElementById('fi_nreg').value = r.nreg;
+        document.getElementById('fi_aplicador').value = r.aplicador;
+        document.getElementById('fi_equipo').value = r.equipo;
+        document.getElementById('fi_dosis').value = r.dosis;
+        document.getElementById('fi_m2').value = r.m2;
+        document.getElementById('fi_color_manual').value = r.color_manual;
+        
+        // Calcular plazo en días basándose en la fecha de vencimiento guardada
+        let dias = Math.ceil((new Date(r.v) - new Date(r.f)) / (1000 * 60 * 60 * 24));
+        document.getElementById('fi_plazo').value = dias;
     }
 
     function borrarFito(idx) {
@@ -512,7 +537,6 @@
     }
 
     function actualizarColoresMapas() {
-        // Mapa Trazabilidad
         document.querySelectorAll('#svg-trazabilidad .mesa').forEach(r => {
             let id = r.id.replace('t-', ''); let d = DB_TRAZA[id];
             r.classList.remove('ocupada', 'rejuntado');
@@ -522,7 +546,6 @@
             }
         });
         
-        // Mapa Logística / Fitos
         let hoy = new Date();
         document.querySelectorAll('#svg-fito .mesa, #svg-fito .carro').forEach(rect => {
             let id = rect.id.replace('f-', ''); let data = DB_FITO[id];
@@ -531,16 +554,11 @@
             
             if(data) {
                 if(data.pedidos?.length > 0) rect.style.fill = "var(--neon-ready)";
-                
-                // Lógica de Fitos (Solo Mesas)
                 if(!esCarro && data.fito?.length > 0) {
                     let last = data.fito[data.fito.length-1];
-                    
-                    // Prioridad 1: Color Manual
                     if(last.color_manual === "RED") { rect.style.stroke = "var(--rojo-fito)"; rect.style.strokeWidth = "6"; }
                     else if(last.color_manual === "ORANGE") { rect.style.stroke = "var(--naranja-fito)"; rect.style.strokeWidth = "6"; }
                     else if(last.color_manual === "GREEN") { rect.style.stroke = "var(--verde-cultigar)"; rect.style.strokeWidth = "6"; }
-                    // Prioridad 2: Color Automático por Fecha
                     else {
                         rect.style.stroke = new Date(last.v) > hoy ? "var(--rojo-fito)" : "var(--verde-cultigar)";
                         rect.style.strokeWidth = "6";
