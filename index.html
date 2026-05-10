@@ -255,15 +255,10 @@
         actualizarColoresMapas();
     }
 
-    // --- FUNCIONES COMUNES ---
     function cerrarModales() {
         document.getElementById('overlay').style.display = 'none';
         document.querySelectorAll('.modal').forEach(m => m.style.display = 'none');
         indexEdicion = null;
-        document.getElementById('btnGuardarTraza').innerText = "💾 GUARDAR TRAZA";
-        document.getElementById('btnGuardarTraza').style.background = "var(--verde-cultigar)";
-        document.getElementById('btnGuardarLog').innerText = "💾 AÑADIR PEDIDO";
-        document.getElementById('btnGuardarLog').style.background = "var(--azul-log)";
         limpiarForms();
     }
 
@@ -279,7 +274,6 @@
         subirDatos();
     }
 
-    // --- MAPA 1 (TRAZABILIDAD) ---
     function abrirTraza(id) {
         mesaSeleccionada = id; indexEdicion = null;
         mostrarTablaTraza();
@@ -294,7 +288,7 @@
             html += `<tr><td>${r.ref}</td><td>${r.lote}</td><td>${r.num_bandejas}</td>
                 <td style="display:flex; gap:3px;">
                     <button class="btn-accion" onclick="editarTraza(${i})">✏️</button>
-                    <button class="btn-accion" onclick="copiarLote(${i}, 'traza')">📦</button>
+                    <button class="btn-accion" onclick="cortarLote(${i}, 'traza')">📦</button>
                     <button class="btn-accion" onclick="borrarTraza(${i})">🗑️</button>
                 </td></tr>`;
         });
@@ -317,17 +311,15 @@
         document.getElementById('f_ref').value = r.ref; document.getElementById('f_lote').value = r.lote;
         document.getElementById('f_num_bandejas').value = r.num_bandejas; document.getElementById('f_tipo_bandeja').value = r.tipo_bandeja;
         document.getElementById('btnGuardarTraza').innerText = "💾 ACTUALIZAR";
-        document.getElementById('btnGuardarTraza').style.background = "#f39c12";
     }
 
     function borrarTraza(i) {
-        if(confirm("⚠️ ¿BORRAR ESTE REGISTRO DE TRAZA?")) {
+        if(confirm("⚠️ ¿BORRAR ESTE REGISTRO?")) {
             DB_TRAZA[mesaSeleccionada].splice(i, 1);
             persistir(); mostrarTablaTraza(); actualizarColoresMapas();
         }
     }
 
-    // --- MAPA 2 (LOGÍSTICA / FITOS) ---
     function abrirFito(id) {
         mesaSeleccionada = id; indexEdicion = null;
         document.getElementById('logTitulo').innerText = "Logística - Mesa " + id;
@@ -343,12 +335,13 @@
             html += `<tr><td>${p.cli}</td><td>${p.bnd}</td><td>${p.lot}</td>
                 <td style="display:flex; gap:3px;">
                     <button class="btn-accion" onclick="editarLog(${i})">✏️</button>
+                    <button class="btn-accion" onclick="cortarLote(${i}, 'log')">📦</button>
                     <button class="btn-accion" onclick="borrarLog(${i})">🗑️</button>
                 </td></tr>`;
         });
         document.getElementById('logCuerpoMesa').innerHTML = html || "<tr><td colspan='4'>Sin pedidos</td></tr>";
         document.getElementById('btnRejuntar').style.background = data.rejuntado ? "#27ae60" : "#555";
-        document.getElementById('zonaPegarLog').innerHTML = portapapeles ? `<button class="btn-guardar" style="background:var(--purpura);" onclick="pegarEnLog()">📋 PEGAR LOTE DE TRAZA</button>` : "";
+        document.getElementById('zonaPegarLog').innerHTML = portapapeles ? `<button class="btn-guardar" style="background:var(--purpura);" onclick="pegarEnLog()">📋 PEGAR AQUÍ</button>` : "";
     }
 
     function guardarLog() {
@@ -364,7 +357,6 @@
         indexEdicion = i;
         document.getElementById('l_cli').value = p.cli; document.getElementById('l_bnd').value = p.bnd; document.getElementById('l_lot').value = p.lot;
         document.getElementById('btnGuardarLog').innerText = "💾 ACTUALIZAR";
-        document.getElementById('btnGuardarLog').style.background = "#f39c12";
     }
 
     function borrarLog(i) {
@@ -374,33 +366,37 @@
         }
     }
 
-    // --- SISTEMA COPIAR/PEGAR ---
-    function copiarLote(i, origen) {
+    function cortarLote(i, origen) {
         if(origen === 'traza') {
             portapapeles = {...DB_TRAZA[mesaSeleccionada][i]};
-            alert("Lote '" + portapapeles.ref + "' copiado. Úsalo UNA VEZ donde necesites.");
+            DB_TRAZA[mesaSeleccionada].splice(i, 1);
+            persistir(); mostrarTablaTraza();
+        } else if(origen === 'log') {
+            let p = DB_FITO[mesaSeleccionada].pedidos[i];
+            portapapeles = { ref: p.cli, lote: p.lot, num_bandejas: p.bnd };
+            DB_FITO[mesaSeleccionada].pedidos.splice(i, 1);
+            persistir(); mostrarLog();
         }
+        actualizarColoresMapas();
+        alert("Lote '" + portapapeles.ref + "' CORTADO.");
     }
 
     function pegarEnTraza() {
         if(!portapapeles) return;
         if(!DB_TRAZA[mesaSeleccionada]) DB_TRAZA[mesaSeleccionada] = [];
         DB_TRAZA[mesaSeleccionada].push({ ref: portapapeles.ref, lote: portapapeles.lote, num_bandejas: portapapeles.num_bandejas, tipo_bandeja: portapapeles.tipo_bandeja || "" });
-        portapapeles = null; // Vaciamos portapapeles después de usar
-        persistir(); mostrarTablaTraza();
+        portapapeles = null;
+        persistir(); mostrarTablaTraza(); actualizarColoresMapas();
     }
 
     function pegarEnLog() {
         if(!portapapeles) return;
         if(!DB_FITO[mesaSeleccionada]) DB_FITO[mesaSeleccionada] = { pedidos: [], rejuntado: false, fito: [] };
-        document.getElementById('l_cli').value = portapapeles.ref || "";
-        document.getElementById('l_bnd').value = portapapeles.num_bandejas || "";
-        document.getElementById('l_lot').value = portapapeles.lote || "";
-        portapapeles = null; // Vaciamos portapapeles después de usar
-        mostrarLog(); // Refrescamos para que desaparezca el botón de pegar
+        DB_FITO[mesaSeleccionada].pedidos.push({ cli: portapapeles.ref, bnd: portapapeles.num_bandejas, lot: portapapeles.lote });
+        portapapeles = null;
+        persistir(); mostrarLog(); actualizarColoresMapas();
     }
 
-    // --- FITOS, COLORES, GIST ---
     function switchTab(t) {
         document.getElementById('panelLog').style.display = t === 'log' ? 'block' : 'none';
         document.getElementById('panelFit').style.display = t === 'fit' ? 'block' : 'none';
@@ -450,8 +446,7 @@
     }
 
     async function subirDatos() {
-        const token = localStorage.getItem('github_token');
-        if(!token) return;
+        const token = localStorage.getItem('github_token'); if(!token) return;
         try {
             await fetch(`https://api.github.com/gists/${GIST_ID}`, {
                 method: 'PATCH',
