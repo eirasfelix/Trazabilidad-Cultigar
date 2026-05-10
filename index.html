@@ -214,6 +214,8 @@
     <div id="panelFit" style="display:none;">
         <h2 style="color: var(--rojo-fito); font-size: 18px;">🛡️ Nuevo Tratamiento</h2>
         
+        <div class="form-group"><label>Tipo de Plaga / Enfermedad</label><input type="text" id="fi_plaga"></div>
+
         <div class="flex-row">
             <div class="form-group"><label>Nombre Comercial</label><input type="text" id="fi_nomcom"></div>
             <div class="form-group"><label>Nº Registro</label><input type="text" id="fi_nreg"></div>
@@ -245,8 +247,8 @@
         
         <h2 style="color: #aaa; font-size: 14px; margin-top:20px;">Historial de la Mesa</h2>
         <div style="overflow-x: auto;">
-            <table style="min-width: 600px;">
-                <thead><tr><th>Fecha</th><th>Producto</th><th>Vence</th><th>Aplicador</th><th>m²</th><th>Acción</th></tr></thead>
+            <table style="min-width: 700px;">
+                <thead><tr><th>Fecha</th><th>Plaga</th><th>Producto</th><th>Vence</th><th>Aplicador</th><th>m²</th><th>Acción</th></tr></thead>
                 <tbody id="fitoCuerpoMesaPro"></tbody>
             </table>
         </div>
@@ -312,10 +314,11 @@
         document.getElementById('f_ref').value = ""; document.getElementById('f_lote').value = "";
         document.getElementById('f_num_bandejas').value = ""; document.getElementById('f_tipo_bandeja').value = "";
         document.getElementById('l_cli').value = ""; document.getElementById('l_bnd').value = ""; document.getElementById('l_lot').value = "";
-        document.getElementById('fi_nomcom').value = ""; document.getElementById('fi_nreg').value = "";
-        document.getElementById('fi_aplicador').value = ""; document.getElementById('fi_equipo').value = "";
-        document.getElementById('fi_dosis').value = ""; document.getElementById('fi_m2').value = "";
-        document.getElementById('fi_plazo').value = ""; document.getElementById('fi_color_manual').value = "AUTO";
+        document.getElementById('fi_plaga').value = ""; document.getElementById('fi_nomcom').value = ""; 
+        document.getElementById('fi_nreg').value = ""; document.getElementById('fi_aplicador').value = ""; 
+        document.getElementById('fi_equipo').value = ""; document.getElementById('fi_dosis').value = ""; 
+        document.getElementById('fi_m2').value = ""; document.getElementById('fi_plazo').value = ""; 
+        document.getElementById('fi_color_manual').value = "AUTO";
     }
 
     function persistir() {
@@ -462,6 +465,7 @@
         document.getElementById('btFit').style.background = t === 'fit' ? '#c0392b' : '#555';
     }
 
+    // --- SECCIÓN FITOS ---
     function guardarFitoPro() {
         if(!DB_FITO[mesaSeleccionada]) DB_FITO[mesaSeleccionada] = { pedidos: [], fito: [] };
         if(!DB_FITO[mesaSeleccionada].fito) DB_FITO[mesaSeleccionada].fito = [];
@@ -471,6 +475,7 @@
         venc.setDate(hoy.getDate() + parseInt(document.getElementById('fi_plazo').value || 0));
         
         let nuevoRegistro = {
+            plaga: document.getElementById('fi_plaga').value.toUpperCase(),
             nomcom: document.getElementById('fi_nomcom').value.toUpperCase(),
             nreg: document.getElementById('fi_nreg').value,
             aplicador: document.getElementById('fi_aplicador').value.toUpperCase(),
@@ -500,6 +505,7 @@
             let dias = Math.ceil((new Date(r.v) - hoy) / (1000 * 60 * 60 * 24));
             html += `<tr>
                 <td>${r.f}</td>
+                <td>${r.plaga || "-"}</td>
                 <td>${r.nomcom}</td>
                 <td style="color:${dias>0?'red':'green'}">${dias>0?dias+'d':'OK'}</td>
                 <td>${r.aplicador}</td>
@@ -516,6 +522,7 @@
     function editarFito(idx) {
         let r = DB_FITO[mesaSeleccionada].fito[idx];
         indexFitoEdicion = idx;
+        document.getElementById('fi_plaga').value = r.plaga || "";
         document.getElementById('fi_nomcom').value = r.nomcom;
         document.getElementById('fi_nreg').value = r.nreg;
         document.getElementById('fi_aplicador').value = r.aplicador;
@@ -524,7 +531,6 @@
         document.getElementById('fi_m2').value = r.m2;
         document.getElementById('fi_color_manual').value = r.color_manual;
         
-        // Calcular plazo en días basándose en la fecha de vencimiento guardada
         let dias = Math.ceil((new Date(r.v) - new Date(r.f)) / (1000 * 60 * 60 * 24));
         document.getElementById('fi_plazo').value = dias;
     }
