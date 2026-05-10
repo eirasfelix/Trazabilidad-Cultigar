@@ -260,7 +260,6 @@
         document.getElementById('overlay').style.display = 'none';
         document.querySelectorAll('.modal').forEach(m => m.style.display = 'none');
         indexEdicion = null;
-        // Reset botones
         document.getElementById('btnGuardarTraza').innerText = "💾 GUARDAR TRAZA";
         document.getElementById('btnGuardarTraza').style.background = "var(--verde-cultigar)";
         document.getElementById('btnGuardarLog').innerText = "💾 AÑADIR PEDIDO";
@@ -375,30 +374,33 @@
         }
     }
 
-    // --- SISTEMA COPIAR/PEGAR ENTRE MAPAS ---
+    // --- SISTEMA COPIAR/PEGAR ---
     function copiarLote(i, origen) {
         if(origen === 'traza') {
             portapapeles = {...DB_TRAZA[mesaSeleccionada][i]};
-            // No lo borramos del origen, solo copiamos.
-            alert("Lote '" + portapapeles.ref + "' copiado. Puedes pegarlo en cualquier mapa.");
+            alert("Lote '" + portapapeles.ref + "' copiado. Úsalo UNA VEZ donde necesites.");
         }
     }
 
     function pegarEnTraza() {
+        if(!portapapeles) return;
         if(!DB_TRAZA[mesaSeleccionada]) DB_TRAZA[mesaSeleccionada] = [];
         DB_TRAZA[mesaSeleccionada].push({ ref: portapapeles.ref, lote: portapapeles.lote, num_bandejas: portapapeles.num_bandejas, tipo_bandeja: portapapeles.tipo_bandeja || "" });
+        portapapeles = null; // Vaciamos portapapeles después de usar
         persistir(); mostrarTablaTraza();
     }
 
     function pegarEnLog() {
+        if(!portapapeles) return;
         if(!DB_FITO[mesaSeleccionada]) DB_FITO[mesaSeleccionada] = { pedidos: [], rejuntado: false, fito: [] };
-        // Al pegar en logística, ponemos la referencia como nombre de cliente/variedad por defecto
         document.getElementById('l_cli').value = portapapeles.ref || "";
         document.getElementById('l_bnd').value = portapapeles.num_bandejas || "";
         document.getElementById('l_lot').value = portapapeles.lote || "";
+        portapapeles = null; // Vaciamos portapapeles después de usar
+        mostrarLog(); // Refrescamos para que desaparezca el botón de pegar
     }
 
-    // --- RESTO DE FUNCIONES (FITOS, COLORES, GIST) ---
+    // --- FITOS, COLORES, GIST ---
     function switchTab(t) {
         document.getElementById('panelLog').style.display = t === 'log' ? 'block' : 'none';
         document.getElementById('panelFit').style.display = t === 'fit' ? 'block' : 'none';
