@@ -166,7 +166,8 @@
 
 <div class="seccion-mapa">
     <h3 class="titulo-mapa" style="color: var(--azul-log);">Mapa 2: Logística y Fitos</h3>
-    <svg width="480" height="880" id="svg-fito"></svg> </div>
+    <svg width="480" height="880" id="svg-fito"></svg>
+</div>
 
 <div class="overlay" id="overlay" onclick="cerrarModales()"></div>
 
@@ -191,7 +192,7 @@
 </div>
 
 <div id="modalFito" class="modal">
-    <div style="display:flex; gap:5px; margin-bottom:15px;">
+    <div id="tabsFito" style="display:flex; gap:5px; margin-bottom:15px;">
         <button id="btLog" class="btn-guardar" style="background:#2980b9; flex:1; padding:10px;" onclick="switchTab('log')">📦 LOGÍSTICA</button>
         <button id="btFit" class="btn-guardar" style="background:#555; flex:1; padding:10px;" onclick="switchTab('fit')">🛡️ FITOS</button>
     </div>
@@ -250,14 +251,12 @@
             trazHtml += `<rect id="t-${i}" class="mesa" x="395" y="${yPos}" width="75" height="38" onclick="abrirTraza('${i}')"></rect><text x="432" y="${yPos + 22}" class="texto-id">${i}</text>`;
             fitoHtml += `<rect id="f-${i}" class="mesa" x="395" y="${yPos}" width="75" height="38" onclick="abrirFito('${i}')"></rect><text x="432" y="${yPos + 22}" class="texto-id">${i}</text>`;
         }
-        // AÑADIR PARKING DE CARROS BAJO MESAS 14-17
         const mesasCarro = ['14-52', '15-53', '16-54', '17-55'];
         mesasCarro.forEach((id, idx) => {
             let m = GEOMETRIA.find(g => g.id === id);
             fitoHtml += `<rect id="f-C${idx+1}" class="carro" x="${m.x}" y="${m.y + m.h + 20}" width="${m.w}" height="60" onclick="abrirFito('C${idx+1}')"></rect>
                          <text x="${m.x + m.w/2}" y="${m.y + m.h + 55}" class="texto-id">🛒 C${idx+1}</text>`;
         });
-
         document.getElementById('svg-trazabilidad').innerHTML = trazHtml;
         document.getElementById('svg-fito').innerHTML = fitoHtml;
         actualizarColoresMapas();
@@ -338,7 +337,17 @@
     function abrirFito(id) {
         mesaSeleccionada = id; indexEdicion = null;
         document.getElementById('logTitulo').innerText = (id.startsWith('C') ? "Carro " : "Mesa ") + id;
-        switchTab('log'); mostrarLog(); mostrarFitoPro();
+        
+        // Si es un carro, ocultamos la pestaña de fitos
+        if(id.startsWith('C')) {
+            document.getElementById('tabsFito').style.display = 'none';
+            switchTab('log');
+        } else {
+            document.getElementById('tabsFito').style.display = 'flex';
+            switchTab('log');
+        }
+        
+        mostrarLog(); mostrarFitoPro();
         document.getElementById('overlay').style.display = 'block';
         document.getElementById('modalFito').style.display = 'block';
     }
@@ -441,10 +450,15 @@
         let hoy = new Date();
         document.querySelectorAll('#svg-fito .mesa, #svg-fito .carro').forEach(rect => {
             let id = rect.id.replace('f-', ''); let data = DB_FITO[id];
-            rect.style.fill = "#ffffff"; rect.style.stroke = rect.classList.contains('carro') ? "#333" : "#333";
+            let esCarro = rect.classList.contains('carro');
+            rect.style.fill = "#ffffff"; 
+            rect.style.stroke = "#333";
+            rect.style.strokeWidth = "1.5";
+            
             if(data) {
                 if(data.pedidos?.length > 0) rect.style.fill = "var(--neon-ready)";
-                if(data.fito?.length > 0) {
+                // Fitos solo para mesas, no para carros
+                if(!esCarro && data.fito?.length > 0) {
                     let last = data.fito[data.fito.length-1];
                     rect.style.stroke = new Date(last.v) > hoy ? "#c0392b" : "#27ae60"; rect.style.strokeWidth = "5";
                 }
