@@ -193,12 +193,13 @@
     
     <div id="panelLog">
         <h2 id="logTitulo" style="color: #2980b9; font-size: 18px;">Logística - Mesa --</h2>
-        <table><thead><tr><th>Cliente</th><th>Bnd</th><th>Lote</th><th>🗑️</th></tr></thead><tbody id="logCuerpoMesa"></tbody></table>
-        <div class="form-group"><label>Cliente</label><input type="text" id="l_cli"></div>
+        <div id="zonaPegarLog"></div>
+        <table><thead><tr><th>Cliente</th><th>Bnd</th><th>Lote</th><th>Acción</th></tr></thead><tbody id="logCuerpoMesa"></tbody></table>
+        <div class="form-group"><label>Cliente / Variedad</label><input type="text" id="l_cli"></div>
         <div class="form-group"><label>Bandejas</label><input type="number" id="l_bnd"></div>
         <div class="form-group"><label>Lote</label><input type="text" id="l_lot"></div>
         <div style="display:flex; gap:5px;">
-            <button class="btn-guardar" style="background:#2980b9; flex:2;" onclick="guardarLog()">💾 AÑADIR</button>
+            <button id="btnGuardarLog" class="btn-guardar" style="background:#2980b9; flex:2;" onclick="guardarLog()">💾 AÑADIR PEDIDO</button>
             <button id="btnRejuntar" class="btn-guardar" style="background:#555; flex:1;" onclick="toggleRejuntar()">⬜ REJUNTAR</button>
         </div>
     </div>
@@ -254,7 +255,32 @@
         actualizarColoresMapas();
     }
 
-    // --- FUNCIONES MAPA 1 (TRAZABILIDAD) ---
+    // --- FUNCIONES COMUNES ---
+    function cerrarModales() {
+        document.getElementById('overlay').style.display = 'none';
+        document.querySelectorAll('.modal').forEach(m => m.style.display = 'none');
+        indexEdicion = null;
+        // Reset botones
+        document.getElementById('btnGuardarTraza').innerText = "💾 GUARDAR TRAZA";
+        document.getElementById('btnGuardarTraza').style.background = "var(--verde-cultigar)";
+        document.getElementById('btnGuardarLog').innerText = "💾 AÑADIR PEDIDO";
+        document.getElementById('btnGuardarLog').style.background = "var(--azul-log)";
+        limpiarForms();
+    }
+
+    function limpiarForms() {
+        document.getElementById('f_ref').value = ""; document.getElementById('f_lote').value = "";
+        document.getElementById('f_num_bandejas').value = ""; document.getElementById('f_tipo_bandeja').value = "";
+        document.getElementById('l_cli').value = ""; document.getElementById('l_bnd').value = ""; document.getElementById('l_lot').value = "";
+    }
+
+    function persistir() {
+        localStorage.setItem('culti_traza', JSON.stringify(DB_TRAZA));
+        localStorage.setItem('culti_fito', JSON.stringify(DB_FITO));
+        subirDatos();
+    }
+
+    // --- MAPA 1 (TRAZABILIDAD) ---
     function abrirTraza(id) {
         mesaSeleccionada = id; indexEdicion = null;
         mostrarTablaTraza();
@@ -266,113 +292,80 @@
         let html = "";
         let datos = DB_TRAZA[mesaSeleccionada] || [];
         datos.forEach((r, i) => {
-            html += `<tr>
-                <td>${r.ref}</td><td>${r.lote}</td><td>${r.num_bandejas}</td>
+            html += `<tr><td>${r.ref}</td><td>${r.lote}</td><td>${r.num_bandejas}</td>
                 <td style="display:flex; gap:3px;">
                     <button class="btn-accion" onclick="editarTraza(${i})">✏️</button>
-                    <button class="btn-accion" onclick="copiarTraza(${i})">📦</button>
+                    <button class="btn-accion" onclick="copiarLote(${i}, 'traza')">📦</button>
                     <button class="btn-accion" onclick="borrarTraza(${i})">🗑️</button>
-                </td>
-            </tr>`;
+                </td></tr>`;
         });
         document.getElementById('mesaTitulo').innerText = "Mesa " + mesaSeleccionada;
         document.getElementById('tablaCuerpoMesa').innerHTML = html || "<tr><td colspan='4'>Mesa vacía</td></tr>";
-        actualizarBotonPegar();
+        document.getElementById('zonaPegarTraza').innerHTML = portapapeles ? `<button class="btn-guardar" style="background:var(--purpura);" onclick="pegarEnTraza()">📋 PEGAR AQUÍ</button>` : "";
     }
 
     function guardarRegistroTrazabilidad() {
         let nuevo = { ref: document.getElementById('f_ref').value.toUpperCase(), lote: document.getElementById('f_lote').value, num_bandejas: document.getElementById('f_num_bandejas').value, tipo_bandeja: document.getElementById('f_tipo_bandeja').value };
         if(!DB_TRAZA[mesaSeleccionada]) DB_TRAZA[mesaSeleccionada] = [];
-        
-        if(indexEdicion !== null) {
-            DB_TRAZA[mesaSeleccionada][indexEdicion] = nuevo;
-            indexEdicion = null;
-            document.getElementById('btnGuardarTraza').innerText = "💾 GUARDAR TRAZA";
-            document.getElementById('btnGuardarTraza').style.background = "var(--verde-cultigar)";
-        } else {
-            DB_TRAZA[mesaSeleccionada].push(nuevo);
-        }
-        
-        persistir(); mostrarTablaTraza(); actualizarColoresMapas(); limpiarFormTraza();
+        if(indexEdicion !== null) { DB_TRAZA[mesaSeleccionada][indexEdicion] = nuevo; } 
+        else { DB_TRAZA[mesaSeleccionada].push(nuevo); }
+        persistir(); mostrarTablaTraza(); actualizarColoresMapas(); cerrarModales();
     }
 
     function editarTraza(i) {
         let r = DB_TRAZA[mesaSeleccionada][i];
         indexEdicion = i;
-        document.getElementById('f_ref').value = r.ref;
-        document.getElementById('f_lote').value = r.lote;
-        document.getElementById('f_num_bandejas').value = r.num_bandejas;
-        document.getElementById('f_tipo_bandeja').value = r.tipo_bandeja;
-        document.getElementById('btnGuardarTraza').innerText = "💾 ACTUALIZAR CAMBIOS";
+        document.getElementById('f_ref').value = r.ref; document.getElementById('f_lote').value = r.lote;
+        document.getElementById('f_num_bandejas').value = r.num_bandejas; document.getElementById('f_tipo_bandeja').value = r.tipo_bandeja;
+        document.getElementById('btnGuardarTraza').innerText = "💾 ACTUALIZAR";
         document.getElementById('btnGuardarTraza').style.background = "#f39c12";
     }
 
     function borrarTraza(i) {
-        if(confirm("⚠️ ¿SEGURO QUE QUIERES ELIMINAR ESTE REGISTRO?")) {
+        if(confirm("⚠️ ¿BORRAR ESTE REGISTRO DE TRAZA?")) {
             DB_TRAZA[mesaSeleccionada].splice(i, 1);
             persistir(); mostrarTablaTraza(); actualizarColoresMapas();
         }
     }
 
-    function copiarTraza(i) {
-        portapapeles = {...DB_TRAZA[mesaSeleccionada][i]};
-        DB_TRAZA[mesaSeleccionada].splice(i, 1);
-        persistir(); mostrarTablaTraza(); actualizarColoresMapas();
-        alert("Lote movido al portapapeles. Ábrelo en otra mesa para PEGAR.");
-    }
-
-    function pegarTraza() {
-        if(!portapapeles) return;
-        if(!DB_TRAZA[mesaSeleccionada]) DB_TRAZA[mesaSeleccionada] = [];
-        DB_TRAZA[mesaSeleccionada].push(portapapeles);
-        portapapeles = null;
-        persistir(); mostrarTablaTraza(); actualizarColoresMapas();
-    }
-
-    function actualizarBotonPegar() {
-        let div = document.getElementById('zonaPegarTraza');
-        div.innerHTML = portapapeles ? `<button class="btn-guardar" style="background:var(--purpura);" onclick="pegarTraza()">📋 PEGAR LOTE AQUÍ</button>` : "";
-    }
-
-    function limpiarFormTraza() {
-        document.getElementById('f_ref').value = ""; document.getElementById('f_lote').value = "";
-        document.getElementById('f_num_bandejas').value = ""; document.getElementById('f_tipo_bandeja').value = "";
-    }
-
-    // --- FUNCIONES MAPA 2 (LOGÍSTICA + FITOS) ---
-    function switchTab(t) {
-        document.getElementById('panelLog').style.display = t === 'log' ? 'block' : 'none';
-        document.getElementById('panelFit').style.display = t === 'fit' ? 'block' : 'none';
-        document.getElementById('btLog').style.background = t === 'log' ? '#2980b9' : '#555';
-        document.getElementById('btFit').style.background = t === 'fit' ? '#c0392b' : '#555';
-    }
-
+    // --- MAPA 2 (LOGÍSTICA / FITOS) ---
     function abrirFito(id) {
-        mesaSeleccionada = id;
+        mesaSeleccionada = id; indexEdicion = null;
         document.getElementById('logTitulo').innerText = "Logística - Mesa " + id;
         switchTab('log'); mostrarLog(); mostrarFitoPro();
         document.getElementById('overlay').style.display = 'block';
         document.getElementById('modalFito').style.display = 'block';
     }
 
-    function guardarLog() {
-        if(!DB_FITO[mesaSeleccionada] || !DB_FITO[mesaSeleccionada].pedidos) DB_FITO[mesaSeleccionada] = { pedidos: [], rejuntado: false, fito: [] };
-        DB_FITO[mesaSeleccionada].pedidos.push({ cli: document.getElementById('l_cli').value.toUpperCase(), bnd: document.getElementById('l_bnd').value, lot: document.getElementById('l_lot').value });
-        document.getElementById('l_cli').value = ""; persistir(); mostrarLog(); actualizarColoresMapas();
-    }
-
     function mostrarLog() {
         let html = "";
         let data = DB_FITO[mesaSeleccionada] || { pedidos: [] };
-        (data.pedidos || []).forEach((p, i) => { html += `<tr><td>${p.cli}</td><td>${p.bnd}</td><td>${p.lot}</td><td><button onclick="borrarLog(${i})">🗑️</button></td></tr>`; });
+        (data.pedidos || []).forEach((p, i) => {
+            html += `<tr><td>${p.cli}</td><td>${p.bnd}</td><td>${p.lot}</td>
+                <td style="display:flex; gap:3px;">
+                    <button class="btn-accion" onclick="editarLog(${i})">✏️</button>
+                    <button class="btn-accion" onclick="borrarLog(${i})">🗑️</button>
+                </td></tr>`;
+        });
         document.getElementById('logCuerpoMesa').innerHTML = html || "<tr><td colspan='4'>Sin pedidos</td></tr>";
         document.getElementById('btnRejuntar').style.background = data.rejuntado ? "#27ae60" : "#555";
+        document.getElementById('zonaPegarLog').innerHTML = portapapeles ? `<button class="btn-guardar" style="background:var(--purpura);" onclick="pegarEnLog()">📋 PEGAR LOTE DE TRAZA</button>` : "";
     }
 
-    function toggleRejuntar() {
+    function guardarLog() {
         if(!DB_FITO[mesaSeleccionada]) DB_FITO[mesaSeleccionada] = { pedidos: [], rejuntado: false, fito: [] };
-        DB_FITO[mesaSeleccionada].rejuntado = !DB_FITO[mesaSeleccionada].rejuntado;
-        persistir(); mostrarLog(); actualizarColoresMapas();
+        let nuevo = { cli: document.getElementById('l_cli').value.toUpperCase(), bnd: document.getElementById('l_bnd').value, lot: document.getElementById('l_lot').value };
+        if(indexEdicion !== null) { DB_FITO[mesaSeleccionada].pedidos[indexEdicion] = nuevo; }
+        else { DB_FITO[mesaSeleccionada].pedidos.push(nuevo); }
+        persistir(); mostrarLog(); actualizarColoresMapas(); cerrarModales();
+    }
+
+    function editarLog(i) {
+        let p = DB_FITO[mesaSeleccionada].pedidos[i];
+        indexEdicion = i;
+        document.getElementById('l_cli').value = p.cli; document.getElementById('l_bnd').value = p.bnd; document.getElementById('l_lot').value = p.lot;
+        document.getElementById('btnGuardarLog').innerText = "💾 ACTUALIZAR";
+        document.getElementById('btnGuardarLog').style.background = "#f39c12";
     }
 
     function borrarLog(i) {
@@ -380,6 +373,43 @@
             DB_FITO[mesaSeleccionada].pedidos.splice(i, 1);
             persistir(); mostrarLog(); actualizarColoresMapas();
         }
+    }
+
+    // --- SISTEMA COPIAR/PEGAR ENTRE MAPAS ---
+    function copiarLote(i, origen) {
+        if(origen === 'traza') {
+            portapapeles = {...DB_TRAZA[mesaSeleccionada][i]};
+            // No lo borramos del origen, solo copiamos.
+            alert("Lote '" + portapapeles.ref + "' copiado. Puedes pegarlo en cualquier mapa.");
+        }
+    }
+
+    function pegarEnTraza() {
+        if(!DB_TRAZA[mesaSeleccionada]) DB_TRAZA[mesaSeleccionada] = [];
+        DB_TRAZA[mesaSeleccionada].push({ ref: portapapeles.ref, lote: portapapeles.lote, num_bandejas: portapapeles.num_bandejas, tipo_bandeja: portapapeles.tipo_bandeja || "" });
+        persistir(); mostrarTablaTraza();
+    }
+
+    function pegarEnLog() {
+        if(!DB_FITO[mesaSeleccionada]) DB_FITO[mesaSeleccionada] = { pedidos: [], rejuntado: false, fito: [] };
+        // Al pegar en logística, ponemos la referencia como nombre de cliente/variedad por defecto
+        document.getElementById('l_cli').value = portapapeles.ref || "";
+        document.getElementById('l_bnd').value = portapapeles.num_bandejas || "";
+        document.getElementById('l_lot').value = portapapeles.lote || "";
+    }
+
+    // --- RESTO DE FUNCIONES (FITOS, COLORES, GIST) ---
+    function switchTab(t) {
+        document.getElementById('panelLog').style.display = t === 'log' ? 'block' : 'none';
+        document.getElementById('panelFit').style.display = t === 'fit' ? 'block' : 'none';
+        document.getElementById('btLog').style.background = t === 'log' ? '#2980b9' : '#555';
+        document.getElementById('btFit').style.background = t === 'fit' ? '#c0392b' : '#555';
+    }
+
+    function toggleRejuntar() {
+        if(!DB_FITO[mesaSeleccionada]) DB_FITO[mesaSeleccionada] = { pedidos: [], rejuntado: false, fito: [] };
+        DB_FITO[mesaSeleccionada].rejuntado = !DB_FITO[mesaSeleccionada].rejuntado;
+        persistir(); mostrarLog(); actualizarColoresMapas();
     }
 
     function guardarFitoPro() {
@@ -417,12 +447,6 @@
         });
     }
 
-    function persistir() {
-        localStorage.setItem('culti_traza', JSON.stringify(DB_TRAZA));
-        localStorage.setItem('culti_fito', JSON.stringify(DB_FITO));
-        subirDatos();
-    }
-
     async function subirDatos() {
         const token = localStorage.getItem('github_token');
         if(!token) return;
@@ -453,15 +477,6 @@
         document.querySelectorAll('#svg-trazabilidad .mesa').forEach(m => m.classList.remove('resaltado'));
         if(!b) return;
         for(let m in DB_TRAZA) if(DB_TRAZA[m].some(r => r.ref.includes(b))) document.getElementById('t-'+m)?.classList.add('resaltado');
-    }
-
-    function cerrarModales() {
-        document.getElementById('overlay').style.display = 'none';
-        document.querySelectorAll('.modal').forEach(m => m.style.display = 'none');
-        indexEdicion = null;
-        document.getElementById('btnGuardarTraza').innerText = "💾 GUARDAR TRAZA";
-        document.getElementById('btnGuardarTraza').style.background = "var(--verde-cultigar)";
-        limpiarFormTraza();
     }
 
     window.onload = () => { inicializarMapas(); bajarDatos(); };
