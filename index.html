@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CULTIGAR PRO v6.0</title>
+    <title>CULTIGAR PRO v6.4 - CÓDIGO SAGRADO</title>
     <style>
         :root {
             --bg-dark: #2c3e50;
@@ -16,57 +16,269 @@
             --neon-ready: #39FF14;
         }
 
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg-dark); margin: 0; color: white; padding-bottom: 50px; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-dark);
+            margin: 0;
+            color: white;
+            padding-bottom: 50px;
+        }
 
-        /* NAVEGACIÓN */
-        .nav-tabs { display: flex; background: #1a252f; position: sticky; top: 0; z-index: 2000; box-shadow: 0 2px 10px rgba(0,0,0,0.5); }
-        .tab-button { flex: 1; padding: 15px; border: none; background: none; color: #888; font-weight: bold; cursor: pointer; border-bottom: 3px solid transparent; font-size: 13px; }
-        .tab-button.active { color: white; border-bottom: 3px solid var(--verde-cultigar); background: rgba(255,255,255,0.05); }
+        /* NAVEGACIÓN PRINCIPAL */
+        .nav-tabs {
+            display: flex;
+            background-color: #1a252f;
+            position: sticky;
+            top: 0;
+            z-index: 2000;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.5);
+        }
 
-        .content-section { display: none; padding: 10px; }
-        .content-section.active { display: block; }
+        .tab-button {
+            flex: 1;
+            padding: 15px;
+            border: none;
+            background: none;
+            color: #888;
+            font-weight: bold;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: 0.3s;
+            font-size: 13px;
+        }
 
-        .header-tools { background: white; padding: 10px; display: flex; gap: 10px; }
-        .input-busqueda { flex-grow: 1; padding: 12px; border-radius: 8px; border: 2px solid #ddd; color: #333; font-size: 16px; }
+        .tab-button.active {
+            color: white;
+            border-bottom: 3px solid var(--verde-cultigar);
+            background-color: rgba(255,255,255,0.05);
+        }
 
-        .seccion-mapa { background: #eee; margin: 10px auto; padding: 15px; width: 480px; border-radius: 10px; border: 3px solid #000; }
-        .titulo-mapa { text-align: center; color: #333; margin: 0 0 10px 0; text-transform: uppercase; font-size: 16px; font-weight: bold; }
+        .content-section {
+            display: none;
+            padding: 10px;
+        }
 
-        svg { display: block; margin: auto; background: white; }
-        .mesa, .carro { fill: white; stroke: #333; stroke-width: 1.5; cursor: pointer; transition: 0.2s; }
-        .carro { stroke-dasharray: 4; }
-        .texto-id { font-size: 10px; font-weight: bold; fill: black; pointer-events: none; text-anchor: middle; }
+        .content-section.active {
+            display: block;
+        }
 
-        /* ESTADOS */
+        /* BARRA DE HERRAMIENTAS SUPERIOR */
+        .header-tools {
+            background-color: white;
+            padding: 10px;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        .input-busqueda {
+            flex-grow: 1;
+            padding: 12px;
+            border-radius: 8px;
+            border: 2px solid #ddd;
+            color: #333;
+            font-size: 16px;
+        }
+
+        /* ESTILOS DEL MAPA */
+        .seccion-mapa {
+            background-color: #eee;
+            margin: 10px auto;
+            padding: 15px;
+            width: 480px;
+            border-radius: 10px;
+            border: 3px solid #000;
+            overflow-x: auto;
+        }
+
+        .titulo-mapa {
+            text-align: center;
+            color: #333;
+            margin: 0 0 10px 0;
+            text-transform: uppercase;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        svg {
+            display: block;
+            margin: auto;
+            background-color: white;
+        }
+
+        .mesa, .carro {
+            fill: white;
+            stroke: #333;
+            stroke-width: 1.5;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .mesa:hover, .carro:hover {
+            fill: #f0f0f0;
+            stroke-width: 2.5;
+        }
+
+        .carro {
+            stroke-dasharray: 4;
+        }
+
+        .texto-id {
+            font-size: 10px;
+            font-weight: bold;
+            fill: black;
+            pointer-events: none;
+            text-anchor: middle;
+        }
+
+        /* ESTADOS DE LAS MESAS */
         .ocupada { fill: #a9dfbf !important; }
         .rejuntado { fill: var(--azul-log) !important; }
-        .resaltado { fill: #f39c12 !important; stroke: #d35400 !important; stroke-width: 4 !important; }
+        .resaltado {
+            fill: #f39c12 !important;
+            stroke: #d35400 !important;
+            stroke-width: 4 !important;
+        }
         .listo-salida { fill: var(--neon-ready) !important; }
-        
-        @keyframes parpadeo { 0% { stroke: var(--purpura); stroke-width: 2; } 50% { stroke: white; stroke-width: 6; } 100% { stroke: var(--purpura); stroke-width: 2; } }
-        .aviso-salida { animation: parpadeo 1.5s infinite; stroke: var(--purpura) !important; stroke-width: 4; }
+
+        @keyframes parpadeo {
+            0% { stroke: var(--purpura); stroke-width: 2; }
+            50% { stroke: white; stroke-width: 6; }
+            100% { stroke: var(--purpura); stroke-width: 2; }
+        }
+
+        .aviso-salida {
+            animation: parpadeo 1.5s infinite;
+            stroke: var(--purpura) !important;
+            stroke-width: 4;
+        }
 
         /* MODALES */
-        .modal { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 95%; max-width: 500px; height: 90%; background: #1a1a1a; border: 4px solid #444; border-radius: 15px; display: none; z-index: 3000; padding: 20px; overflow-y: auto; }
-        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none; z-index: 2500; }
+        .modal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 95%;
+            max-width: 500px;
+            height: 90%;
+            background-color: #1a1a1a;
+            border: 4px solid #444;
+            border-radius: 15px;
+            display: none;
+            z-index: 3000;
+            padding: 20px;
+            overflow-y: auto;
+        }
 
-        /* TARJETAS MCDONALDS */
-        .card-pedido { background: #34495e; border-radius: 8px; padding: 15px; margin-bottom: 10px; border-left: 8px solid var(--purpura); box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
-        .card-pedido.completado { border-left-color: var(--verde-cultigar); opacity: 0.8; }
-        .progress-bar { background: #2c3e50; height: 12px; border-radius: 6px; margin-top: 10px; overflow: hidden; border: 1px solid #555; }
-        .progress-fill { background: var(--verde-cultigar); height: 100%; width: 0%; transition: 0.5s ease-in-out; }
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            display: none;
+            z-index: 2500;
+        }
 
-        .btn-guardar { width: 100%; padding: 15px; border: none; border-radius: 8px; font-weight: bold; color: white; cursor: pointer; margin-bottom: 5px; font-size: 14px; }
-        .btn-accion { padding: 6px; cursor: pointer; border: none; border-radius: 4px; background: #444; color: white; }
-        .form-group { margin-bottom: 12px; }
-        .form-group label { display: block; font-size: 11px; color: #aaa; margin-bottom: 4px; text-transform: uppercase; }
-        .form-group input, .form-group select { width: 100%; padding: 10px; background: #222; border: 1px solid #444; color: white; box-sizing: border-box; border-radius: 5px; }
-        
-        table { width: 100%; border-collapse: collapse; font-size: 12px; margin-bottom: 15px; }
-        th { color: var(--verde-cultigar); border-bottom: 2px solid #444; text-align: left; padding: 8px; }
-        td { padding: 8px; border-bottom: 1px solid #333; }
-        .flex-row { display: flex; gap: 10px; }
-        .flex-row .form-group { flex: 1; }
+        /* PEDIDOS ESTILO MC AUTO */
+        .card-pedido {
+            background: #34495e;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-left: 8px solid var(--purpura);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        }
+
+        .card-pedido.completado {
+            border-left-color: var(--verde-cultigar);
+            opacity: 0.8;
+        }
+
+        /* FORMULARIOS */
+        .btn-guardar {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            color: white;
+            cursor: pointer;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+
+        .btn-accion {
+            padding: 6px;
+            cursor: pointer;
+            border: none;
+            border-radius: 4px;
+            background: #444;
+            color: white;
+        }
+
+        .form-group {
+            margin-bottom: 12px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 11px;
+            color: #aaa;
+            margin-bottom: 4px;
+            text-transform: uppercase;
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 10px;
+            background: #222;
+            border: 1px solid #444;
+            color: white;
+            box-sizing: border-box;
+            border-radius: 5px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+            margin-bottom: 15px;
+        }
+
+        th {
+            color: var(--verde-cultigar);
+            border-bottom: 2px solid #444;
+            text-align: left;
+            padding: 8px;
+        }
+
+        td {
+            padding: 8px;
+            border-bottom: 1px solid #333;
+        }
+
+        .flex-row {
+            display: flex;
+            gap: 10px;
+        }
+
+        .flex-row .form-group {
+            flex: 1;
+        }
+
+        /* LISTA DE TRATAMIENTOS */
+        .fito-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 10px;
+            font-size: 10px;
+            font-weight: bold;
+            background: var(--rojo-fito);
+        }
     </style>
 </head>
 <body>
@@ -78,29 +290,32 @@
 </div>
 
 <div class="header-tools">
-    <input type="text" id="buscador" class="input-busqueda" placeholder="🔍 Buscar Variedad..." onkeyup="ejecutarBusqueda()">
-    <button onclick="subirDatos()" style="background:var(--verde-cultigar); color:white; border:none; padding:10px 15px; border-radius:8px; font-weight:bold;">⬆</button>
-    <button onclick="bajarDatos()" style="background:var(--azul-log); color:white; border:none; padding:10px 15px; border-radius:8px; font-weight:bold;">⬇</button>
+    <input type="text" id="buscador" class="input-busqueda" placeholder="🔍 Buscar Clon/Variedad..." onkeyup="ejecutarBusqueda()">
+    <button onclick="subirDatos()" style="background:var(--verde-cultigar); color:white; border:none; padding:10px 15px; border-radius:8px; font-weight:bold;">⬆ SINC</button>
+    <button onclick="bajarDatos()" style="background:var(--azul-log); color:white; border:none; padding:10px 15px; border-radius:8px; font-weight:bold;">⬇ BAJAR</button>
 </div>
 
 <div id="tab-traza" class="content-section active">
     <div class="seccion-mapa">
         <h3 class="titulo-mapa">Mapa 1: Ubicación Real</h3>
-        <svg width="450" height="780" id="svg-trazabilidad"></svg>
+        <svg width="450" height="780" id="svg-trazabilidad">
+            </svg>
     </div>
 </div>
 
 <div id="tab-fito" class="content-section">
     <div class="seccion-mapa">
         <h3 class="titulo-mapa">Mapa 2: Logística y Fitos</h3>
-        <svg width="450" height="880" id="svg-fito"></svg>
+        <svg width="450" height="880" id="svg-fito">
+            </svg>
     </div>
 </div>
 
 <div id="tab-pedidos" class="content-section">
     <div style="max-width: 500px; margin: auto; padding: 10px;">
         <button class="btn-guardar" style="background: var(--purpura);" onclick="importarHojaMasiva()">📋 IMPORTAR HOJA DE PEDIDOS</button>
-        <div id="lista-pedidos-mcdonalds" style="margin-top:20px;"></div>
+        <div id="lista-pedidos-mcdonalds" style="margin-top:20px;">
+            </div>
     </div>
 </div>
 
@@ -108,76 +323,87 @@
 
 <div id="modalMesa" class="modal">
     <h2 id="mesaTitulo" style="color:var(--verde-cultigar); margin-top:0;">Mesa --</h2>
-    <div id="zonaPegarTraza"></div>
     
     <div id="opcionesEnvioPedido" style="display:none; background:#2c3e50; padding:15px; border-radius:10px; margin-bottom:15px; border: 2px solid var(--purpura);">
-        <p style="margin:0 0 10px 0; font-weight:bold;">📤 Enviar a Pedido:</p>
+        <p style="margin:0 0 10px 0; font-weight:bold;">📤 Enviar a Pedido McDonalds:</p>
         <select id="selectDestinoPedido" style="width:100%; padding:10px; margin-bottom:10px;"></select>
         <button class="btn-guardar" style="background:var(--purpura); margin:0;" onclick="confirmarEnvioAPedido()">CONFIRMAR ENVÍO</button>
         <button class="btn-guardar" style="background:#444; margin-top:5px;" onclick="document.getElementById('opcionesEnvioPedido').style.display='none'">CANCELAR</button>
     </div>
 
     <table>
-        <thead><tr><th>Ref</th><th>Bnd</th><th>Acción</th></tr></thead>
+        <thead>
+            <tr><th>Clon</th><th>Bnd</th><th>Acciones</th></tr>
+        </thead>
         <tbody id="tablaCuerpoMesa"></tbody>
     </table>
 
-    <div class="form-group"><label>Variedad</label><input type="text" id="f_ref"></div>
-    <div class="form-group"><label>Lote</label><input type="text" id="f_lote"></div>
-    <div class="flex-row">
-        <div class="form-group"><label>Nº Bnd</label><input type="number" id="f_num_bandejas"></div>
-        <div class="form-group"><label>Tipo Bnd</label><input type="text" id="f_tipo_bandeja" list="op_bnd"></div>
-    </div>
-    
-    <div style="display:flex; gap:5px;">
-        <button class="btn-guardar" style="background: var(--verde-cultigar); flex:2;" onclick="guardarRegistroTrazabilidad()">💾 GUARDAR</button>
-        <button id="btnRej" class="btn-guardar" style="background: #444; flex:1;" onclick="toggleRejuntar()">REJ.</button>
+    <div style="background: #222; padding: 15px; border-radius: 10px;">
+        <div class="form-group"><label>Variedad / Clon</label><input type="text" id="f_ref"></div>
+        <div class="form-group"><label>Lote</label><input type="text" id="f_lote"></div>
+        <div class="flex-row">
+            <div class="form-group"><label>Nº Bnd</label><input type="number" id="f_num_bandejas"></div>
+            <div class="form-group"><label>Tipo</label><input type="text" id="f_tipo_bandeja" list="op_bnd"></div>
+        </div>
+        
+        <div style="display:flex; gap:5px;">
+            <button class="btn-guardar" style="background: var(--verde-cultigar); flex:2;" onclick="guardarRegistroTrazabilidad()">💾 GUARDAR</button>
+            <button id="btnRej" class="btn-guardar" style="background: #444; flex:1;" onclick="toggleRejuntar()">REJUNT.</button>
+        </div>
     </div>
     <button class="btn-guardar" style="background: #555; margin-top:10px;" onclick="cerrarModales()">CERRAR</button>
 </div>
 
 <div id="modalFito" class="modal">
     <div style="display:flex; gap:5px; margin-bottom:15px;">
-        <button id="btnTabLog" class="btn-guardar" style="background:var(--azul-log); flex:1;" onclick="switchFitoTab('log')">📦 LOG</button>
+        <button id="btnTabLog" class="btn-guardar" style="background:var(--azul-log); flex:1;" onclick="switchFitoTab('log')">📦 LOGÍSTICA</button>
         <button id="btnTabFit" class="btn-guardar" style="background:#444; flex:1;" onclick="switchFitoTab('fit')">🛡️ FITOS</button>
     </div>
 
     <div id="panelLog">
         <h2 id="logTitulo" style="color:var(--azul-log); margin-top:0;">Logística</h2>
-        <table><thead><tr><th>Cliente</th><th>Bnd</th><th>Acción</th></tr></thead><tbody id="logCuerpoMesa"></tbody></table>
-        <div class="form-group"><label>Cliente / Variedad</label><input type="text" id="l_cli"></div>
+        <table>
+            <thead><tr><th>Cliente</th><th>Bnd</th><th>Acción</th></tr></thead>
+            <tbody id="logCuerpoMesa"></tbody>
+        </table>
+        <div class="form-group"><label>Cliente / Referencia</label><input type="text" id="l_cli"></div>
         <div class="form-group"><label>Bandejas</label><input type="number" id="l_bnd"></div>
         <button class="btn-guardar" style="background:var(--azul-log);" onclick="guardarLog()">💾 AÑADIR A CARRO/MESA</button>
     </div>
 
     <div id="panelFit" style="display:none;">
-        <h2 style="color:var(--rojo-fito); margin-top:0;">🛡️ Tratamiento</h2>
+        <h2 style="color:var(--rojo-fito); margin-top:0;">🛡️ Tratamientos</h2>
         <div class="form-group"><label>Plaga / Enfermedad</label><input type="text" id="fi_plaga"></div>
         <div class="form-group"><label>Producto Comercial</label><input type="text" id="fi_nomcom"></div>
         <div class="flex-row">
             <div class="form-group"><label>Dosis</label><input type="text" id="fi_dosis"></div>
-            <div class="form-group"><label>Plazo (Días)</label><input type="number" id="fi_plazo"></div>
+            <div class="form-group"><label>Plazo Seguridad (Días)</label><input type="number" id="fi_plazo"></div>
         </div>
-        <button class="btn-guardar" style="background:var(--rojo-fito);" onclick="guardarFitoPro()">🛡️ REGISTRAR</button>
-        <div style="overflow-x:auto">
-            <table><thead><tr><th>Fecha</th><th>Plaga</th><th>Vence</th><th>Acción</th></tr></thead><tbody id="fitoCuerpoMesaPro"></tbody></table>
-        </div>
+        <button class="btn-guardar" style="background:var(--rojo-fito);" onclick="guardarFitoPro()">🛡️ REGISTRAR TRATAMIENTO</button>
+        
+        <table>
+            <thead><tr><th>Fecha</th><th>Producto</th><th>Seg.</th><th>Acción</th></tr></thead>
+            <tbody id="fitoCuerpoMesaPro"></tbody>
+        </table>
     </div>
     <button class="btn-guardar" style="background:#555; margin-top:10px;" onclick="cerrarModales()">CERRAR</button>
 </div>
 
-<datalist id="op_bnd"><option value="40"><option value="60"><option value="84"></datalist>
+<datalist id="op_bnd">
+    <option value="40"><option value="60"><option value="84"><option value="104">
+</datalist>
 
 <script>
+    // --- CONFIGURACIÓN Y BASES DE DATOS ---
     const GIST_ID = "dc4b1ac9b41655086c76352f03ccfafe";
     let DB_TRAZA = JSON.parse(localStorage.getItem('culti_traza')) || {};
     let DB_FITO = JSON.parse(localStorage.getItem('culti_fito')) || {};
     let DB_PEDIDOS = JSON.parse(localStorage.getItem('culti_pedidos')) || [];
     
     let mesaSeleccionada = "";
-    let itemParaCortar = null;
-    let editIdx = null;
+    let itemSeleccionadoParaPedido = null;
 
+    // --- GEOMETRÍA SAGRADA ---
     const GEOMETRIA = [
         {id:'10-48', x:10, y:70, w:40, h:140}, {id:'11-49', x:55, y:70, w:40, h:140},
         {id:'12-50', x:105, y:70, w:40, h:140}, {id:'13-51', x:150, y:70, w:40, h:140},
@@ -195,6 +421,35 @@
         {id:'16-54', x:300, y:540, w:38, h:145}, {id:'17-55', x:345, y:540, w:38, h:145}
     ];
 
+    // --- INICIALIZACIÓN ---
+    function inicializarMapas() {
+        let tHtml = "", fHtml = "";
+        
+        // Dibujar bloques principales
+        GEOMETRIA.forEach(m => {
+            tHtml += `<rect id="t-${m.id}" class="mesa" x="${m.x}" y="${m.y}" width="${m.w}" height="${m.h}" onclick="abrirTraza('${m.id}')"></rect><text x="${m.x + m.w/2}" y="${m.y + m.h - 5}" class="texto-id">${m.id}</text>`;
+            fHtml += `<rect id="f-${m.id}" class="mesa" x="${m.x}" y="${m.y}" width="${m.w}" height="${m.h}" onclick="abrirFito('${m.id}')"></rect><text x="${m.x + m.w/2}" y="${m.y + m.h - 5}" class="texto-id">${m.id}</text>`;
+        });
+
+        // Dibujar Pasillo Túneles 1-14 (Derecha)
+        for(let i=1; i<=14; i++) {
+            let yPos = 70 + (14-i) * 46;
+            tHtml += `<rect id="t-${i}" class="mesa" x="390" y="${yPos}" width="75" height="42" onclick="abrirTraza('${i}')"></rect><text x="427" y="${yPos + 26}" class="texto-id">${i}</text>`;
+            fHtml += `<rect id="f-${i}" class="mesa" x="390" y="${yPos}" width="75" height="42" onclick="abrirFito('${i}')"></rect><text x="427" y="${yPos + 26}" class="texto-id">${i}</text>`;
+        }
+
+        // Dibujar Carros (Solo Mapa 2)
+        ['C1','C2','C3','C4'].forEach((id, idx) => {
+            let xPos = 210 + (idx * 45);
+            fHtml += `<rect id="f-${id}" class="carro" x="${xPos}" y="710" width="38" height="65" onclick="abrirFito('${id}')"></rect><text x="${xPos+19}" y="748" class="texto-id">${id}</text>`;
+        });
+
+        document.getElementById('svg-trazabilidad').innerHTML = tHtml;
+        document.getElementById('svg-fito').innerHTML = fHtml;
+        actualizarColoresMapas();
+    }
+
+    // --- FUNCIONES DE NAVEGACIÓN ---
     function showTab(id) {
         document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
         document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
@@ -204,37 +459,21 @@
         actualizarColoresMapas();
     }
 
-    function inicializarMapas() {
-        let tHtml = "", fHtml = "";
-        GEOMETRIA.forEach(m => {
-            tHtml += `<rect id="t-${m.id}" class="mesa" x="${m.x}" y="${m.y}" width="${m.w}" height="${m.h}" onclick="abrirTraza('${m.id}')"></rect><text x="${m.x + m.w/2}" y="${m.y + m.h - 5}" class="texto-id">${m.id}</text>`;
-            fHtml += `<rect id="f-${m.id}" class="mesa" x="${m.x}" y="${m.y}" width="${m.w}" height="${m.h}" onclick="abrirFito('${m.id}')"></rect><text x="${m.x + m.w/2}" y="${m.y + m.h - 5}" class="texto-id">${m.id}</text>`;
-        });
-        // Pasillo de mesas 1-14 derecha
-        for(let i=1; i<=14; i++) {
-            let yPos = 70 + (14-i) * 46;
-            tHtml += `<rect id="t-${i}" class="mesa" x="395" y="${yPos}" width="75" height="38" onclick="abrirTraza('${i}')"></rect><text x="432" y="${yPos + 22}" class="texto-id">${i}</text>`;
-            fHtml += `<rect id="f-${i}" class="mesa" x="395" y="${yPos}" width="75" height="38" onclick="abrirFito('${i}')"></rect><text x="432" y="${yPos + 22}" class="texto-id">${i}</text>`;
-        }
-        // Carros 
-        ['C1','C2','C3','C4'].forEach((id, idx) => {
-            let xPos = 210 + (idx * 45);
-            fHtml += `<rect id="f-${id}" class="carro" x="${xPos}" y="710" width="38" height="60" onclick="abrirFito('${id}')"></rect><text x="${xPos+19}" y="745" class="texto-id">${id}</text>`;
-        });
-        document.getElementById('svg-trazabilidad').innerHTML = tHtml;
-        document.getElementById('svg-fito').innerHTML = fHtml;
-        actualizarColoresMapas();
-    }
-
-    // --- FUNCIONES PEDIDOS (MC AUTO) ---
+    // --- GESTIÓN DE PEDIDOS ---
     function importarHojaMasiva() {
         let raw = prompt("Pega los datos procesados:");
         if(!raw) return;
         raw.split('\n').forEach(l => {
             try {
                 let p = l.split('|');
-                DB_PEDIDOS.push({ id: Date.now()+Math.random(), cli: p[0].split(':')[1].trim(), var: p[1].split(':')[1].trim(), total: parseInt(p[2].split(':')[1].trim()), actual: 0 });
-            } catch(e) {}
+                DB_PEDIDOS.push({
+                    id: Date.now() + Math.random(),
+                    cli: p[0].split(':')[1].trim(),
+                    var: p[1].split(':')[1].trim(),
+                    total: parseInt(p[2].split(':')[1].trim()),
+                    actual: 0
+                });
+            } catch(e) { console.error("Error en línea:", l); }
         });
         persistir(); dibujarPedidos();
     }
@@ -244,20 +483,30 @@
         DB_PEDIDOS.forEach(p => {
             let perc = Math.min(100, (p.actual / p.total) * 100);
             html += `<div class="card-pedido ${perc >= 100 ? 'completado' : ''}">
-                <div style="display:flex; justify-content:space-between"><b>${p.cli}</b> <span>${p.actual} / ${p.total}</span></div>
+                <div style="display:flex; justify-content:space-between">
+                    <b>${p.cli}</b>
+                    <span>${p.actual} / ${p.total} bnd</span>
+                </div>
                 <div style="font-size:12px; color:#aaa; margin-top:4px;">Variedad: ${p.var}</div>
-                <div class="progress-bar"><div class="progress-fill" style="width:${perc}%"></div></div>
-                ${perc >= 100 ? `<button onclick="despachar(${p.id})" style="background:var(--verde-cultigar); border:none; color:white; padding:5px; border-radius:4px; margin-top:10px; cursor:pointer;">✅ DESPACHAR</button>` : ''}
+                <div style="background:#2c3e50; height:8px; border-radius:4px; margin-top:10px;">
+                    <div style="background:var(--verde-cultigar); width:${perc}%; height:100%; border-radius:4px;"></div>
+                </div>
+                ${perc >= 100 ? `<button onclick="eliminarPedido(${p.id})" style="margin-top:10px; padding:5px; width:100%; border:none; background:var(--verde-cultigar); color:white; border-radius:4px; font-weight:bold;">✅ FINALIZAR Y QUITAR</button>` : ''}
             </div>`;
         });
-        document.getElementById('lista-pedidos-mcdonalds').innerHTML = html || "<p style='text-align:center; color:#888;'>No hay pedidos pendientes.</p>";
+        document.getElementById('lista-pedidos-mcdonalds').innerHTML = html || "<p style='text-align:center;'>No hay pedidos pendientes.</p>";
     }
 
-    function despachar(id) { DB_PEDIDOS = DB_PEDIDOS.filter(p => p.id !== id); persistir(); dibujarPedidos(); actualizarColoresMapas(); }
+    function eliminarPedido(id) {
+        if(confirm("¿Deseas archivar este pedido?")) {
+            DB_PEDIDOS = DB_PEDIDOS.filter(p => p.id !== id);
+            persistir(); dibujarPedidos(); actualizarColoresMapas();
+        }
+    }
 
     // --- TRAZABILIDAD (MAPA 1) ---
     function abrirTraza(id) {
-        mesaSeleccionada = id; editIdx = null;
+        mesaSeleccionada = id;
         document.getElementById('mesaTitulo').innerText = "Mesa " + id;
         mostrarTablaTraza();
         document.getElementById('overlay').style.display = 'block';
@@ -269,11 +518,14 @@
         let items = Array.isArray(mesa) ? mesa : mesa.items;
         let html = "";
         items.forEach((it, i) => {
-            html += `<tr><td>${it.ref}</td><td>${it.num_bandejas}</td>
+            html += `<tr>
+                <td><b>${it.ref}</b></td>
+                <td>${it.num_bandejas}</td>
                 <td style="display:flex; gap:5px;">
                     <button class="btn-accion" onclick="prepararEnvio(${i})">📦</button>
-                    <button class="btn-accion" onclick="borrarItem(${i})">🗑️</button>
-                </td></tr>`;
+                    <button class="btn-accion" style="background:#c0392b" onclick="borrarItem(${i})">🗑️</button>
+                </td>
+            </tr>`;
         });
         document.getElementById('tablaCuerpoMesa').innerHTML = html;
         document.getElementById('btnRej').style.background = mesa.rej ? "var(--azul-log)" : "#444";
@@ -282,8 +534,18 @@
     function guardarRegistroTrazabilidad() {
         if(!DB_TRAZA[mesaSeleccionada]) DB_TRAZA[mesaSeleccionada] = { items: [], rej: false };
         let items = Array.isArray(DB_TRAZA[mesaSeleccionada]) ? DB_TRAZA[mesaSeleccionada] : DB_TRAZA[mesaSeleccionada].items;
-        items.push({ ref: document.getElementById('f_ref').value.toUpperCase(), lote: document.getElementById('f_lote').value, num_bandejas: parseInt(document.getElementById('f_num_bandejas').value), tipo: document.getElementById('f_tipo_bandeja').value });
+        
+        items.push({
+            ref: document.getElementById('f_ref').value.toUpperCase(),
+            lote: document.getElementById('f_lote').value,
+            num_bandejas: parseInt(document.getElementById('f_num_bandejas').value) || 0,
+            tipo: document.getElementById('f_tipo_bandeja').value
+        });
+        
         persistir(); mostrarTablaTraza(); actualizarColoresMapas();
+        // Limpiar campos
+        document.getElementById('f_ref').value = "";
+        document.getElementById('f_num_bandejas').value = "";
     }
 
     function toggleRejuntar() {
@@ -292,82 +554,117 @@
         persistir(); mostrarTablaTraza(); actualizarColoresMapas();
     }
 
-    function prepararEnvio(i) {
+    function prepararEnvio(idx) {
         let items = Array.isArray(DB_TRAZA[mesaSeleccionada]) ? DB_TRAZA[mesaSeleccionada] : DB_TRAZA[mesaSeleccionada].items;
-        itemParaCortar = { idx: i, data: items[i] };
+        itemSeleccionadoParaPedido = { idx: idx, data: items[idx] };
+        
         let sel = document.getElementById('selectDestinoPedido');
         sel.innerHTML = "";
-        DB_PEDIDOS.forEach(p => {
-            if(p.var.includes(itemParaCortar.data.ref)) {
-                let o = document.createElement('option'); o.value = p.id; o.text = `${p.cli} (${p.var})`; sel.add(o);
-            }
+        
+        let coincidencias = DB_PEDIDOS.filter(p => p.var.toUpperCase().includes(itemSeleccionadoParaPedido.data.ref.toUpperCase()));
+        
+        if(coincidencias.length === 0) {
+            alert("No hay pedidos abiertos que coincidan con esta variedad.");
+            return;
+        }
+
+        coincidencias.forEach(p => {
+            let opt = document.createElement('option');
+            opt.value = p.id;
+            opt.text = `${p.cli} - ${p.var} (Faltan: ${p.total - p.actual})`;
+            sel.add(opt);
         });
-        document.getElementById('opcionesEnvioPedido').style.display = sel.options.length > 0 ? "block" : "none";
-        if(sel.options.length === 0) alert("No hay pedidos de esta variedad en el McDonald's.");
+
+        document.getElementById('opcionesEnvioPedido').style.display = 'block';
     }
 
     function confirmarEnvioAPedido() {
-        let pId = document.getElementById('selectDestinoPedido').value;
-        let cant = parseInt(prompt("Cantidad a enviar:", itemParaCortar.data.num_bandejas));
-        if(!cant) return;
+        let pedidoId = document.getElementById('selectDestinoPedido').value;
+        let cant = parseInt(prompt("¿Cuántas bandejas envías?", itemSeleccionadoParaPedido.data.num_bandejas));
         
-        let p = DB_PEDIDOS.find(x => x.id == pId);
+        if(!cant || cant <= 0) return;
+
+        // Actualizar Pedido
+        let p = DB_PEDIDOS.find(x => x.id == pedidoId);
         p.actual += cant;
-        
+
+        // Actualizar Mesa
         let items = Array.isArray(DB_TRAZA[mesaSeleccionada]) ? DB_TRAZA[mesaSeleccionada] : DB_TRAZA[mesaSeleccionada].items;
-        items[itemParaCortar.idx].num_bandejas -= cant;
-        if(items[itemParaCortar.idx].num_bandejas <= 0) items.splice(itemParaCortar.idx, 1);
+        items[itemSeleccionadoParaPedido.idx].num_bandejas -= cant;
         
-        persistir(); cerrarModales(); actualizarColoresMapas();
+        if(items[itemSeleccionadoParaPedido.idx].num_bandejas <= 0) {
+            items.splice(itemSeleccionadoParaPedido.idx, 1);
+        }
+
+        persistir();
+        document.getElementById('opcionesEnvioPedido').style.display = 'none';
+        mostrarTablaTraza();
+        actualizarColoresMapas();
+        alert("Enviado correctamente.");
     }
 
     function borrarItem(i) {
-        let items = Array.isArray(DB_TRAZA[mesaSeleccionada]) ? DB_TRAZA[mesaSeleccionada] : DB_TRAZA[mesaSeleccionada].items;
-        items.splice(i,1); persistir(); mostrarTablaTraza(); actualizarColoresMapas();
+        if(confirm("¿Borrar esta línea?")) {
+            let items = Array.isArray(DB_TRAZA[mesaSeleccionada]) ? DB_TRAZA[mesaSeleccionada] : DB_TRAZA[mesaSeleccionada].items;
+            items.splice(i, 1);
+            persistir(); mostrarTablaTraza(); actualizarColoresMapas();
+        }
     }
 
-    // --- FITOS / LOG (MAPA 2) ---
+    // --- FITOS / LOGÍSTICA (MAPA 2) ---
     function abrirFito(id) {
         mesaSeleccionada = id;
-        document.getElementById('logTitulo').innerText = id;
-        mostrarLog(); mostrarFito();
+        document.getElementById('logTitulo').innerText = "Gestión: " + id;
+        switchFitoTab('log');
+        mostrarLog();
+        mostrarFito();
         document.getElementById('overlay').style.display = 'block';
         document.getElementById('modalFito').style.display = 'block';
     }
 
-    function switchFitoTab(t) {
-        document.getElementById('panelLog').style.display = t==='log'?'block':'none';
-        document.getElementById('panelFit').style.display = t==='fit'?'block':'none';
-        document.getElementById('btnTabLog').style.background = t==='log'? 'var(--azul-log)':'#444';
-        document.getElementById('btnTabFit').style.background = t==='fit'? 'var(--rojo-fito)':'#444';
+    function switchFitoTab(tab) {
+        document.getElementById('panelLog').style.display = tab === 'log' ? 'block' : 'none';
+        document.getElementById('panelFit').style.display = tab === 'fit' ? 'block' : 'none';
+        document.getElementById('btnTabLog').style.background = tab === 'log' ? 'var(--azul-log)' : '#444';
+        document.getElementById('btnTabFit').style.background = tab === 'fit' ? 'var(--rojo-fito)' : '#444';
+    }
+
+    function guardarLog() {
+        if(!DB_FITO[mesaSeleccionada]) DB_FITO[mesaSeleccionada] = { pedidos: [], fito: [] };
+        DB_FITO[mesaSeleccionada].pedidos.push({
+            cli: document.getElementById('l_cli').value.toUpperCase(),
+            bnd: document.getElementById('l_bnd').value
+        });
+        persistir(); mostrarLog(); actualizarColoresMapas();
+        document.getElementById('l_cli').value = "";
     }
 
     function mostrarLog() {
         let html = "";
         let peds = DB_FITO[mesaSeleccionada]?.pedidos || [];
         peds.forEach((p, i) => {
-            html += `<tr><td>${p.cli}</td><td>${p.bnd}</td><td><button onclick="borrarLog(${i})">🗑️</button></td></tr>`;
+            html += `<tr><td>${p.cli}</td><td>${p.bnd}</td><td><button class="btn-accion" onclick="borrarLog(${i})">🗑️</button></td></tr>`;
         });
         document.getElementById('logCuerpoMesa').innerHTML = html;
     }
 
-    function guardarLog() {
-        if(!DB_FITO[mesaSeleccionada]) DB_FITO[mesaSeleccionada] = { pedidos: [], fito: [] };
-        DB_FITO[mesaSeleccionada].pedidos.push({ cli: document.getElementById('l_cli').value.toUpperCase(), bnd: document.getElementById('l_bnd').value });
+    function borrarLog(i) {
+        DB_FITO[mesaSeleccionada].pedidos.splice(i, 1);
         persistir(); mostrarLog(); actualizarColoresMapas();
     }
 
-    function borrarLog(i) { DB_FITO[mesaSeleccionada].pedidos.splice(i,1); persistir(); mostrarLog(); actualizarColoresMapas(); }
-
-    function guardarFito() {
+    function guardarFitoPro() {
         if(!DB_FITO[mesaSeleccionada]) DB_FITO[mesaSeleccionada] = { pedidos: [], fito: [] };
-        let v = new Date(); v.setDate(v.getDate() + parseInt(document.getElementById('fi_plazo').value || 0));
+        let vencimiento = new Date();
+        vencimiento.setDate(vencimiento.getDate() + parseInt(document.getElementById('fi_plazo').value || 0));
+        
         DB_FITO[mesaSeleccionada].fito.push({
-            f: new Date().toLocaleDateString(),
-            p: document.getElementById('fi_plaga').value.toUpperCase(),
-            n: document.getElementById('fi_nomcom').value.toUpperCase(),
-            v: v.toISOString()
+            fecha: new Date().toLocaleDateString(),
+            plaga: document.getElementById('fi_plaga').value.toUpperCase(),
+            producto: document.getElementById('fi_nomcom').value.toUpperCase(),
+            vence: vencimiento.toISOString()
         });
+        
         persistir(); mostrarFito(); actualizarColoresMapas();
     }
 
@@ -376,15 +673,24 @@
         let hoy = new Date();
         let fits = DB_FITO[mesaSeleccionada]?.fito || [];
         fits.forEach((f, i) => {
-            let rest = Math.ceil((new Date(f.v) - hoy) / (1000*60*60*24));
-            html += `<tr><td>${f.f}</td><td>${f.n}</td><td style="color:${rest>0?'red':'green'}">${rest>0?rest+'d':'OK'}</td><td><button onclick="borrarFito(${i})">🗑️</button></td></tr>`;
+            let diasRestantes = Math.ceil((new Date(f.vence) - hoy) / (1000 * 60 * 60 * 24));
+            let colorVence = diasRestantes > 0 ? "red" : "green";
+            html += `<tr>
+                <td>${f.fecha}</td>
+                <td>${f.producto}</td>
+                <td style="color:${colorVence}; font-weight:bold;">${diasRestantes > 0 ? diasRestantes + 'd' : 'OK'}</td>
+                <td><button class="btn-accion" onclick="borrarFito(${i})">🗑️</button></td>
+            </tr>`;
         });
         document.getElementById('fitoCuerpoMesaPro').innerHTML = html;
     }
 
-    function borrarFito(i) { DB_FITO[mesaSeleccionada].fito.splice(i,1); persistir(); mostrarFito(); actualizarColoresMapas(); }
+    function borrarFito(i) {
+        DB_FITO[mesaSeleccionada].fito.splice(i, 1);
+        persistir(); mostrarFito(); actualizarColoresMapas();
+    }
 
-    // --- GENERALES ---
+    // --- ACTUALIZACIÓN VISUAL ---
     function actualizarColoresMapas() {
         // Mapa 1
         document.querySelectorAll('#svg-trazabilidad .mesa').forEach(r => {
@@ -393,55 +699,46 @@
             r.classList.remove('ocupada', 'rejuntado');
             if(d) {
                 let items = Array.isArray(d) ? d : d.items;
-                if(items?.length > 0) d.rej ? r.classList.add('rejuntado') : r.classList.add('ocupada');
+                if(items && items.length > 0) {
+                    d.rej ? r.classList.add('rejuntado') : r.classList.add('ocupada');
+                }
             }
         });
+
         // Mapa 2
         document.querySelectorAll('#svg-fito .mesa, #svg-fito .carro').forEach(r => {
             let id = r.id.replace('f-', '');
             let d = DB_FITO[id];
             r.classList.remove('aviso-salida', 'listo-salida');
-            r.style.fill = "white"; r.style.strokeWidth = "1.5";
-            if(d) {
-                if(d.pedidos?.length > 0) r.classList.add('listo-salida');
-                if(d.fito?.some(f => new Date(f.v) > new Date())) { r.style.fill = "var(--rojo-fito)"; r.style.stroke = "white"; }
+            r.style.fill = "white";
+
+            // Si hay logística manual (Listo para salida)
+            if(d && d.pedidos && d.pedidos.length > 0) r.classList.add('listo-salida');
+            
+            // Si hay tratamiento activo (En Rojo)
+            if(d && d.fito && d.fito.some(f => new Date(f.vence) > new Date())) {
+                r.style.fill = "var(--rojo-fito)";
             }
-            // Alerta McDonalds
-            let items = DB_TRAZA[id] ? (Array.isArray(DB_TRAZA[id]) ? DB_TRAZA[id] : DB_TRAZA[id].items) : [];
-            if(items?.some(it => DB_PEDIDOS.some(p => p.var.includes(it.ref)))) r.classList.add('aviso-salida');
+
+            // Alerta McDonalds (Parpadeo lila)
+            let itemsTraza = DB_TRAZA[id] ? (Array.isArray(DB_TRAZA[id]) ? DB_TRAZA[id] : DB_TRAZA[id].items) : [];
+            if(itemsTraza && itemsTraza.some(it => DB_PEDIDOS.some(p => p.var.toUpperCase().includes(it.ref.toUpperCase())))) {
+                r.classList.add('aviso-salida');
+            }
         });
     }
 
-    async function subirDatos() {
-        const token = localStorage.getItem('github_token'); if(!token) return alert("Falta Token");
-        await fetch(`https://api.github.com/gists/${GIST_ID}`, {
-            method: 'PATCH',
-            headers: { 'Authorization': `token ${token}` },
-            body: JSON.stringify({ files: { "cultigar_db.json": { content: JSON.stringify(DB_TRAZA) }, "cultigar_fito.json": { content: JSON.stringify(DB_FITO) }, "cultigar_ped.json": { content: JSON.stringify(DB_PEDIDOS) } }})
-        });
-        alert("Sincronizado");
-    }
-
-    async function bajarDatos() {
-        try {
-            const res = await fetch(`https://api.github.com/gists/${GIST_ID}?cb=${Date.now()}`);
-            const data = await res.json();
-            if(data.files["cultigar_db.json"]) DB_TRAZA = JSON.parse(data.files["cultigar_db.json"].content);
-            if(data.files["cultigar_fito.json"]) DB_FITO = JSON.parse(data.files["cultigar_fito.json"].content);
-            if(data.files["cultigar_ped.json"]) DB_PEDIDOS = JSON.parse(data.files["cultigar_ped.json"].content);
-            actualizarColoresMapas();
-        } catch(e) {}
-    }
-
+    // --- UTILIDADES ---
     function ejecutarBusqueda() {
         let b = document.getElementById('buscador').value.toUpperCase();
-        document.querySelectorAll('.mesa').forEach(m => m.classList.remove('resaltado'));
+        document.querySelectorAll('.mesa, .carro').forEach(m => m.classList.remove('resaltado'));
         if(!b) return;
-        for(let m in DB_TRAZA) {
-            let items = Array.isArray(DB_TRAZA[m]) ? DB_TRAZA[m] : DB_TRAZA[m].items;
-            if(items?.some(it => it.ref.includes(b))) {
-                document.getElementById('t-'+m)?.classList.add('resaltado');
-                document.getElementById('f-'+m)?.classList.add('resaltado');
+        
+        for(let id in DB_TRAZA) {
+            let items = Array.isArray(DB_TRAZA[id]) ? DB_TRAZA[id] : DB_TRAZA[id].items;
+            if(items && items.some(it => it.ref.toUpperCase().includes(b))) {
+                document.getElementById('t-'+id)?.classList.add('resaltado');
+                document.getElementById('f-'+id)?.classList.add('resaltado');
             }
         }
     }
@@ -452,12 +749,48 @@
         localStorage.setItem('culti_pedidos', JSON.stringify(DB_PEDIDOS));
     }
 
-    function cerrarModales() { 
-        document.getElementById('overlay').style.display = 'none'; 
-        document.querySelectorAll('.modal').forEach(m => m.style.display = 'none'); 
+    function cerrarModales() {
+        document.getElementById('overlay').style.display = 'none';
+        document.getElementById('modalMesa').style.display = 'none';
+        document.getElementById('modalFito').style.display = 'none';
     }
 
-    window.onload = () => { inicializarMapas(); bajarDatos(); };
+    async function subirDatos() {
+        const token = localStorage.getItem('github_token') || prompt("Introduce tu Token de GitHub:");
+        if(!token) return;
+        localStorage.setItem('github_token', token);
+        
+        try {
+            await fetch(`https://api.github.com/gists/${GIST_ID}`, {
+                method: 'PATCH',
+                headers: { 'Authorization': `token ${token}` },
+                body: JSON.stringify({
+                    files: {
+                        "cultigar_db.json": { content: JSON.stringify(DB_TRAZA) },
+                        "cultigar_fito.json": { content: JSON.stringify(DB_FITO) },
+                        "cultigar_ped.json": { content: JSON.stringify(DB_PEDIDOS) }
+                    }
+                })
+            });
+            alert("✅ Sincronizado en la nube.");
+        } catch(e) { alert("❌ Error al subir."); }
+    }
+
+    async function bajarDatos() {
+        try {
+            const res = await fetch(`https://api.github.com/gists/${GIST_ID}?nocache=${Date.now()}`);
+            const data = await res.json();
+            DB_TRAZA = JSON.parse(data.files["cultigar_db.json"].content);
+            DB_FITO = JSON.parse(data.files["cultigar_fito.json"].content);
+            DB_PEDIDOS = JSON.parse(data.files["cultigar_ped.json"].content);
+            persistir();
+            inicializarMapas();
+            alert("✅ Datos actualizados desde la nube.");
+        } catch(e) { alert("❌ Error al bajar datos."); }
+    }
+
+    window.onload = inicializarMapas;
 </script>
+
 </body>
 </html>
