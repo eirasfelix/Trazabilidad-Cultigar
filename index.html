@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CULTIGAR - SISTEMA INTEGRAL PRO</title>
     <style>
         :root {
@@ -22,9 +22,6 @@
             margin: 0; 
             color: white;
             padding-bottom: 50px;
-            /* CORRECCIÓN 2: Evita desplazamientos raros del cuerpo */
-            max-width: 100vw;
-            overflow-x: hidden;
         }
 
         .header-sticky {
@@ -57,17 +54,17 @@
             transition: 0.3s;
         }
 
+        /* CONTENEDOR MEJORADO: Centra el mapa y permite scroll si es necesario */
         .seccion-mapa {
             background: #eee;
             margin: 20px auto;
-            padding: 15px;
-            /* CORRECCIÓN 3: Ancho flexible para que quepa todo el SVG */
+            padding: 10px;
             width: 95%;
-            max-width: 520px; 
+            max-width: 500px; 
             border-radius: 10px;
             border: 3px solid #000;
-            overflow-x: auto; /* Permite scroll si el móvil es estrecho */
-            -webkit-overflow-scrolling: touch;
+            overflow-x: auto; 
+            display: block;
         }
 
         .titulo-mapa {
@@ -80,9 +77,8 @@
 
         svg {
             display: block;
-            margin: auto;
+            margin: 0 auto;
             background: white;
-            /* Asegura que no se deforme */
             flex-shrink: 0;
         }
 
@@ -174,12 +170,12 @@
 
 <div class="seccion-mapa">
     <h3 class="titulo-mapa" style="color: var(--verde-cultigar);">Mapa 1: Trazabilidad</h3>
-    <svg width="500" height="780" viewBox="0 0 500 780" id="svg-trazabilidad"></svg>
+    <svg width="480" height="780" id="svg-trazabilidad" style="min-width: 480px;"></svg>
 </div>
 
 <div class="seccion-mapa">
     <h3 class="titulo-mapa" style="color: var(--azul-log);">Mapa 2: Logística y Fitos</h3>
-    <svg width="500" height="880" viewBox="0 0 500 880" id="svg-fito"></svg>
+    <svg width="480" height="880" id="svg-fito" style="min-width: 480px;"></svg>
 </div>
 
 <div class="overlay" id="overlay" onclick="cerrarModales()"></div>
@@ -222,24 +218,19 @@
 
     <div id="panelFit" style="display:none;">
         <h2 style="color: var(--rojo-fito); font-size: 18px;">🛡️ Nuevo Tratamiento</h2>
-        
         <div class="form-group"><label>Tipo de Plaga / Enfermedad</label><input type="text" id="fi_plaga"></div>
-
         <div class="flex-row">
             <div class="form-group"><label>Nombre Comercial</label><input type="text" id="fi_nomcom"></div>
             <div class="form-group"><label>Nº Registro</label><input type="text" id="fi_nreg"></div>
         </div>
-        
         <div class="flex-row">
             <div class="form-group"><label>Aplicador</label><input type="text" id="fi_aplicador"></div>
             <div class="form-group"><label>Equipo</label><input type="text" id="fi_equipo"></div>
         </div>
-
         <div class="flex-row">
             <div class="form-group"><label>Dosis</label><input type="text" id="fi_dosis"></div>
             <div class="form-group"><label>Superficie m²</label><input type="number" id="fi_m2"></div>
         </div>
-
         <div class="flex-row">
             <div class="form-group"><label>Plazo Seguridad (Días)</label><input type="number" id="fi_plazo"></div>
             <div class="form-group"><label>Color Manual Mapa</label>
@@ -251,16 +242,9 @@
                 </select>
             </div>
         </div>
-
         <button id="btnGuardarFito" class="btn-guardar" style="background:var(--rojo-fito);" onclick="guardarFitoPro()">🛡️ REGISTRAR TRATAMIENTO</button>
-        
         <h2 style="color: #aaa; font-size: 14px; margin-top:20px;">Historial de la Mesa</h2>
-        <div style="overflow-x: auto;">
-            <table style="min-width: 700px;">
-                <thead><tr><th>Fecha</th><th>Plaga</th><th>Producto</th><th>Vence</th><th>Aplicador</th><th>m²</th><th>Acción</th></tr></thead>
-                <tbody id="fitoCuerpoMesaPro"></tbody>
-            </table>
-        </div>
+        <div style="overflow-x: auto;"><table style="min-width: 700px;"><thead><tr><th>Fecha</th><th>Plaga</th><th>Producto</th><th>Vence</th><th>Aplicador</th><th>m²</th><th>Acción</th></tr></thead><tbody id="fitoCuerpoMesaPro"></tbody></table></div>
     </div>
     <button class="btn-guardar btn-cerrar" onclick="cerrarModales()">CERRAR</button>
 </div>
