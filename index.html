@@ -96,11 +96,9 @@
             text-anchor: middle;
         }
 
-        /* Estados Visuales */
         .ocupada { fill: #a9dfbf !important; }
         .resaltado { fill: #f39c12 !important; stroke: #d35400; stroke-width: 4; }
 
-        /* Modales */
         .modal {
             position: fixed;
             top: 50%;
@@ -145,6 +143,7 @@
 
         .btn-guardar { width: 100%; padding: 15px; border: none; border-radius: 8px; font-weight: bold; color: white; cursor: pointer; font-size: 16px; margin-bottom: 5px; }
         .btn-cerrar { background: #555; margin-top: 10px; }
+        .btn-accion { padding: 5px; cursor: pointer; border: none; border-radius: 3px; }
     </style>
 </head>
 <body>
@@ -169,6 +168,7 @@
 
 <div id="modalMesa" class="modal">
     <h2 id="mesaTitulo" style="color: var(--verde-cultigar); font-size: 18px;">Mesa --</h2>
+    <div id="zonaPegarTraza"></div>
     <table>
         <thead><tr><th>Ref</th><th>Lote</th><th>Bnd</th><th>Acción</th></tr></thead>
         <tbody id="tablaCuerpoMesa"></tbody>
@@ -181,7 +181,7 @@
             <datalist id="op_bnd"><option value="40"><option value="60"><option value="84"></datalist>
         </div>
     </div>
-    <button class="btn-guardar" style="background: var(--verde-cultigar);" onclick="guardarRegistroTrazabilidad()">💾 GUARDAR TRAZA</button>
+    <button id="btnGuardarTraza" class="btn-guardar" style="background: var(--verde-cultigar);" onclick="guardarRegistroTrazabilidad()">💾 GUARDAR TRAZA</button>
     <button class="btn-guardar btn-cerrar" onclick="cerrarModales()">CERRAR</button>
 </div>
 
@@ -219,6 +219,7 @@
     let DB_FITO = JSON.parse(localStorage.getItem('culti_fito')) || {};
     let mesaSeleccionada = "";
     let indexEdicion = null;
+    let portapapeles = null;
 
     const GEOMETRIA = [
         {id:'10-48', x:10, y:70, w:40, h:140}, {id:'11-49', x:55, y:70, w:40, h:140},
@@ -253,9 +254,9 @@
         actualizarColoresMapas();
     }
 
-    // FUNCIONES MAPA 1 (TRAZABILIDAD)
+    // --- FUNCIONES MAPA 1 (TRAZABILIDAD) ---
     function abrirTraza(id) {
-        mesaSeleccionada = id;
+        mesaSeleccionada = id; indexEdicion = null;
         mostrarTablaTraza();
         document.getElementById('overlay').style.display = 'block';
         document.getElementById('modalMesa').style.display = 'block';
@@ -265,25 +266,80 @@
         let html = "";
         let datos = DB_TRAZA[mesaSeleccionada] || [];
         datos.forEach((r, i) => {
-            html += `<tr><td>${r.ref}</td><td>${r.lote}</td><td>${r.num_bandejas}</td><td><button onclick="borrarTraza(${i})">🗑️</button></td></tr>`;
+            html += `<tr>
+                <td>${r.ref}</td><td>${r.lote}</td><td>${r.num_bandejas}</td>
+                <td style="display:flex; gap:3px;">
+                    <button class="btn-accion" onclick="editarTraza(${i})">✏️</button>
+                    <button class="btn-accion" onclick="copiarTraza(${i})">📦</button>
+                    <button class="btn-accion" onclick="borrarTraza(${i})">🗑️</button>
+                </td>
+            </tr>`;
         });
         document.getElementById('mesaTitulo').innerText = "Mesa " + mesaSeleccionada;
         document.getElementById('tablaCuerpoMesa').innerHTML = html || "<tr><td colspan='4'>Mesa vacía</td></tr>";
+        actualizarBotonPegar();
     }
 
     function guardarRegistroTrazabilidad() {
         let nuevo = { ref: document.getElementById('f_ref').value.toUpperCase(), lote: document.getElementById('f_lote').value, num_bandejas: document.getElementById('f_num_bandejas').value, tipo_bandeja: document.getElementById('f_tipo_bandeja').value };
         if(!DB_TRAZA[mesaSeleccionada]) DB_TRAZA[mesaSeleccionada] = [];
-        DB_TRAZA[mesaSeleccionada].push(nuevo);
-        persistir(); mostrarTablaTraza(); actualizarColoresMapas();
+        
+        if(indexEdicion !== null) {
+            DB_TRAZA[mesaSeleccionada][indexEdicion] = nuevo;
+            indexEdicion = null;
+            document.getElementById('btnGuardarTraza').innerText = "💾 GUARDAR TRAZA";
+            document.getElementById('btnGuardarTraza').style.background = "var(--verde-cultigar)";
+        } else {
+            DB_TRAZA[mesaSeleccionada].push(nuevo);
+        }
+        
+        persistir(); mostrarTablaTraza(); actualizarColoresMapas(); limpiarFormTraza();
+    }
+
+    function editarTraza(i) {
+        let r = DB_TRAZA[mesaSeleccionada][i];
+        indexEdicion = i;
+        document.getElementById('f_ref').value = r.ref;
+        document.getElementById('f_lote').value = r.lote;
+        document.getElementById('f_num_bandejas').value = r.num_bandejas;
+        document.getElementById('f_tipo_bandeja').value = r.tipo_bandeja;
+        document.getElementById('btnGuardarTraza').innerText = "💾 ACTUALIZAR CAMBIOS";
+        document.getElementById('btnGuardarTraza').style.background = "#f39c12";
     }
 
     function borrarTraza(i) {
+        if(confirm("⚠️ ¿SEGURO QUE QUIERES ELIMINAR ESTE REGISTRO?")) {
+            DB_TRAZA[mesaSeleccionada].splice(i, 1);
+            persistir(); mostrarTablaTraza(); actualizarColoresMapas();
+        }
+    }
+
+    function copiarTraza(i) {
+        portapapeles = {...DB_TRAZA[mesaSeleccionada][i]};
         DB_TRAZA[mesaSeleccionada].splice(i, 1);
+        persistir(); mostrarTablaTraza(); actualizarColoresMapas();
+        alert("Lote movido al portapapeles. Ábrelo en otra mesa para PEGAR.");
+    }
+
+    function pegarTraza() {
+        if(!portapapeles) return;
+        if(!DB_TRAZA[mesaSeleccionada]) DB_TRAZA[mesaSeleccionada] = [];
+        DB_TRAZA[mesaSeleccionada].push(portapapeles);
+        portapapeles = null;
         persistir(); mostrarTablaTraza(); actualizarColoresMapas();
     }
 
-    // FUNCIONES MAPA 2 (LOGÍSTICA + FITOS)
+    function actualizarBotonPegar() {
+        let div = document.getElementById('zonaPegarTraza');
+        div.innerHTML = portapapeles ? `<button class="btn-guardar" style="background:var(--purpura);" onclick="pegarTraza()">📋 PEGAR LOTE AQUÍ</button>` : "";
+    }
+
+    function limpiarFormTraza() {
+        document.getElementById('f_ref').value = ""; document.getElementById('f_lote').value = "";
+        document.getElementById('f_num_bandejas').value = ""; document.getElementById('f_tipo_bandeja').value = "";
+    }
+
+    // --- FUNCIONES MAPA 2 (LOGÍSTICA + FITOS) ---
     function switchTab(t) {
         document.getElementById('panelLog').style.display = t === 'log' ? 'block' : 'none';
         document.getElementById('panelFit').style.display = t === 'fit' ? 'block' : 'none';
@@ -319,7 +375,12 @@
         persistir(); mostrarLog(); actualizarColoresMapas();
     }
 
-    function borrarLog(i) { DB_FITO[mesaSeleccionada].pedidos.splice(i, 1); persistir(); mostrarLog(); actualizarColoresMapas(); }
+    function borrarLog(i) {
+        if(confirm("⚠️ ¿BORRAR ESTE PEDIDO?")) {
+            DB_FITO[mesaSeleccionada].pedidos.splice(i, 1);
+            persistir(); mostrarLog(); actualizarColoresMapas();
+        }
+    }
 
     function guardarFitoPro() {
         if(!DB_FITO[mesaSeleccionada] || !DB_FITO[mesaSeleccionada].fito) DB_FITO[mesaSeleccionada] = { pedidos: [], rejuntado: false, fito: [] };
@@ -397,6 +458,10 @@
     function cerrarModales() {
         document.getElementById('overlay').style.display = 'none';
         document.querySelectorAll('.modal').forEach(m => m.style.display = 'none');
+        indexEdicion = null;
+        document.getElementById('btnGuardarTraza').innerText = "💾 GUARDAR TRAZA";
+        document.getElementById('btnGuardarTraza').style.background = "var(--verde-cultigar)";
+        limpiarFormTraza();
     }
 
     window.onload = () => { inicializarMapas(); bajarDatos(); };
