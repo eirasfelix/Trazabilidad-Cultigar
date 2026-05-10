@@ -9,6 +9,7 @@
             --bg-dark: #2c3e50;
             --verde-cultigar: #27ae60;
             --rojo-fito: #c0392b;
+            --naranja-fito: #e67e22;
             --azul-log: #2980b9;
             --purpura: #af7ac5;
             --blanco: #ffffff;
@@ -109,9 +110,9 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            width: 90%;
-            max-width: 450px;
-            height: 85%;
+            width: 95%;
+            max-width: 500px;
+            height: 90%;
             background: #1a1a1a;
             border: 4px solid #444;
             border-radius: 15px;
@@ -129,26 +130,30 @@
             z-index: 1500;
         }
 
-        .form-group { margin-bottom: 15px; }
-        .form-group label { display: block; font-size: 12px; color: #aaa; margin-bottom: 5px; }
-        .form-group input {
+        .form-group { margin-bottom: 12px; }
+        .form-group label { display: block; font-size: 11px; color: #aaa; margin-bottom: 3px; text-transform: uppercase; }
+        .form-group input, .form-group select {
             width: 100%;
-            padding: 10px;
+            padding: 8px;
             border-radius: 5px;
             border: 1px solid #444;
             background: #222;
             color: white;
-            font-size: 16px;
+            font-size: 14px;
             box-sizing: border-box;
         }
 
-        table { width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 13px; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 12px; }
         th { border-bottom: 2px solid var(--verde-cultigar); padding: 8px; text-align: left; color: var(--verde-cultigar); }
         td { padding: 8px; border-bottom: 1px solid #333; }
 
         .btn-guardar { width: 100%; padding: 15px; border: none; border-radius: 8px; font-weight: bold; color: white; cursor: pointer; font-size: 16px; margin-bottom: 5px; }
         .btn-cerrar { background: #555; margin-top: 10px; }
         .btn-accion { padding: 5px; cursor: pointer; border: none; border-radius: 3px; }
+
+        /* Estilo específico para los campos en paralelo */
+        .flex-row { display: flex; gap: 10px; }
+        .flex-row .form-group { flex: 1; }
     </style>
 </head>
 <body>
@@ -180,9 +185,9 @@
     </table>
     <div class="form-group"><label>Variedad</label><input type="text" id="f_ref"></div>
     <div class="form-group"><label>Lote</label><input type="text" id="f_lote"></div>
-    <div style="display: flex; gap: 10px;">
-        <div class="form-group" style="flex: 1;"><label>Nº Bnd</label><input type="number" id="f_num_bandejas"></div>
-        <div class="form-group" style="flex: 1;"><label>Tipo</label><input type="text" id="f_tipo_bandeja" list="op_bnd"><datalist id="op_bnd"><option value="40"><option value="60"><option value="84"></datalist></div>
+    <div class="flex-row">
+        <div class="form-group"><label>Nº Bnd</label><input type="number" id="f_num_bandejas"></div>
+        <div class="form-group"><label>Tipo</label><input type="text" id="f_tipo_bandeja" list="op_bnd"><datalist id="op_bnd"><option value="40"><option value="60"><option value="84"></datalist></div>
     </div>
     <div style="display:flex; gap:5px;">
         <button id="btnGuardarTraza" class="btn-guardar" style="background: var(--verde-cultigar); flex:2;" onclick="guardarRegistroTrazabilidad()">💾 GUARDAR</button>
@@ -196,6 +201,7 @@
         <button id="btLog" class="btn-guardar" style="background:#2980b9; flex:1; padding:10px;" onclick="switchTab('log')">📦 LOGÍSTICA</button>
         <button id="btFit" class="btn-guardar" style="background:#555; flex:1; padding:10px;" onclick="switchTab('fit')">🛡️ FITOS</button>
     </div>
+    
     <div id="panelLog">
         <h2 id="logTitulo" style="color: #2980b9; font-size: 18px;">Logística - Mesa/Carro --</h2>
         <div id="zonaPegarLog"></div>
@@ -205,12 +211,46 @@
         <div class="form-group"><label>Lote</label><input type="text" id="l_lot"></div>
         <button id="btnGuardarLog" class="btn-guardar" style="background:#2980b9;" onclick="guardarLog()">💾 AÑADIR PEDIDO</button>
     </div>
+
     <div id="panelFit" style="display:none;">
-        <h2 style="color: var(--rojo-fito); font-size: 18px;">Fitos - Plazos</h2>
-        <div class="form-group"><label>Producto</label><input type="text" id="fi_prod_new"></div>
-        <div class="form-group"><label>Plazo Seguridad (Días)</label><input type="number" id="fi_plazo"></div>
-        <button class="btn-guardar" style="background:var(--rojo-fito);" onclick="guardarFitoPro()">🛡️ REGISTRAR</button>
-        <table><thead><tr><th>Fecha</th><th>Prod</th><th>Vence</th></tr></thead><tbody id="fitoCuerpoMesaPro"></tbody></table>
+        <h2 style="color: var(--rojo-fito); font-size: 18px;">🛡️ Nuevo Tratamiento</h2>
+        
+        <div class="flex-row">
+            <div class="form-group"><label>Nombre Comercial</label><input type="text" id="fi_nomcom"></div>
+            <div class="form-group"><label>Nº Registro</label><input type="text" id="fi_nreg"></div>
+        </div>
+        
+        <div class="flex-row">
+            <div class="form-group"><label>Aplicador</label><input type="text" id="fi_aplicador"></div>
+            <div class="form-group"><label>Equipo</label><input type="text" id="fi_equipo"></div>
+        </div>
+
+        <div class="flex-row">
+            <div class="form-group"><label>Dosis</label><input type="text" id="fi_dosis"></div>
+            <div class="form-group"><label>Superficie m²</label><input type="number" id="fi_m2"></div>
+        </div>
+
+        <div class="flex-row">
+            <div class="form-group"><label>Plazo Seguridad (Días)</label><input type="number" id="fi_plazo"></div>
+            <div class="form-group"><label>Color Manual Mapa</label>
+                <select id="fi_color_manual">
+                    <option value="AUTO">Automático (Días)</option>
+                    <option value="RED">Rojo (Cerrado)</option>
+                    <option value="ORANGE">Naranja (Precaución)</option>
+                    <option value="GREEN">Verde (Libre)</option>
+                </select>
+            </div>
+        </div>
+
+        <button class="btn-guardar" style="background:var(--rojo-fito);" onclick="guardarFitoPro()">🛡️ REGISTRAR TRATAMIENTO</button>
+        
+        <h2 style="color: #aaa; font-size: 14px; margin-top:20px;">Historial de la Mesa</h2>
+        <div style="overflow-x: auto;">
+            <table style="min-width: 600px;">
+                <thead><tr><th>Fecha</th><th>Producto</th><th>Vence</th><th>Aplicador</th><th>m²</th><th>Acción</th></tr></thead>
+                <tbody id="fitoCuerpoMesaPro"></tbody>
+            </table>
+        </div>
     </div>
     <button class="btn-guardar btn-cerrar" onclick="cerrarModales()">CERRAR</button>
 </div>
@@ -272,6 +312,10 @@
         document.getElementById('f_ref').value = ""; document.getElementById('f_lote').value = "";
         document.getElementById('f_num_bandejas').value = ""; document.getElementById('f_tipo_bandeja').value = "";
         document.getElementById('l_cli').value = ""; document.getElementById('l_bnd').value = ""; document.getElementById('l_lot').value = "";
+        document.getElementById('fi_nomcom').value = ""; document.getElementById('fi_nreg').value = "";
+        document.getElementById('fi_aplicador').value = ""; document.getElementById('fi_equipo').value = "";
+        document.getElementById('fi_dosis').value = ""; document.getElementById('fi_m2').value = "";
+        document.getElementById('fi_plazo').value = "";
     }
 
     function persistir() {
@@ -337,8 +381,6 @@
     function abrirFito(id) {
         mesaSeleccionada = id; indexEdicion = null;
         document.getElementById('logTitulo').innerText = (id.startsWith('C') ? "Carro " : "Mesa ") + id;
-        
-        // Si es un carro, ocultamos la pestaña de fitos
         if(id.startsWith('C')) {
             document.getElementById('tabsFito').style.display = 'none';
             switchTab('log');
@@ -346,7 +388,6 @@
             document.getElementById('tabsFito').style.display = 'flex';
             switchTab('log');
         }
-        
         mostrarLog(); mostrarFitoPro();
         document.getElementById('overlay').style.display = 'block';
         document.getElementById('modalFito').style.display = 'block';
@@ -421,24 +462,57 @@
         document.getElementById('btFit').style.background = t === 'fit' ? '#c0392b' : '#555';
     }
 
+    // --- SECCIÓN FITOS MEJORADA ---
     function guardarFitoPro() {
-        if(!DB_FITO[mesaSeleccionada] || !DB_FITO[mesaSeleccionada].fito) DB_FITO[mesaSeleccionada] = { pedidos: (DB_FITO[mesaSeleccionada]?.pedidos || []), fito: [] };
-        let hoy = new Date(); let venc = new Date(); venc.setDate(hoy.getDate() + parseInt(document.getElementById('fi_plazo').value || 0));
-        DB_FITO[mesaSeleccionada].fito.push({ p: document.getElementById('fi_prod_new').value.toUpperCase(), f: hoy.toLocaleDateString(), v: venc.toISOString() });
+        if(!DB_FITO[mesaSeleccionada]) DB_FITO[mesaSeleccionada] = { pedidos: [], fito: [] };
+        if(!DB_FITO[mesaSeleccionada].fito) DB_FITO[mesaSeleccionada].fito = [];
+        
+        let hoy = new Date();
+        let venc = new Date();
+        venc.setDate(hoy.getDate() + parseInt(document.getElementById('fi_plazo').value || 0));
+        
+        let nuevoRegistro = {
+            nomcom: document.getElementById('fi_nomcom').value.toUpperCase(),
+            nreg: document.getElementById('fi_nreg').value,
+            aplicador: document.getElementById('fi_aplicador').value.toUpperCase(),
+            equipo: document.getElementById('fi_equipo').value.toUpperCase(),
+            dosis: document.getElementById('fi_dosis').value,
+            m2: document.getElementById('fi_m2').value,
+            color_manual: document.getElementById('fi_color_manual').value,
+            f: hoy.toLocaleDateString(),
+            v: venc.toISOString()
+        };
+
+        DB_FITO[mesaSeleccionada].fito.push(nuevoRegistro);
         persistir(); mostrarFitoPro(); actualizarColoresMapas();
     }
 
     function mostrarFitoPro() {
         let html = ""; let hoy = new Date();
         let regs = (DB_FITO[mesaSeleccionada] && DB_FITO[mesaSeleccionada].fito) ? DB_FITO[mesaSeleccionada].fito : [];
-        regs.forEach(r => {
+        regs.forEach((r, idx) => {
             let dias = Math.ceil((new Date(r.v) - hoy) / (1000 * 60 * 60 * 24));
-            html += `<tr><td>${r.f}</td><td>${r.p}</td><td style="color:${dias>0?'red':'green'}">${dias>0?dias+'d':'OK'}</td></tr>`;
+            html += `<tr>
+                <td>${r.f}</td>
+                <td>${r.nomcom}</td>
+                <td style="color:${dias>0?'red':'green'}">${dias>0?dias+'d':'OK'}</td>
+                <td>${r.aplicador}</td>
+                <td>${r.m2}</td>
+                <td><button class="btn-accion" onclick="borrarFito(${idx})">🗑️</button></td>
+            </tr>`;
         });
         document.getElementById('fitoCuerpoMesaPro').innerHTML = html;
     }
 
+    function borrarFito(idx) {
+        if(confirm("⚠️ ¿BORRAR ESTE TRATAMIENTO?")) {
+            DB_FITO[mesaSeleccionada].fito.splice(idx, 1);
+            persistir(); mostrarFitoPro(); actualizarColoresMapas();
+        }
+    }
+
     function actualizarColoresMapas() {
+        // Mapa Trazabilidad
         document.querySelectorAll('#svg-trazabilidad .mesa').forEach(r => {
             let id = r.id.replace('t-', ''); let d = DB_TRAZA[id];
             r.classList.remove('ocupada', 'rejuntado');
@@ -447,20 +521,30 @@
                 if(items?.length > 0) d.rej ? r.classList.add('rejuntado') : r.classList.add('ocupada');
             }
         });
+        
+        // Mapa Logística / Fitos
         let hoy = new Date();
         document.querySelectorAll('#svg-fito .mesa, #svg-fito .carro').forEach(rect => {
             let id = rect.id.replace('f-', ''); let data = DB_FITO[id];
             let esCarro = rect.classList.contains('carro');
-            rect.style.fill = "#ffffff"; 
-            rect.style.stroke = "#333";
-            rect.style.strokeWidth = "1.5";
+            rect.style.fill = "#ffffff"; rect.style.stroke = "#333"; rect.style.strokeWidth = "1.5";
             
             if(data) {
                 if(data.pedidos?.length > 0) rect.style.fill = "var(--neon-ready)";
-                // Fitos solo para mesas, no para carros
+                
+                // Lógica de Fitos (Solo Mesas)
                 if(!esCarro && data.fito?.length > 0) {
                     let last = data.fito[data.fito.length-1];
-                    rect.style.stroke = new Date(last.v) > hoy ? "#c0392b" : "#27ae60"; rect.style.strokeWidth = "5";
+                    
+                    // Prioridad 1: Color Manual
+                    if(last.color_manual === "RED") { rect.style.stroke = "var(--rojo-fito)"; rect.style.strokeWidth = "6"; }
+                    else if(last.color_manual === "ORANGE") { rect.style.stroke = "var(--naranja-fito)"; rect.style.strokeWidth = "6"; }
+                    else if(last.color_manual === "GREEN") { rect.style.stroke = "var(--verde-cultigar)"; rect.style.strokeWidth = "6"; }
+                    // Prioridad 2: Color Automático por Fecha
+                    else {
+                        rect.style.stroke = new Date(last.v) > hoy ? "var(--rojo-fito)" : "var(--verde-cultigar)";
+                        rect.style.strokeWidth = "6";
+                    }
                 }
             }
         });
