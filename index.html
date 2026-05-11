@@ -5,259 +5,604 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CULTIGAR - SISTEMA INTEGRAL PRO</title>
     <style>
-        :root { --bg: #2c3e50; --green: #27ae60; --red: #c0392b; --orange: #e67e22; --blue: #2980b9; --purple: #af7ac5; --neon: #39FF14; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; color: white; padding-bottom: 50px; }
-        .header-sticky { position: sticky; top: 0; background: white; padding: 10px; z-index: 1000; display: flex; gap: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
-        .input-busqueda { flex-grow: 1; padding: 12px; border-radius: 8px; border: 2px solid #ddd; font-size: 16px; color: #333; }
-        .btn-nube { padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; color: white; }
-        .seccion-mapa { background: #eee; margin: 20px auto; padding: 15px; width: 480px; border-radius: 10px; border: 3px solid #000; }
-        svg { display: block; margin: auto; background: white; }
-        .mesa, .carro { fill: white; stroke: #333; stroke-width: 1.5; cursor: pointer; }
+        :root {
+            --bg-dark: #2c3e50;
+            --verde-cultigar: #27ae60;
+            --rojo-fito: #c0392b;
+            --naranja-fito: #e67e22;
+            --azul-log: #2980b9;
+            --purpura: #af7ac5;
+            --blanco: #ffffff;
+            --neon-ready: #39FF14;
+        }
+
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background: var(--bg-dark); 
+            margin: 0; 
+            color: white;
+            padding-bottom: 50px;
+        }
+
+        .header-sticky {
+            position: sticky;
+            top: 0;
+            background: white;
+            padding: 10px;
+            z-index: 1000;
+            display: flex;
+            gap: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+
+        .input-busqueda {
+            flex-grow: 1;
+            padding: 12px;
+            border-radius: 8px;
+            border: 2px solid #ddd;
+            font-size: 16px;
+            color: #333;
+        }
+
+        .btn-nube {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            color: white;
+            transition: 0.3s;
+        }
+
+        .seccion-mapa {
+            background: #eee;
+            margin: 20px auto;
+            padding: 15px;
+            width: 500px;
+            border-radius: 10px;
+            border: 3px solid #000;
+        }
+
+        .titulo-mapa {
+            text-align: center;
+            padding: 10px;
+            margin: 0;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        svg {
+            display: block;
+            margin: auto;
+            background: white;
+        }
+
+        .mesa, .carro {
+            fill: white;
+            stroke: #333;
+            stroke-width: 1.5;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .carro { stroke-dasharray: 4; }
+
+        .mesa:hover, .carro:hover {
+            stroke: #000;
+            stroke-width: 3;
+        }
+
+        .texto-id {
+            font-size: 10px;
+            font-weight: bold;
+            fill: black;
+            pointer-events: none;
+            text-anchor: middle;
+        }
+
         .ocupada { fill: #a9dfbf !important; }
-        .rejuntado { fill: var(--blue) !important; }
+        .rejuntado { fill: var(--azul-log) !important; }
         .resaltado { fill: #f39c12 !important; stroke: #d35400; stroke-width: 4; }
-        .listo-salida { fill: var(--neon) !important; }
-        .texto-id { font-size: 10px; font-weight: bold; fill: black; pointer-events: none; text-anchor: middle; }
-        .modal { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 95%; max-width: 500px; height: 90%; background: #1a1a1a; border: 4px solid #444; border-radius: 15px; display: none; z-index: 2000; padding: 20px; overflow-y: auto; }
-        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none; z-index: 1500; }
+        .listo-salida { fill: var(--neon-ready) !important; }
+
+        .modal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 95%;
+            max-width: 500px;
+            height: 90%;
+            background: #1a1a1a;
+            border: 4px solid #444;
+            border-radius: 15px;
+            display: none;
+            z-index: 2000;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8);
+            display: none;
+            z-index: 1500;
+        }
+
         .form-group { margin-bottom: 12px; }
-        label { display: block; font-size: 11px; color: #aaa; margin-bottom: 3px; }
-        input, select { width: 100%; padding: 8px; border-radius: 5px; border: 1px solid #444; background: #222; color: white; box-sizing: border-box; }
+        .form-group label { display: block; font-size: 11px; color: #aaa; margin-bottom: 3px; text-transform: uppercase; }
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 8px;
+            border-radius: 5px;
+            border: 1px solid #444;
+            background: #222;
+            color: white;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+
         table { width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 12px; }
-        th { border-bottom: 2px solid var(--green); padding: 8px; text-align: left; color: var(--green); }
+        th { border-bottom: 2px solid var(--verde-cultigar); padding: 8px; text-align: left; color: var(--verde-cultigar); }
         td { padding: 8px; border-bottom: 1px solid #333; }
-        .btn-guardar { width: 100%; padding: 15px; border: none; border-radius: 8px; font-weight: bold; color: white; cursor: pointer; margin-bottom: 5px; }
-        .btn-accion { padding: 5px; cursor: pointer; border: none; border-radius: 3px; font-size: 14px; margin-right: 2px; }
+
+        .btn-guardar { width: 100%; padding: 15px; border: none; border-radius: 8px; font-weight: bold; color: white; cursor: pointer; font-size: 16px; margin-bottom: 5px; }
+        .btn-cerrar { background: #555; margin-top: 10px; }
+        .btn-accion { padding: 5px; cursor: pointer; border: none; border-radius: 3px; }
+
+        .flex-row { display: flex; gap: 10px; }
+        .flex-row .form-group { flex: 1; }
     </style>
 </head>
 <body>
 
 <div class="header-sticky">
     <input type="text" id="buscador" class="input-busqueda" placeholder="🔍 Buscar Variedad..." onkeyup="ejecutarBusqueda()">
-    <button class="btn-nube" style="background: var(--green);" onclick="subirDatos()">⬆</button>
-    <button class="btn-nube" style="background: var(--blue);" onclick="bajarDatos()">⬇</button>
+    <button class="btn-nube" style="background: #27ae60;" onclick="subirDatos()">⬆</button>
+    <button class="btn-nube" style="background: #2980b9;" onclick="bajarDatos()">⬇</button>
 </div>
 
 <div class="seccion-mapa">
-    <h3 style="color:var(--green); text-align:center;">MAPA 1: TRAZABILIDAD</h3>
-    <svg width="460" height="780" id="svg1"></svg>
+    <h3 class="titulo-mapa" style="color: var(--verde-cultigar);">Mapa 1: Trazabilidad</h3>
+    <svg width="480" height="780" id="svg-trazabilidad"></svg>
 </div>
 
 <div class="seccion-mapa">
-    <h3 style="color:var(--blue); text-align:center;">MAPA 2: LOGÍSTICA / FITOS</h3>
-    <svg width="460" height="880" id="svg2"></svg>
+    <h3 class="titulo-mapa" style="color: var(--azul-log);">Mapa 2: Logística y Fitos</h3>
+    <svg width="480" height="880" id="svg-fito"></svg>
 </div>
 
-<div class="overlay" id="ov" onclick="cerrar()"></div>
+<div class="overlay" id="overlay" onclick="cerrarModales()"></div>
 
-<div id="modT" class="modal">
-    <h2 id="titT" style="color:var(--green)"></h2>
-    <div id="pT"></div>
-    <table><thead><tr><th>Ref</th><th>Lot</th><th>Bnd</th><th>Acción</th></tr></thead><tbody id="bodyT"></tbody></table>
-    <div class="form-group"><label>Ref</label><input type="text" id="t_ref"></div>
-    <div class="form-group"><label>Lote</label><input type="text" id="t_lot"></div>
-    <div style="display:flex; gap:10px">
-        <div class="form-group" style="flex:1"><label>Bnd</label><input type="number" id="t_bnd"></div>
-        <div class="form-group" style="flex:1"><label>Tipo</label><input type="text" id="t_tip" list="lbnd"></div>
+<div id="modalMesa" class="modal">
+    <h2 id="mesaTitulo" style="color: var(--verde-cultigar); font-size: 18px;">Mesa --</h2>
+    <div id="zonaPegarTraza"></div>
+    <table>
+        <thead><tr><th>Ref</th><th>Lote</th><th>Bnd</th><th>Acción</th></tr></thead>
+        <tbody id="tablaCuerpoMesa"></tbody>
+    </table>
+    <div class="form-group"><label>Variedad</label><input type="text" id="f_ref"></div>
+    <div class="form-group"><label>Lote</label><input type="text" id="f_lote"></div>
+    <div class="flex-row">
+        <div class="form-group"><label>Nº Bnd</label><input type="number" id="f_num_bandejas"></div>
+        <div class="form-group"><label>Tipo</label><input type="text" id="f_tipo_bandeja" list="op_bnd"><datalist id="op_bnd"><option value="40"><option value="60"><option value="84"></datalist></div>
     </div>
-    <button class="btn-guardar" style="background:var(--green)" onclick="saveT()">💾 GUARDAR</button>
-    <button id="btnRej" class="btn-guardar" onclick="toggleRej()">⬜ REJUNTAR</button>
-    <button class="btn-guardar" style="background:#555" onclick="cerrar()">CERRAR</button>
+    <div style="display:flex; gap:5px;">
+        <button id="btnGuardarTraza" class="btn-guardar" style="background: var(--verde-cultigar); flex:2;" onclick="guardarRegistroTrazabilidad()">💾 GUARDAR</button>
+        <button id="btnRejuntarTraza" class="btn-guardar" style="background: #555; flex:1;" onclick="toggleRejuntarTraza()">⬜ REJUNTAR</button>
+    </div>
+    <button class="btn-guardar btn-cerrar" onclick="cerrarModales()">CERRAR</button>
 </div>
 
-<div id="modL" class="modal">
-    <div style="display:flex; gap:5px; margin-bottom:15px">
-        <button class="btn-guardar" style="background:var(--blue); flex:1" onclick="tab('log')">📦 LOG</button>
-        <button class="btn-guardar" style="background:var(--red); flex:1" onclick="tab('fit')">🛡️ FITO</button>
+<div id="modalFito" class="modal">
+    <div id="tabsFito" style="display:flex; gap:5px; margin-bottom:15px;">
+        <button id="btLog" class="btn-guardar" style="background:#2980b9; flex:1; padding:10px;" onclick="switchTab('log')">📦 LOGÍSTICA</button>
+        <button id="btFit" class="btn-guardar" style="background:#555; flex:1; padding:10px;" onclick="switchTab('fit')">🛡️ FITOS</button>
     </div>
-    <div id="pLog">
-        <h2 id="titL" style="color:var(--blue)"></h2>
-        <div id="pL"></div>
-        <table><thead><tr><th>Cli</th><th>Bnd</th><th>Detalle</th><th>Acción</th></tr></thead><tbody id="bodyL"></tbody></table>
-        <input type="text" id="l_cli" placeholder="Cliente" style="margin-bottom:5px">
-        <input type="number" id="l_bnd" placeholder="Bandejas" style="margin-bottom:5px">
-        <input type="text" id="l_det" placeholder="Detalle">
-        <button class="btn-guardar" style="background:var(--blue)" onclick="saveL()">🚚 AÑADIR SALIDA</button>
+    
+    <div id="panelLog">
+        <h2 id="logTitulo" style="color: #2980b9; font-size: 18px;">Logística - Mesa/Carro --</h2>
+        <div id="zonaPegarLog"></div>
+        <table><thead><tr><th>Cliente</th><th>Bnd</th><th>Lote</th><th>Acción</th></tr></thead><tbody id="logCuerpoMesa"></tbody></table>
+        <div class="form-group"><label>Cliente / Variedad</label><input type="text" id="l_cli"></div>
+        <div class="form-group"><label>Bandejas</label><input type="number" id="l_bnd"></div>
+        <div class="form-group"><label>Lote</label><input type="text" id="l_lot"></div>
+        <button id="btnGuardarLog" class="btn-guardar" style="background:#2980b9;" onclick="guardarLog()">💾 AÑADIR PEDIDO</button>
     </div>
-    <div id="pFit" style="display:none">
-        <h2 style="color:var(--red)">🛡️ NUEVO TRATAMIENTO</h2>
-        <input type="text" id="f_pro" placeholder="Producto/Plaga" style="margin-bottom:5px">
-        <div style="display:flex; gap:5px">
-            <input type="number" id="f_pla" placeholder="Plazo Días">
-            <select id="f_col"><option value="AUTO">AUTO</option><option value="RED">ROJO</option><option value="ORANGE">NARANJA</option></select>
+
+    <div id="panelFit" style="display:none;">
+        <h2 style="color: var(--rojo-fito); font-size: 18px;">🛡️ Nuevo Tratamiento</h2>
+        
+        <div class="flex-row">
+            <div class="form-group"><label>Nombre Comercial</label><input type="text" id="fi_nomcom"></div>
+            <div class="form-group"><label>Nº Registro</label><input type="text" id="fi_nreg"></div>
         </div>
-        <button class="btn-guardar" style="background:var(--red)" onclick="saveF()">⚠️ REGISTRAR</button>
-        <table><thead><tr><th>Fecha</th><th>Producto</th><th>Vence</th><th>Acción</th></tr></thead><tbody id="bodyF"></tbody></table>
-    </div>
-    <button class="btn-guardar" style="background:#555" onclick="cerrar()">CERRAR</button>
-</div>
+        
+        <div class="flex-row">
+            <div class="form-group"><label>Aplicador</label><input type="text" id="fi_aplicador"></div>
+            <div class="form-group"><label>Equipo</label><input type="text" id="fi_equipo"></div>
+        </div>
 
-<datalist id="lbnd"><option value="40"><option value="60"><option value="84"></datalist>
+        <div class="flex-row">
+            <div class="form-group"><label>Dosis</label><input type="text" id="fi_dosis"></div>
+            <div class="form-group"><label>Superficie m²</label><input type="number" id="fi_m2"></div>
+        </div>
+
+        <div class="flex-row">
+            <div class="form-group"><label>Plazo Seguridad (Días)</label><input type="number" id="fi_plazo"></div>
+            <div class="form-group"><label>Color Manual Mapa</label>
+                <select id="fi_color_manual">
+                    <option value="AUTO">Automático (Días)</option>
+                    <option value="RED">Rojo (Cerrado)</option>
+                    <option value="ORANGE">Naranja (Precaución)</option>
+                    <option value="GREEN">Verde (Libre)</option>
+                </select>
+            </div>
+        </div>
+
+        <button id="btnGuardarFito" class="btn-guardar" style="background:var(--rojo-fito);" onclick="guardarFitoPro()">🛡️ REGISTRAR TRATAMIENTO</button>
+        
+        <h2 style="color: #aaa; font-size: 14px; margin-top:20px;">Historial de la Mesa</h2>
+        <div style="overflow-x: auto;">
+            <table style="min-width: 600px;">
+                <thead><tr><th>Fecha</th><th>Producto</th><th>Vence</th><th>Aplicador</th><th>m²</th><th>Acción</th></tr></thead>
+                <tbody id="fitoCuerpoMesaPro"></tbody>
+            </table>
+        </div>
+    </div>
+    <button class="btn-guardar btn-cerrar" onclick="cerrarModales()">CERRAR</button>
+</div>
 
 <script>
-    const GIST = "dc4b1ac9b41655086c76352f03ccfafe";
-    let DB_T = JSON.parse(localStorage.getItem('culti_traza')) || {};
-    let DB_F = JSON.parse(localStorage.getItem('culti_fito')) || {};
-    let mA = "", iE = null, port = null;
+    const GIST_ID = "dc4b1ac9b41655086c76352f03ccfafe";
+    let DB_TRAZA = JSON.parse(localStorage.getItem('culti_traza')) || {};
+    let DB_FITO = JSON.parse(localStorage.getItem('culti_fito')) || {};
+    let mesaSeleccionada = "";
+    let indexEdicion = null;
+    let indexFitoEdicion = null;
+    let portapapeles = null;
 
-    const GEO = [{id:'10-48',x:10,y:70,w:40,h:140},{id:'11-49',x:55,y:70,w:40,h:140},{id:'12-50',x:105,y:70,w:40,h:140},{id:'13-51',x:150,y:70,w:40,h:140},{id:'7-45',x:15,y:220,w:40,h:65},{id:'8-46',x:65,y:220,w:45,h:90},{id:'9-47',x:135,y:220,w:38,h:90},{id:'4-42',x:10,y:325,w:45,h:200},{id:'5-43',x:65,y:325,w:45,h:200},{id:'6-44',x:125,y:325,w:45,h:200},{id:'1-39',x:10,y:540,w:45,h:210},{id:'2-40',x:65,y:540,w:45,h:210},{id:'3-41',x:125,y:580,w:45,h:170},{id:'22-63',x:210,y:70,w:38,h:75},{id:'23-64',x:255,y:70,w:38,h:75},{id:'24-65',x:300,y:70,w:38,h:75},{id:'22-60',x:210,y:155,w:38,h:100},{id:'23-61',x:255,y:155,w:38,h:100},{id:'24-62',x:300,y:155,w:38,h:100},{id:'18-56',x:215,y:360,w:35,h:110},{id:'19-57',x:255,y:325,w:38,h:200},{id:'20-58',x:300,y:325,w:38,h:200},{id:'21-59',x:345,y:325,w:38,h:200},{id:'14-52',x:210,y:540,w:38,h:145},{id:'15-53',x:255,y:540,w:38,h:145},{id:'16-54',x:300,y:540,w:38,h:145},{id:'17-55',x:345,y:540,w:38,h:145}];
+    const GEOMETRIA = [
+        {id:'10-48', x:10, y:70, w:40, h:140}, {id:'11-49', x:55, y:70, w:40, h:140},
+        {id:'12-50', x:105, y:70, w:40, h:140}, {id:'13-51', x:150, y:70, w:40, h:140},
+        {id:'7-45', x:15, y:220, w:40, h:65}, {id:'8-46', x:65, y:220, w:45, h:90},
+        {id:'9-47', x:135, y:220, w:38, h:90}, {id:'4-42', x:10, y:325, w:45, h:200},
+        {id:'5-43', x:65, y:325, w:45, h:200}, {id:'6-44', x:125, y:325, w:45, h:200},
+        {id:'1-39', x:10, y:540, w:45, h:210}, {id:'2-40', x:65, y:540, w:45, h:210},
+        {id:'3-41', x:125, y:580, w:45, h:170},
+        {id:'22-63', x:210, y:70, w:38, h:75}, {id:'23-64', x:255, y:70, w:38, h:75},
+        {id:'24-65', x:300, y:70, w:38, h:75}, {id:'22-60', x:210, y:155, w:38, h:100},
+        {id:'23-61', x:255, y:155, w:38, h:100}, {id:'24-62', x:300, y:155, w:38, h:100},
+        {id:'18-56', x:215, y:360, w:35, h:110}, {id:'19-57', x:255, y:325, w:38, h:200},
+        {id:'20-58', x:300, y:325, w:38, h:200}, {id:'21-59', x:345, y:325, w:38, h:200},
+        {id:'14-52', x:210, y:540, w:38, h:145}, {id:'15-53', x:255, y:540, w:38, h:145},
+        {id:'16-54', x:300, y:540, w:38, h:145}, {id:'17-55', x:345, y:540, w:38, h:145}
+    ];
 
-    function init() {
-        let h1 = "", h2 = "";
-        GEO.forEach(m => {
-            h1 += `<rect id="t-${m.id}" class="mesa" x="${m.x}" y="${m.y}" width="${m.w}" height="${m.h}" onclick="openT('${m.id}')"></rect><text x="${m.x+m.w/2}" y="${m.y+m.h-5}" class="texto-id">${m.id}</text>`;
-            h2 += `<rect id="f-${m.id}" class="mesa" x="${m.x}" y="${m.y}" width="${m.w}" height="${m.h}" onclick="openL('${m.id}')"></rect><text x="${m.x+m.w/2}" y="${m.y+m.h-5}" class="texto-id">${m.id}</text>`;
+    function inicializarMapas() {
+        let trazHtml = "", fitoHtml = "";
+        GEOMETRIA.forEach(m => {
+            trazHtml += `<rect id="t-${m.id}" class="mesa" x="${m.x}" y="${m.y}" width="${m.w}" height="${m.h}" onclick="abrirTraza('${m.id}')"></rect><text x="${m.x + m.w/2}" y="${m.y + m.h - 5}" class="texto-id">${m.id}</text>`;
+            fitoHtml += `<rect id="f-${m.id}" class="mesa" x="${m.x}" y="${m.y}" width="${m.w}" height="${m.h}" onclick="abrirFito('${m.id}')"></rect><text x="${m.x + m.w/2}" y="${m.y + m.h - 5}" class="texto-id">${m.id}</text>`;
         });
-        for(let i=1;i<=14;i++){
-            let y=70+(14-i)*46;
-            h1+=`<rect id="t-${i}" class="mesa" x="380" y="${y}" width="70" height="38" onclick="openT('${i}')"></rect><text x="415" y="${y+22}" class="texto-id">${i}</text>`;
-            h2+=`<rect id="f-${i}" class="mesa" x="380" y="${y}" width="70" height="38" onclick="openL('${i}')"></rect><text x="415" y="${y+22}" class="texto-id">${i}</text>`;
+        for(let i=1; i<=14; i++) {
+            let yPos = 70 + (14-i) * 46;
+            trazHtml += `<rect id="t-${i}" class="mesa" x="395" y="${yPos}" width="75" height="38" onclick="abrirTraza('${i}')"></rect><text x="432" y="${yPos + 22}" class="texto-id">${i}</text>`;
+            fitoHtml += `<rect id="f-${i}" class="mesa" x="395" y="${yPos}" width="75" height="38" onclick="abrirFito('${i}')"></rect><text x="432" y="${yPos + 22}" class="texto-id">${i}</text>`;
         }
-        ['C1','C2','C3','C4'].forEach((c,i)=>{
-            let x=210+(i*55);
-            h2+=`<rect id="f-${c}" class="carro" x="${x}" y="750" width="50" height="30" onclick="openL('${c}')"></rect><text x="${x+25}" y="770" class="texto-id">${c}</text>`;
+        const mesasCarro = ['14-52', '15-53', '16-54', '17-55'];
+        mesasCarro.forEach((id, idx) => {
+            let m = GEOMETRIA.find(g => g.id === id);
+            fitoHtml += `<rect id="f-C${idx+1}" class="carro" x="${m.x}" y="${m.y + m.h + 20}" width="${m.w}" height="60" onclick="abrirFito('C${idx+1}')"></rect>
+                         <text x="${m.x + m.w/2}" y="${m.y + m.h + 55}" class="texto-id">🛒 C${idx+1}</text>`;
         });
-        document.getElementById('svg1').innerHTML=h1; document.getElementById('svg2').innerHTML=h2;
-        render(); bajarDatos();
+        document.getElementById('svg-trazabilidad').innerHTML = trazHtml;
+        document.getElementById('svg-fito').innerHTML = fitoHtml;
+        actualizarColoresMapas();
     }
 
-    function openT(id) {
-        mA = id; iE = null; document.getElementById('titT').innerText = "Mesa " + id;
-        let h = ""; let d = DB_T[id] || { items: [] };
-        let its = Array.isArray(d) ? d : d.items;
-        its.forEach((r, i) => {
-            h += `<tr><td>${r.ref}</td><td>${r.lote}</td><td>${r.num_bandejas}</td><td>
-                <button class="btn-accion" style="background:var(--blue);color:white" onclick="editT(${i})">✏️</button>
-                <button class="btn-accion" style="background:var(--purple);color:white" onclick="cutT(${i})">✂️</button>
-                <button class="btn-accion" style="background:var(--red);color:white" onclick="delT(${i})">🗑️</button></td></tr>`;
+    function cerrarModales() {
+        document.getElementById('overlay').style.display = 'none';
+        document.querySelectorAll('.modal').forEach(m => m.style.display = 'none');
+        indexEdicion = null; indexFitoEdicion = null; limpiarForms();
+    }
+
+    function limpiarForms() {
+        document.getElementById('f_ref').value = ""; document.getElementById('f_lote').value = "";
+        document.getElementById('f_num_bandejas').value = ""; document.getElementById('f_tipo_bandeja').value = "";
+        document.getElementById('l_cli').value = ""; document.getElementById('l_bnd').value = ""; document.getElementById('l_lot').value = "";
+        document.getElementById('fi_nomcom').value = ""; document.getElementById('fi_nreg').value = "";
+        document.getElementById('fi_aplicador').value = ""; document.getElementById('fi_equipo').value = "";
+        document.getElementById('fi_dosis').value = ""; document.getElementById('fi_m2').value = "";
+        document.getElementById('fi_plazo').value = ""; document.getElementById('fi_color_manual').value = "AUTO";
+    }
+
+    function persistir() {
+        localStorage.setItem('culti_traza', JSON.stringify(DB_TRAZA));
+        localStorage.setItem('culti_fito', JSON.stringify(DB_FITO));
+        subirDatos();
+    }
+
+    function abrirTraza(id) {
+        mesaSeleccionada = id; indexEdicion = null;
+        mostrarTablaTraza();
+        document.getElementById('overlay').style.display = 'block';
+        document.getElementById('modalMesa').style.display = 'block';
+    }
+
+    function mostrarTablaTraza() {
+        let html = ""; let mesa = DB_TRAZA[mesaSeleccionada] || { items: [], rej: false };
+        let datos = Array.isArray(mesa) ? mesa : (mesa.items || []);
+        datos.forEach((r, i) => {
+            html += `<tr><td>${r.ref}</td><td>${r.lote}</td><td>${r.num_bandejas}</td>
+                <td style="display:flex; gap:3px;">
+                    <button class="btn-accion" onclick="editarTraza(${i})">✏️</button>
+                    <button class="btn-accion" onclick="cortarLote(${i}, 'traza')">📦</button>
+                    <button class="btn-accion" onclick="borrarTraza(${i})">🗑️</button>
+                </td></tr>`;
         });
-        document.getElementById('bodyT').innerHTML = h || "<tr><td colspan='4'>Vacía</td></tr>";
-        document.getElementById('btnRej').style.background = d.rej ? "var(--blue)" : "#555";
-        document.getElementById('pT').innerHTML = port ? `<button class="btn-guardar" style="background:var(--purple)" onclick="pegarT()">📋 PEGAR REJUNTE</button>` : "";
-        show('modT');
+        document.getElementById('mesaTitulo').innerText = "Mesa " + mesaSeleccionada;
+        document.getElementById('tablaCuerpoMesa').innerHTML = html || "<tr><td colspan='4'>Mesa vacía</td></tr>";
+        document.getElementById('btnRejuntarTraza').style.background = mesa.rej ? "var(--azul-log)" : "#555";
+        document.getElementById('zonaPegarTraza').innerHTML = portapapeles ? `<button class="btn-guardar" style="background:var(--purpura);" onclick="pegarEnTraza()">📋 PEGAR AQUÍ</button>` : "";
     }
 
-    function saveT() {
-        if(!DB_T[mA]) DB_T[mA] = { items: [], rej: false };
-        if(Array.isArray(DB_T[mA])) DB_T[mA] = { items: DB_T[mA], rej: false };
-        let n = { ref: val('t_ref').toUpperCase(), lote: val('t_lot'), num_bandejas: val('t_bnd'), tipo_bandeja: val('t_tip') };
-        if(iE !== null) DB_T[mA].items[iE] = n; else DB_T[mA].items.push(n);
-        persist(); openT(mA); clear();
+    function toggleRejuntarTraza() {
+        if(!DB_TRAZA[mesaSeleccionada]) DB_TRAZA[mesaSeleccionada] = { items: [], rej: false };
+        if(Array.isArray(DB_TRAZA[mesaSeleccionada])) DB_TRAZA[mesaSeleccionada] = { items: DB_TRAZA[mesaSeleccionada], rej: false };
+        DB_TRAZA[mesaSeleccionada].rej = !DB_TRAZA[mesaSeleccionada].rej;
+        persistir(); mostrarTablaTraza(); actualizarColoresMapas();
     }
 
-    function editT(i) {
-        let its = Array.isArray(DB_T[mA]) ? DB_T[mA] : DB_T[mA].items;
-        let r = its[i]; iE = i;
-        set('t_ref', r.ref); set('t_lot', r.lote); set('t_bnd', r.num_bandejas); set('t_tip', r.tipo_bandeja);
+    function guardarRegistroTrazabilidad() {
+        if(!DB_TRAZA[mesaSeleccionada]) DB_TRAZA[mesaSeleccionada] = { items: [], rej: false };
+        if(Array.isArray(DB_TRAZA[mesaSeleccionada])) DB_TRAZA[mesaSeleccionada] = { items: DB_TRAZA[mesaSeleccionada], rej: false };
+        let nuevo = { ref: document.getElementById('f_ref').value.toUpperCase(), lote: document.getElementById('f_lote').value, num_bandejas: document.getElementById('f_num_bandejas').value, tipo_bandeja: document.getElementById('f_tipo_bandeja').value };
+        if(indexEdicion !== null) { DB_TRAZA[mesaSeleccionada].items[indexEdicion] = nuevo; } 
+        else { DB_TRAZA[mesaSeleccionada].items.push(nuevo); }
+        persistir(); mostrarTablaTraza(); actualizarColoresMapas(); cerrarModales();
     }
 
-    function delT(i) { if(confirm('¿Borrar?')) { (Array.isArray(DB_T[mA])?DB_T[mA]:DB_T[mA].items).splice(i,1); persist(); openT(mA); } }
-
-    function cutT(i) {
-        let its = Array.isArray(DB_T[mA]) ? DB_T[mA] : DB_T[mA].items;
-        port = {...its[i]}; its.splice(i,1); persist(); openT(mA); alert("Cortado.");
+    function editarTraza(i) {
+        let items = Array.isArray(DB_TRAZA[mesaSeleccionada]) ? DB_TRAZA[mesaSeleccionada] : DB_TRAZA[mesaSeleccionada].items;
+        let r = items[i]; indexEdicion = i;
+        document.getElementById('f_ref').value = r.ref; document.getElementById('f_lote').value = r.lote;
+        document.getElementById('f_num_bandejas').value = r.num_bandejas; document.getElementById('f_tipo_bandeja').value = r.tipo_bandeja;
     }
 
-    function pegarT() {
-        if(!DB_T[mA]) DB_T[mA] = { items: [], rej: false };
-        if(Array.isArray(DB_T[mA])) DB_T[mA] = { items: DB_T[mA], rej: false };
-        DB_T[mA].items.push(port); port = null; persist(); openT(mA);
+    function borrarTraza(i) {
+        if(confirm("⚠️ ¿BORRAR?")) {
+            let items = Array.isArray(DB_TRAZA[mesaSeleccionada]) ? DB_TRAZA[mesaSeleccionada] : DB_TRAZA[mesaSeleccionada].items;
+            items.splice(i, 1); persistir(); mostrarTablaTraza(); actualizarColoresMapas();
+        }
     }
 
-    function toggleRej() {
-        if(!DB_T[mA]) DB_T[mA] = { items: [], rej: false };
-        if(Array.isArray(DB_T[mA])) DB_T[mA] = { items: DB_T[mA], rej: false };
-        DB_T[mA].rej = !DB_T[mA].rej; persist(); openT(mA);
+    function abrirFito(id) {
+        mesaSeleccionada = id; indexEdicion = null; indexFitoEdicion = null;
+        document.getElementById('logTitulo').innerText = (id.startsWith('C') ? "Carro " : "Mesa ") + id;
+        if(id.startsWith('C')) {
+            document.getElementById('tabsFito').style.display = 'none';
+            switchTab('log');
+        } else {
+            document.getElementById('tabsFito').style.display = 'flex';
+            switchTab('log');
+        }
+        mostrarLog(); mostrarFitoPro();
+        document.getElementById('overlay').style.display = 'block';
+        document.getElementById('modalFito').style.display = 'block';
     }
 
-    function openL(id) {
-        mA = id; iE = null; document.getElementById('titL').innerText = (id.startsWith('C')?'Carro ':'Ubicación ')+id;
-        show('modL'); tab('log'); refreshL();
-    }
-
-    function refreshL() {
-        let h = ""; let d = DB_F[mA] || { pedidos: [], fito: [] };
-        (d.pedidos||[]).forEach((p,i) => {
-            h += `<tr><td>${p.cli}</td><td>${p.bnd}</td><td>${p.lot}</td><td><button class="btn-accion" style="background:var(--red);color:white" onclick="delL(${i})">🗑️</button></td></tr>`;
+    function mostrarLog() {
+        let html = ""; let data = DB_FITO[mesaSeleccionada] || { pedidos: [] };
+        (data.pedidos || []).forEach((p, i) => {
+            html += `<tr><td>${p.cli}</td><td>${p.bnd}</td><td>${p.lot}</td>
+                <td style="display:flex; gap:3px;">
+                    <button class="btn-accion" onclick="editarLog(${i})">✏️</button>
+                    <button class="btn-accion" onclick="cortarLote(${i}, 'log')">📦</button>
+                    <button class="btn-accion" onclick="borrarLog(${i})">🗑️</button>
+                </td></tr>`;
         });
-        document.getElementById('bodyL').innerHTML = h || "<tr><td colspan='4'>Sin datos</td></tr>";
-        document.getElementById('pL').innerHTML = port ? `<button class="btn-guardar" style="background:var(--purple)" onclick="pegarL()">📋 PEGAR REJUNTE</button>` : "";
+        document.getElementById('logCuerpoMesa').innerHTML = html || "<tr><td colspan='4'>Sin datos</td></tr>";
+        document.getElementById('zonaPegarLog').innerHTML = portapapeles ? `<button class="btn-guardar" style="background:var(--purpura);" onclick="pegarEnLog()">📋 PEGAR AQUÍ</button>` : "";
+    }
+
+    function guardarLog() {
+        if(!DB_FITO[mesaSeleccionada]) DB_FITO[mesaSeleccionada] = { pedidos: [], rejuntado: false, fito: [] };
+        let nuevo = { cli: document.getElementById('l_cli').value.toUpperCase(), bnd: document.getElementById('l_bnd').value, lot: document.getElementById('l_lot').value };
+        if(indexEdicion !== null) { DB_FITO[mesaSeleccionada].pedidos[indexEdicion] = nuevo; }
+        else { DB_FITO[mesaSeleccionada].pedidos.push(nuevo); }
+        persistir(); mostrarLog(); actualizarColoresMapas(); cerrarModales();
+    }
+
+    function editarLog(i) {
+        let p = DB_FITO[mesaSeleccionada].pedidos[i]; indexEdicion = i;
+        document.getElementById('l_cli').value = p.cli; document.getElementById('l_bnd').value = p.bnd; document.getElementById('l_lot').value = p.lot;
+    }
+
+    function borrarLog(i) {
+        if(confirm("⚠️ ¿BORRAR?")) {
+            DB_FITO[mesaSeleccionada].pedidos.splice(i, 1); persistir(); mostrarLog(); actualizarColoresMapas();
+        }
+    }
+
+    function cortarLote(i, origen) {
+        if(origen === 'traza') {
+            let items = Array.isArray(DB_TRAZA[mesaSeleccionada]) ? DB_TRAZA[mesaSeleccionada] : DB_TRAZA[mesaSeleccionada].items;
+            portapapeles = {...items[i]}; items.splice(i, 1);
+            persistir(); mostrarTablaTraza();
+        } else if(origen === 'log') {
+            let p = DB_FITO[mesaSeleccionada].pedidos[i];
+            portapapeles = { ref: p.cli, lote: p.lot, num_bandejas: p.bnd };
+            DB_FITO[mesaSeleccionada].pedidos.splice(i, 1);
+            persistir(); mostrarLog();
+        }
+        actualizarColoresMapas(); alert("Cortado.");
+    }
+
+    function pegarEnTraza() {
+        if(!portapapeles) return;
+        if(!DB_TRAZA[mesaSeleccionada]) DB_TRAZA[mesaSeleccionada] = { items: [], rej: false };
+        if(Array.isArray(DB_TRAZA[mesaSeleccionada])) DB_TRAZA[mesaSeleccionada] = { items: DB_TRAZA[mesaSeleccionada], rej: false };
+        DB_TRAZA[mesaSeleccionada].items.push({ ref: portapapeles.ref, lote: portapapeles.lote, num_bandejas: portapapeles.num_bandejas, tipo_bandeja: portapapeles.tipo_bandeja || "" });
+        portapapeles = null; persistir(); mostrarTablaTraza(); actualizarColoresMapas();
+    }
+
+    function pegarEnLog() {
+        if(!portapapeles) return;
+        if(!DB_FITO[mesaSeleccionada]) DB_FITO[mesaSeleccionada] = { pedidos: [], rejuntado: false, fito: [] };
+        DB_FITO[mesaSeleccionada].pedidos.push({ cli: portapapeles.ref, bnd: portapapeles.num_bandejas, lot: portapapeles.lote });
+        portapapeles = null; persistir(); mostrarLog(); actualizarColoresMapas();
+    }
+
+    function switchTab(t) {
+        document.getElementById('panelLog').style.display = t === 'log' ? 'block' : 'none';
+        document.getElementById('panelFit').style.display = t === 'fit' ? 'block' : 'none';
+        document.getElementById('btLog').style.background = t === 'log' ? '#2980b9' : '#555';
+        document.getElementById('btFit').style.background = t === 'fit' ? '#c0392b' : '#555';
+    }
+
+    function guardarFitoPro() {
+        if(!DB_FITO[mesaSeleccionada]) DB_FITO[mesaSeleccionada] = { pedidos: [], fito: [] };
+        if(!DB_FITO[mesaSeleccionada].fito) DB_FITO[mesaSeleccionada].fito = [];
         
-        let hf = ""; (d.fito||[]).forEach((f,i) => {
-            let dias = Math.ceil((new Date(f.v) - new Date())/(1000*60*60*24));
-            hf += `<tr><td>${f.f}</td><td>${f.pro}</td><td style="color:${dias>0?'red':'green'}">${dias>0?dias+'d':'OK'}</td><td><button class="btn-accion" style="background:var(--red);color:white" onclick="delF(${i})">🗑️</button></td></tr>`;
+        let hoy = new Date();
+        let venc = new Date();
+        venc.setDate(hoy.getDate() + parseInt(document.getElementById('fi_plazo').value || 0));
+        
+        let nuevoRegistro = {
+            nomcom: document.getElementById('fi_nomcom').value.toUpperCase(),
+            nreg: document.getElementById('fi_nreg').value,
+            aplicador: document.getElementById('fi_aplicador').value.toUpperCase(),
+            equipo: document.getElementById('fi_equipo').value.toUpperCase(),
+            dosis: document.getElementById('fi_dosis').value,
+            m2: document.getElementById('fi_m2').value,
+            color_manual: document.getElementById('fi_color_manual').value,
+            f: hoy.toLocaleDateString(),
+            v: venc.toISOString()
+        };
+
+        if(indexFitoEdicion !== null) {
+            DB_FITO[mesaSeleccionada].fito[indexFitoEdicion] = nuevoRegistro;
+            indexFitoEdicion = null;
+        } else {
+            DB_FITO[mesaSeleccionada].fito.push(nuevoRegistro);
+        }
+
+        persistir(); mostrarFitoPro(); actualizarColoresMapas();
+        limpiarForms();
+    }
+
+    function mostrarFitoPro() {
+        let html = ""; let hoy = new Date();
+        let regs = (DB_FITO[mesaSeleccionada] && DB_FITO[mesaSeleccionada].fito) ? DB_FITO[mesaSeleccionada].fito : [];
+        regs.forEach((r, idx) => {
+            let dias = Math.ceil((new Date(r.v) - hoy) / (1000 * 60 * 60 * 24));
+            html += `<tr>
+                <td>${r.f}</td>
+                <td>${r.nomcom}</td>
+                <td style="color:${dias>0?'red':'green'}">${dias>0?dias+'d':'OK'}</td>
+                <td>${r.aplicador}</td>
+                <td>${r.m2}</td>
+                <td style="display:flex; gap:3px;">
+                    <button class="btn-accion" onclick="editarFito(${idx})">✏️</button>
+                    <button class="btn-accion" onclick="borrarFito(${idx})">🗑️</button>
+                </td>
+            </tr>`;
         });
-        document.getElementById('bodyF').innerHTML = hf || "<tr><td colspan='4'>Sin tratamientos</td></tr>";
+        document.getElementById('fitoCuerpoMesaPro').innerHTML = html;
     }
 
-    function saveL() {
-        if(!DB_F[mA]) DB_F[mA] = { pedidos: [], fito: [] };
-        DB_F[mA].pedidos.push({ cli: val('l_cli').toUpperCase(), bnd: val('l_bnd'), lot: val('l_det') });
-        persist(); refreshL(); clear();
+    function editarFito(idx) {
+        let r = DB_FITO[mesaSeleccionada].fito[idx];
+        indexFitoEdicion = idx;
+        document.getElementById('fi_nomcom').value = r.nomcom;
+        document.getElementById('fi_nreg').value = r.nreg;
+        document.getElementById('fi_aplicador').value = r.aplicador;
+        document.getElementById('fi_equipo').value = r.equipo;
+        document.getElementById('fi_dosis').value = r.dosis;
+        document.getElementById('fi_m2').value = r.m2;
+        document.getElementById('fi_color_manual').value = r.color_manual;
+        
+        // Calcular plazo en días basándose en la fecha de vencimiento guardada
+        let dias = Math.ceil((new Date(r.v) - new Date(r.f)) / (1000 * 60 * 60 * 24));
+        document.getElementById('fi_plazo').value = dias;
     }
-    function delL(i) { DB_F[mA].pedidos.splice(i,1); persist(); refreshL(); }
 
-    function pegarL() {
-        if(!DB_F[mA]) DB_F[mA] = { pedidos: [], fito: [] };
-        DB_F[mA].pedidos.push({ cli: "REJUNTE", bnd: port.num_bandejas, lot: port.ref });
-        port = null; persist(); refreshL();
+    function borrarFito(idx) {
+        if(confirm("⚠️ ¿BORRAR ESTE TRATAMIENTO?")) {
+            DB_FITO[mesaSeleccionada].fito.splice(idx, 1);
+            persistir(); mostrarFitoPro(); actualizarColoresMapas();
+        }
     }
 
-    function saveF() {
-        if(!DB_F[mA]) DB_F[mA] = { pedidos: [], fito: [] };
-        if(!DB_F[mA].fito) DB_F[mA].fito = [];
-        let v = new Date(); v.setDate(v.getDate() + parseInt(val('f_pla')||0));
-        DB_F[mA].fito.push({ pro: val('f_pro').toUpperCase(), f: new Date().toLocaleDateString(), v: v.toISOString(), col: val('f_col') });
-        persist(); refreshL(); clear();
-    }
-    function delF(i) { DB_F[mA].fito.splice(i,1); persist(); refreshL(); }
-
-    function render() {
-        document.querySelectorAll('#svg1 .mesa').forEach(r => {
-            let id = r.id.replace('t-', ''); let d = DB_T[id];
+    function actualizarColoresMapas() {
+        document.querySelectorAll('#svg-trazabilidad .mesa').forEach(r => {
+            let id = r.id.replace('t-', ''); let d = DB_TRAZA[id];
             r.classList.remove('ocupada', 'rejuntado');
             if(d) {
-                let its = Array.isArray(d) ? d : d.items;
-                if(its?.length > 0) d.rej ? r.classList.add('rejuntado') : r.classList.add('ocupada');
+                let items = Array.isArray(d) ? d : d.items;
+                if(items?.length > 0) d.rej ? r.classList.add('rejuntado') : r.classList.add('ocupada');
             }
         });
-        document.querySelectorAll('#svg2 .mesa, #svg2 .carro').forEach(r => {
-            let id = r.id.replace('f-', ''); let d = DB_F[id];
-            r.style.fill = (d?.pedidos?.length > 0) ? "var(--neon)" : "white";
-            r.style.stroke = "#333"; r.style.strokeWidth = "1.5";
-            if(d?.fito?.length > 0) {
-                let last = d.fito[d.fito.length-1];
-                let col = (last.col !== "AUTO") ? last.col : (new Date(last.v) > new Date() ? "var(--red)" : "var(--green)");
-                r.style.stroke = col; r.style.strokeWidth = "5";
+        
+        let hoy = new Date();
+        document.querySelectorAll('#svg-fito .mesa, #svg-fito .carro').forEach(rect => {
+            let id = rect.id.replace('f-', ''); let data = DB_FITO[id];
+            let esCarro = rect.classList.contains('carro');
+            rect.style.fill = "#ffffff"; rect.style.stroke = "#333"; rect.style.strokeWidth = "1.5";
+            
+            if(data) {
+                if(data.pedidos?.length > 0) rect.style.fill = "var(--neon-ready)";
+                if(!esCarro && data.fito?.length > 0) {
+                    let last = data.fito[data.fito.length-1];
+                    if(last.color_manual === "RED") { rect.style.stroke = "var(--rojo-fito)"; rect.style.strokeWidth = "6"; }
+                    else if(last.color_manual === "ORANGE") { rect.style.stroke = "var(--naranja-fito)"; rect.style.strokeWidth = "6"; }
+                    else if(last.color_manual === "GREEN") { rect.style.stroke = "var(--verde-cultigar)"; rect.style.strokeWidth = "6"; }
+                    else {
+                        rect.style.stroke = new Date(last.v) > hoy ? "var(--rojo-fito)" : "var(--verde-cultigar)";
+                        rect.style.strokeWidth = "6";
+                    }
+                }
             }
         });
     }
-
-    function persist() { localStorage.setItem('culti_traza', JSON.stringify(DB_T)); localStorage.setItem('culti_fito', JSON.stringify(DB_F)); render(); subirDatos(); }
-    function show(id) { document.getElementById('ov').style.display = 'block'; document.getElementById(id).style.display = 'block'; }
-    function cerrar() { document.querySelectorAll('.modal, .overlay').forEach(x => x.style.display = 'none'); }
-    function tab(t) { document.getElementById('pLog').style.display = t=='log'?'block':'none'; document.getElementById('pFit').style.display = t=='fit'?'block':'none'; }
-    function val(id) { return document.getElementById(id).value; }
-    function set(id,v) { document.getElementById(id).value = v; }
-    function clear() { document.querySelectorAll('input').forEach(i => i.value = ""); }
 
     async function subirDatos() {
-        const t = localStorage.getItem('github_token'); if(!t) return;
-        try { await fetch(`https://api.github.com/gists/${GIST}`, { method: 'PATCH', headers: { 'Authorization': `token ${t}` }, body: JSON.stringify({ files: { "cultigar_db.json": { content: JSON.stringify(DB_T) }, "cultigar_fito.json": { content: JSON.stringify(DB_F) } }}) }); } catch(e){}
+        const token = localStorage.getItem('github_token'); if(!token) return;
+        try {
+            await fetch(`https://api.github.com/gists/${GIST_ID}`, {
+                method: 'PATCH',
+                headers: { 'Authorization': `token ${token}` },
+                body: JSON.stringify({ files: { 
+                    "cultigar_db.json": { content: JSON.stringify(DB_TRAZA) },
+                    "cultigar_fito.json": { content: JSON.stringify(DB_FITO) }
+                }})
+            });
+        } catch(e) {}
     }
+
     async function bajarDatos() {
-        try { const r = await fetch(`https://api.github.com/gists/${GIST}?cb=${Date.now()}`); const d = await r.json(); if(d.files["cultigar_db.json"]) DB_T = JSON.parse(d.files["cultigar_db.json"].content); if(d.files["cultigar_fito.json"]) DB_F = JSON.parse(d.files["cultigar_fito.json"].content); render(); } catch(e){}
+        try {
+            const res = await fetch(`https://api.github.com/gists/${GIST_ID}?cb=${Date.now()}`);
+            const data = await res.json();
+            if(data.files["cultigar_db.json"]) DB_TRAZA = JSON.parse(data.files["cultigar_db.json"].content);
+            if(data.files["cultigar_fito.json"]) DB_FITO = JSON.parse(data.files["cultigar_fito.json"].content);
+            actualizarColoresMapas();
+        } catch(e) {}
     }
+
     function ejecutarBusqueda() {
-        let b = val('buscador').toUpperCase();
-        document.querySelectorAll('#svg1 .mesa').forEach(m => m.classList.remove('resaltado'));
+        let b = document.getElementById('buscador').value.toUpperCase();
+        document.querySelectorAll('#svg-trazabilidad .mesa').forEach(m => m.classList.remove('resaltado'));
         if(!b) return;
-        for(let m in DB_T) {
-            let its = Array.isArray(DB_T[m]) ? DB_T[m] : DB_T[m].items;
-            if(its?.some(r => r.ref.includes(b))) document.getElementById('t-'+m)?.classList.add('resaltado');
+        for(let m in DB_TRAZA) {
+            let items = Array.isArray(DB_TRAZA[m]) ? DB_TRAZA[m] : DB_TRAZA[m].items;
+            if(items?.some(r => r.ref.includes(b))) document.getElementById('t-'+m)?.classList.add('resaltado');
         }
     }
-    window.onload = init;
+
+    window.onload = () => { inicializarMapas(); bajarDatos(); };
 </script>
 </body>
 </html>
