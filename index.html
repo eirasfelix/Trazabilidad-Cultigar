@@ -3,277 +3,158 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CULTIGAR - SISTEMA INTEGRAL PRO</title>
+    <title>CULTIGAR - CEREBRO LOGÍSTICO</title>
     <style>
         :root {
-            --bg-dark: #2c3e50;
+            --bg-dark: #1e272e;
             --verde-cultigar: #27ae60;
             --rojo-fito: #c0392b;
             --naranja-fito: #e67e22;
             --azul-log: #2980b9;
-            --purpura: #af7ac5;
+            --purpura: #8e44ad;
             --blanco: #ffffff;
             --neon-ready: #39FF14;
         }
 
-        body { 
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-            background: var(--bg-dark); 
-            margin: 0; 
-            color: white;
-            padding-bottom: 50px;
-        }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg-dark); margin: 0; color: white; }
 
+        /* HEADER Y BUSCADOR */
         .header-sticky {
-            position: sticky;
-            top: 0;
-            background: white;
-            padding: 10px;
-            z-index: 1000;
-            display: flex;
-            gap: 10px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            position: sticky; top: 0; background: white; padding: 10px; z-index: 1000;
+            display: flex; gap: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.3);
         }
+        .input-busqueda { flex-grow: 1; padding: 12px; border-radius: 8px; border: 2px solid #ddd; font-size: 16px; color: #333; }
+        .btn-nube { padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; color: white; }
 
-        .input-busqueda {
-            flex-grow: 1;
-            padding: 12px;
-            border-radius: 8px;
-            border: 2px solid #ddd;
-            font-size: 16px;
-            color: #333;
-        }
+        /* PESTAÑAS */
+        .tabs-principales { display: flex; background: #2c3e50; padding: 5px; gap: 5px; }
+        .tab-btn { flex: 1; padding: 15px; border: none; background: #34495e; color: white; cursor: pointer; font-weight: bold; }
+        .tab-btn.active { background: var(--verde-cultigar); }
 
-        .btn-nube {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: bold;
-            color: white;
-            transition: 0.3s;
-        }
-
-        /* --- PANTALLA MCDONALDS --- */
+        /* PANTALLA MCDONALDS */
         .contenedor-pedidos {
-            display: flex;
-            gap: 15px;
-            overflow-x: auto;
-            padding: 15px;
-            background: #1a1a1a;
-            margin: 10px 20px;
-            border-radius: 10px;
-            border: 1px solid #444;
-            min-height: 100px;
+            display: flex; gap: 15px; overflow-x: auto; padding: 15px; background: #121212;
+            margin: 10px; border-radius: 10px; min-height: 80px;
         }
-
         .tarjeta-pedido {
-            min-width: 180px;
-            background: #2c3e50;
-            border-left: 8px solid var(--azul-log);
-            padding: 12px;
-            border-radius: 8px;
-            flex-shrink: 0;
+            min-width: 180px; background: #2c3e50; border-left: 8px solid var(--azul-log);
+            padding: 10px; border-radius: 8px; flex-shrink: 0; position: relative;
         }
+        .tarjeta-pedido.urgente { border-left-color: var(--rojo-fito); animation: pulse 2s infinite; }
+        @keyframes pulse { 0% { box-shadow: 0 0 0 0px rgba(192,57,43,0.7); } 70% { box-shadow: 0 0 0 10px rgba(192,57,43,0); } 100% { box-shadow: 0 0 0 0px rgba(192,57,43,0); } }
 
-        .tarjeta-pedido.urgente { 
-            border-left-color: var(--rojo-fito); 
-            animation: pulse 2s infinite; 
-        }
-
-        @keyframes pulse {
-            0% { box-shadow: 0 0 0 0px rgba(192, 57, 43, 0.7); }
-            70% { box-shadow: 0 0 0 10px rgba(192, 57, 43, 0); }
-            100% { box-shadow: 0 0 0 0px rgba(192, 57, 43, 0); }
-        }
-
-        .pedido-header { display: flex; justify-content: space-between; font-weight: bold; border-bottom: 1px solid #555; margin-bottom: 8px; font-size: 14px; }
-        .pedido-info { font-size: 13px; color: #eee; }
-        .pedido-meta { font-size: 10px; color: #aaa; margin-top: 8px; }
-
-        .seccion-mapa {
-            background: #eee;
-            margin: 20px auto;
-            padding: 15px;
-            width: 500px;
-            border-radius: 10px;
-            border: 3px solid #000;
-        }
-
-        .titulo-mapa {
-            text-align: center;
-            padding: 10px;
-            margin: 0;
-            font-weight: bold;
-            text-transform: uppercase;
-        }
-
+        /* MAPAS (Mantenemos tus 500px) */
+        .seccion-mapa { background: #eee; margin: 15px auto; padding: 10px; width: 500px; border-radius: 10px; border: 3px solid #000; color: #333; }
         svg { display: block; margin: auto; background: white; }
-
-        .mesa, .carro {
-            fill: white;
-            stroke: #333;
-            stroke-width: 1.5;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .carro { stroke-dasharray: 4; }
-        .mesa:hover, .carro:hover { stroke: #000; stroke-width: 3; }
-
-        .texto-id {
-            font-size: 10px;
-            font-weight: bold;
-            fill: black;
-            pointer-events: none;
-            text-anchor: middle;
-        }
-
+        .mesa, .carro { fill: white; stroke: #333; stroke-width: 1.5; cursor: pointer; transition: 0.2s; }
+        .mesa:hover { stroke-width: 3; stroke: #000; }
         .ocupada { fill: #a9dfbf !important; }
         .rejuntado { fill: var(--azul-log) !important; }
         .resaltado { fill: #f39c12 !important; stroke: #d35400; stroke-width: 4; }
         .listo-salida { fill: var(--neon-ready) !important; }
+        .texto-id { font-size: 10px; font-weight: bold; fill: black; pointer-events: none; text-anchor: middle; }
 
+        /* MODALES */
         .modal {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 95%;
-            max-width: 500px;
-            height: 90%;
-            background: #1a1a1a;
-            border: 4px solid #444;
-            border-radius: 15px;
-            display: none;
-            z-index: 2000;
-            padding: 20px;
-            overflow-y: auto;
+            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 95%; max-width: 500px; height: 85%; background: #1a1a1a;
+            border-radius: 15px; display: none; z-index: 2000; padding: 20px; overflow-y: auto;
         }
+        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none; z-index: 1500; }
 
-        .overlay {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.8);
-            display: none;
-            z-index: 1500;
-        }
-
-        .form-group { margin-bottom: 12px; }
-        .form-group label { display: block; font-size: 11px; color: #aaa; margin-bottom: 3px; text-transform: uppercase; }
-        .form-group input, .form-group select {
-            width: 100%;
-            padding: 8px;
-            border-radius: 5px;
-            border: 1px solid #444;
-            background: #222;
-            color: white;
-            font-size: 14px;
-            box-sizing: border-box;
-        }
-
-        table { width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 12px; }
-        th { border-bottom: 2px solid var(--verde-cultigar); padding: 8px; text-align: left; color: var(--verde-cultigar); }
+        /* TABLAS E INPUTS */
+        table { width: 100%; border-collapse: collapse; margin-bottom: 15px; font-size: 12px; }
+        th { border-bottom: 2px solid var(--verde-cultigar); padding: 8px; text-align: left; }
         td { padding: 8px; border-bottom: 1px solid #333; }
+        .form-group { margin-bottom: 10px; }
+        .form-group label { display: block; font-size: 11px; color: #aaa; text-transform: uppercase; }
+        .form-group input, .form-group select { width: 100%; padding: 10px; background: #222; border: 1px solid #444; color: white; border-radius: 5px; box-sizing: border-box; }
+        .btn-guardar { width: 100%; padding: 12px; border: none; border-radius: 8px; font-weight: bold; color: white; cursor: pointer; margin-top: 5px; }
 
-        .btn-guardar { width: 100%; padding: 15px; border: none; border-radius: 8px; font-weight: bold; color: white; cursor: pointer; font-size: 16px; margin-bottom: 5px; }
-        .btn-cerrar { background: #555; margin-top: 10px; }
-        .btn-accion { padding: 5px; cursor: pointer; border: none; border-radius: 3px; }
-
-        .flex-row { display: flex; gap: 10px; }
-        .flex-row .form-group { flex: 1; }
+        /* HISTORIAL */
+        .log-entry { padding: 8px; border-bottom: 1px solid #444; font-size: 12px; line-height: 1.4; }
+        .log-date { color: var(--verde-cultigar); font-weight: bold; margin-right: 10px; }
     </style>
 </head>
 <body>
 
 <div class="header-sticky">
-    <input type="text" id="buscador" class="input-busqueda" placeholder="🔍 Buscar Variedad..." onkeyup="ejecutarBusqueda()">
+    <input type="text" id="buscador" class="input-busqueda" placeholder="🔍 Buscar Variedad o Lote..." onkeyup="ejecutarBusqueda()">
     <button class="btn-nube" style="background: #27ae60;" onclick="subirDatos()">⬆</button>
     <button class="btn-nube" style="background: #2980b9;" onclick="bajarDatos()">⬇</button>
 </div>
 
-<h3 style="margin: 20px 0 0 20px; color: var(--naranja-fito); font-size: 14px;">PRÓXIMOS PEDIDOS </h3>
-<div id="pantallaMcdonalds" class="contenedor-pedidos"></div>
-
-<div class="seccion-mapa">
-    <h3 class="titulo-mapa" style="color: var(--verde-cultigar);">Mapa 1: Trazabilidad</h3>
-    <svg width="480" height="780" id="svg-trazabilidad"></svg>
+<div class="tabs-principales">
+    <button class="tab-btn active" onclick="cambiarPestaña('p-mapas', this)">🗺️ MAPAS</button>
+    <button class="tab-btn" onclick="cambiarPestaña('p-historial', this)">📜 HISTORIAL JEFATURA</button>
 </div>
 
-<div class="seccion-mapa">
-    <h3 class="titulo-mapa" style="color: var(--azul-log);">Mapa 2: Logística y Fitos</h3>
-    <svg width="480" height="880" id="svg-fito"></svg>
+<div id="p-mapas" class="pestaña-cont">
+    <h3 style="margin: 15px 0 0 20px; color: var(--naranja-fito); font-size: 14px;">🍟 PRÓXIMOS PEDIDOS (AUTOMÁTICO)</h3>
+    <div id="pantallaMcdonalds" class="contenedor-pedidos"></div>
+
+    <div class="seccion-mapa">
+        <h3 style="text-align:center; margin:0; color:var(--verde-cultigar);">MAPA 1: TRAZABILIDAD</h3>
+        <svg width="480" height="780" id="svg-trazabilidad"></svg>
+    </div>
+
+    <div class="seccion-mapa">
+        <h3 style="text-align:center; margin:0; color:var(--azul-log);">MAPA 2: LOGÍSTICA / SALIDAS</h3>
+        <svg width="480" height="880" id="svg-fito"></svg>
+    </div>
+</div>
+
+<div id="p-historial" class="pestaña-cont" style="display:none; padding: 20px;">
+    <h2>📜 Historial de Movimientos y Rejuntes</h2>
+    <div id="listaHistorial" style="background: #121212; border-radius: 10px; padding: 10px;">
+        </div>
 </div>
 
 <div class="overlay" id="overlay" onclick="cerrarModales()"></div>
 
 <div id="modalMesa" class="modal">
-    <h2 id="mesaTitulo" style="color: var(--verde-cultigar); font-size: 18px;">Mesa --</h2>
-    <div id="zonaPegarTraza"></div>
+    <h2 id="mesaTitulo" style="color: var(--verde-cultigar);">Mesa --</h2>
     <table>
-        <thead><tr><th>Ref</th><th>Lote</th><th>Bnd</th><th>Acción</th></tr></thead>
+        <thead><tr><th>Variedad</th><th>Lote</th><th>Bnd</th><th>Acción</th></tr></thead>
         <tbody id="tablaCuerpoMesa"></tbody>
     </table>
     <div class="form-group"><label>Variedad</label><input type="text" id="f_ref"></div>
     <div class="form-group"><label>Lote</label><input type="text" id="f_lote"></div>
-    <div class="flex-row">
-        <div class="form-group"><label>Nº Bnd</label><input type="number" id="f_num_bandejas"></div>
-        <div class="form-group"><label>Tipo</label><input type="text" id="f_tipo_bandeja" list="op_bnd"><datalist id="op_bnd"><option value="40"><option value="60"><option value="84"></datalist></div>
-    </div>
-    <div style="display:flex; gap:5px;">
-        <button id="btnGuardarTraza" class="btn-guardar" style="background: var(--verde-cultigar); flex:2;" onclick="guardarRegistroTrazabilidad()">💾 GUARDAR</button>
-        <button id="btnRejuntarTraza" class="btn-guardar" style="background: #555; flex:1;" onclick="toggleRejuntarTraza()">⬜ REJUNTAR</button>
-    </div>
-    <button class="btn-guardar btn-cerrar" onclick="cerrarModales()">CERRAR</button>
+    <div class="form-group"><label>Bandejas</label><input type="number" id="f_num_bandejas"></div>
+    <button class="btn-guardar" style="background: var(--verde-cultigar);" onclick="guardarTraza()">💾 GUARDAR</button>
+    <button class="btn-guardar" style="background: #555;" onclick="cerrarModales()">CERRAR</button>
 </div>
 
 <div id="modalFito" class="modal">
-    <div id="tabsFito" style="display:flex; gap:5px; margin-bottom:15px;">
-        <button id="btLog" class="btn-guardar" style="background:#2980b9; flex:1; padding:10px;" onclick="switchTab('log')">📦 LOGÍSTICA</button>
-        <button id="btFit" class="btn-guardar" style="background:#555; flex:1; padding:10px;" onclick="switchTab('fit')">🛡️ FITOS</button>
-    </div>
-    
-    <div id="panelLog">
-        <h2 id="logTitulo" style="color: #2980b9; font-size: 18px;">Logística - Mesa/Carro --</h2>
-        <div id="zonaPegarLog"></div>
-        <table><thead><tr><th>Cliente</th><th>Bnd</th><th>Lote</th><th>Acción</th></tr></thead><tbody id="logCuerpoMesa"></tbody></table>
-        <div class="form-group"><label>Cliente / Variedad</label><input type="text" id="l_cli"></div>
-        <div class="flex-row">
-            <div class="form-group"><label>Bandejas</label><input type="number" id="l_bnd"></div>
-            <div class="form-group"><label>Lote</label><input type="text" id="l_lot"></div>
+    <h2 id="logTitulo" style="color: var(--azul-log);">Logística --</h2>
+    <div id="zonaRejunte" style="margin-bottom: 15px;"></div>
+    <table>
+        <thead><tr><th>Cliente</th><th>Bnd</th><th>Var/Lote</th><th>Acción</th></tr></thead>
+        <tbody id="logCuerpoMesa"></tbody>
+    </table>
+    <div class="form-group"><label>Cliente</label><input type="text" id="l_cli" placeholder="Ej: AMILCAR"></div>
+    <div class="form-group"><label>Bandejas</label><input type="number" id="l_bnd"></div>
+    <div class="form-group"><label>Info Variedad/Lote</label><input type="text" id="l_lot"></div>
+    <div style="display:flex; gap:5px;">
+        <div class="form-group" style="flex:2;"><label>Fecha Entrega</label><input type="date" id="l_fecha"></div>
+        <div class="form-group" style="flex:1;"><label>Urgente</label>
+            <select id="l_urgente"><option value="no">No</option><option value="si">SÍ</option></select>
         </div>
-        <div class="flex-row">
-            <div class="form-group"><label>Fecha Entrega</label><input type="date" id="l_fecha"></div>
-            <div class="form-group"><label>Prioridad</label>
-                <select id="l_urgente">
-                    <option value="no">Normal</option>
-                    <option value="si">⚠️ URGENTE</option>
-                </select>
-            </div>
-        </div>
-        <button id="btnGuardarLog" class="btn-guardar" style="background:#2980b9;" onclick="guardarLog()">💾 AÑADIR A LA HOJA</button>
     </div>
-
-    <div id="panelFit" style="display:none;">
-        <h2 style="color: var(--rojo-fito); font-size: 18px;">🛡️ Nuevo Tratamiento</h2>
-        <div class="form-group"><label>Plaga</label><input type="text" id="fi_plaga"></div>
-        <div class="flex-row"><div class="form-group"><label>Producto</label><input type="text" id="fi_nomcom"></div><div class="form-group"><label>Dosis</label><input type="text" id="fi_dosis"></div></div>
-        <div class="flex-row"><div class="form-group"><label>Plazo (Días)</label><input type="number" id="fi_plazo"></div><div class="form-group"><label>Color Mapa</label><select id="fi_color_manual"><option value="AUTO">AUTO</option><option value="RED">ROJO</option><option value="ORANGE">NARANJA</option></select></div></div>
-        <button class="btn-guardar" style="background:var(--rojo-fito);" onclick="guardarFitoPro()">🛡️ REGISTRAR</button>
-        <table style="margin-top:10px;"><thead><tr><th>Fecha</th><th>Producto</th><th>Vence</th><th>Acción</th></tr></thead><tbody id="fitoCuerpoMesaPro"></tbody></table>
-    </div>
-    <button class="btn-guardar btn-cerrar" onclick="cerrarModales()">CERRAR</button>
+    <button class="btn-guardar" style="background: var(--azul-log);" onclick="guardarLog()">💾 AÑADIR PEDIDO</button>
+    <button class="btn-guardar" style="background: #555;" onclick="cerrarModales()">CERRAR</button>
 </div>
 
 <script>
     const GIST_ID = "dc4b1ac9b41655086c76352f03ccfafe";
     let DB_TRAZA = JSON.parse(localStorage.getItem('culti_traza')) || {};
     let DB_FITO = JSON.parse(localStorage.getItem('culti_fito')) || {};
+    let DB_HISTORIAL = JSON.parse(localStorage.getItem('culti_hist')) || [];
+    
     let mesaSeleccionada = "";
-    let indexEdicion = null;
-    let indexFitoEdicion = null;
-    let portapapeles = null;
+    let rejunteMemoria = null; // La "bolsa" donde guardamos lo cortado
 
+    // --- GEOMETRÍA (Tu diseño original) ---
     const GEOMETRIA = [
         {id:'10-48', x:10, y:70, w:40, h:140}, {id:'11-49', x:55, y:70, w:40, h:140},
         {id:'12-50', x:105, y:70, w:40, h:140}, {id:'13-51', x:150, y:70, w:40, h:140},
@@ -297,201 +178,197 @@
             trazHtml += `<rect id="t-${m.id}" class="mesa" x="${m.x}" y="${m.y}" width="${m.w}" height="${m.h}" onclick="abrirTraza('${m.id}')"></rect><text x="${m.x + m.w/2}" y="${m.y + m.h - 5}" class="texto-id">${m.id}</text>`;
             fitoHtml += `<rect id="f-${m.id}" class="mesa" x="${m.x}" y="${m.y}" width="${m.w}" height="${m.h}" onclick="abrirFito('${m.id}')"></rect><text x="${m.x + m.w/2}" y="${m.y + m.h - 5}" class="texto-id">${m.id}</text>`;
         });
+        // Pasillos de la derecha (1-14)
         for(let i=1; i<=14; i++) {
             let yPos = 70 + (14-i) * 46;
             trazHtml += `<rect id="t-${i}" class="mesa" x="395" y="${yPos}" width="75" height="38" onclick="abrirTraza('${i}')"></rect><text x="432" y="${yPos + 22}" class="texto-id">${i}</text>`;
             fitoHtml += `<rect id="f-${i}" class="mesa" x="395" y="${yPos}" width="75" height="38" onclick="abrirFito('${i}')"></rect><text x="432" y="${yPos + 22}" class="texto-id">${i}</text>`;
         }
-        ['14-52', '15-53', '16-54', '17-55'].forEach((id, idx) => {
-            let m = GEOMETRIA.find(g => g.id === id);
-            fitoHtml += `<rect id="f-C${idx+1}" class="carro" x="${m.x}" y="${m.y + m.h + 20}" width="${m.w}" height="60" onclick="abrirFito('C${idx+1}')"></rect>
-                         <text x="${m.x + m.w/2}" y="${m.y + m.h + 55}" class="texto-id">🛒 C${idx+1}</text>`;
+        // Carros C1-C4
+        ['C1','C2','C3','C4'].forEach((cid, idx) => {
+            fitoHtml += `<rect id="f-${cid}" class="carro" x="${210 + (idx*45)}" y="720" width="38" height="60" onclick="abrirFito('${cid}')"></rect><text x="${229 + (idx*45)}" y="755" class="texto-id">${cid}</text>`;
         });
         document.getElementById('svg-trazabilidad').innerHTML = trazHtml;
         document.getElementById('svg-fito').innerHTML = fitoHtml;
-        actualizarTodo();
+        actualizarUI();
     }
 
-    function actualizarTodo() {
-        actualizarColoresMapas();
-        actualizarPantallaMcdonalds();
+    function actualizarUI() {
+        actualizarColores();
+        mostrarMcDonalds();
+        mostrarHistorial();
     }
 
-    function actualizarPantallaMcdonalds() {
-        const pan = document.getElementById('pantallaMcdonalds');
-        pan.innerHTML = "";
-        let pedidos = [];
-        for(let id in DB_FITO) {
-            if(DB_FITO[id].pedidos?.length > 0) {
-                DB_FITO[id].pedidos.forEach(p => pedidos.push({...p, mesa: id}));
-            }
-        }
-        if(pedidos.length === 0) { pan.innerHTML = "<p style='color:#555; width:100%; text-align:center;'>No hay pedidos marchando...</p>"; return; }
+    // --- LÓGICA DE REJUNTE INTELIGENTE ---
+    function iniciarCortarRejunte(idx) {
+        let mesa = DB_TRAZA[mesaSeleccionada];
+        let items = Array.isArray(mesa) ? mesa : mesa.items;
+        let item = items[idx];
+
+        let cant = prompt(`¿Cuántas bandejas quieres REJUNTAR de ${item.ref}?`, item.num_bandejas);
+        if (!cant || cant <= 0) return;
+
+        if (parseInt(cant) > parseInt(item.num_bandejas)) { alert("No hay tantas bandejas"); return; }
+
+        // Guardamos en la memoria
+        rejunteMemoria = {
+            ref: item.ref,
+            lote: item.lote,
+            bnd: cant,
+            origen: mesaSeleccionada
+        };
+
+        // Descontamos del Mapa 1
+        item.num_bandejas = parseInt(item.num_bandejas) - parseInt(cant);
+        if (item.num_bandejas <= 0) items.splice(idx, 1);
+
+        persistir();
+        mostrarTablaTraza();
+        alert("¡Bandejas en el portapapeles! Ve al MAPA 2 para pegarlas.");
+    }
+
+    function pegarRejunte() {
+        if (!rejunteMemoria) return;
         
-        pedidos.forEach(p => {
-            pan.innerHTML += `
-                <div class="tarjeta-pedido ${p.urgente === 'si' ? 'urgente' : ''}">
-                    <div class="pedido-header"><span>${p.cli}</span><span style="color:var(--neon-ready)">#${p.mesa}</span></div>
-                    <div class="pedido-info">📦 <b>${p.bnd}</b> bnd</div>
-                    <div class="pedido-info">🌿 ${p.lot}</div>
-                    <div class="pedido-meta">📅 Entrega: ${p.fecha || '--'}</div>
-                </div>`;
+        if (!DB_FITO[mesaSeleccionada]) DB_FITO[mesaSeleccionada] = { pedidos: [] };
+        
+        let cli = prompt("¿Para qué cliente es este rejunte?", "AMILCAR");
+        if(!cli) return;
+
+        DB_FITO[mesaSeleccionada].pedidos.push({
+            cli: cli.toUpperCase(),
+            bnd: rejunteMemoria.bnd,
+            lot: `${rejunteMemoria.ref} (Lote: ${rejunteMemoria.lote})`,
+            fecha: "",
+            urgente: "no"
         });
+
+        // REGISTRAR EN HISTORIAL
+        registrarHistorial(`Rejunte: Se movieron ${rejunteMemoria.bnd} bnd de ${rejunteMemoria.ref} (Lote ${rejunteMemoria.lote}) desde Mesa ${rejunteMemoria.origen} hacia ${mesaSeleccionada} para el cliente ${cli.toUpperCase()}.`);
+
+        rejunteMemoria = null;
+        persistir();
+        mostrarLog();
+        actualizarUI();
     }
 
+    // --- FUNCIONES CORE ---
     function abrirTraza(id) {
-        mesaSeleccionada = id; indexEdicion = null;
+        mesaSeleccionada = id;
         mostrarTablaTraza();
         document.getElementById('overlay').style.display = 'block';
         document.getElementById('modalMesa').style.display = 'block';
     }
 
     function mostrarTablaTraza() {
-        let html = ""; let mesa = DB_TRAZA[mesaSeleccionada] || { items: [], rej: false };
+        let mesa = DB_TRAZA[mesaSeleccionada] || { items: [] };
         let datos = Array.isArray(mesa) ? mesa : (mesa.items || []);
+        let html = "";
         datos.forEach((r, i) => {
             html += `<tr><td>${r.ref}</td><td>${r.lote}</td><td>${r.num_bandejas}</td>
-                <td style="display:flex; gap:3px;">
-                    <button class="btn-accion" onclick="editarTraza(${i})">✏️</button>
-                    <button class="btn-accion" onclick="cortarLote(${i}, 'traza')">📦</button>
-                    <button class="btn-accion" onclick="borrarTraza(${i})">🗑️</button>
-                </td></tr>`;
+                <td><button onclick="iniciarCortarRejunte(${i})">✂️ CORTAR</button></td></tr>`;
         });
         document.getElementById('mesaTitulo').innerText = "Mesa " + mesaSeleccionada;
-        document.getElementById('tablaCuerpoMesa').innerHTML = html || "<tr><td colspan='4'>Mesa vacía</td></tr>";
-        document.getElementById('btnRejuntarTraza').style.background = mesa.rej ? "var(--azul-log)" : "#555";
-        document.getElementById('zonaPegarTraza').innerHTML = portapapeles ? `<button class="btn-guardar" style="background:var(--purpura);" onclick="pegarEnTraza()">📋 PEGAR AQUÍ</button>` : "";
+        document.getElementById('tablaCuerpoMesa').innerHTML = html || "<tr><td colspan='4'>Vacía</td></tr>";
     }
 
-    function guardarRegistroTrazabilidad() {
-        if(!DB_TRAZA[mesaSeleccionada]) DB_TRAZA[mesaSeleccionada] = { items: [], rej: false };
-        if(Array.isArray(DB_TRAZA[mesaSeleccionada])) DB_TRAZA[mesaSeleccionada] = { items: DB_TRAZA[mesaSeleccionada], rej: false };
-        let nuevo = { ref: document.getElementById('f_ref').value.toUpperCase(), lote: document.getElementById('f_lote').value, num_bandejas: document.getElementById('f_num_bandejas').value, tipo_bandeja: document.getElementById('f_tipo_bandeja').value };
-        if(indexEdicion !== null) { DB_TRAZA[mesaSeleccionada].items[indexEdicion] = nuevo; } 
-        else { DB_TRAZA[mesaSeleccionada].items.push(nuevo); }
-        persistir(); mostrarTablaTraza(); actualizarTodo(); cerrarModales();
+    function guardarTraza() {
+        if (!DB_TRAZA[mesaSeleccionada]) DB_TRAZA[mesaSeleccionada] = { items: [], rej: false };
+        if (Array.isArray(DB_TRAZA[mesaSeleccionada])) DB_TRAZA[mesaSeleccionada] = { items: DB_TRAZA[mesaSeleccionada], rej: false };
+        
+        let nuevo = {
+            ref: document.getElementById('f_ref').value.toUpperCase(),
+            lote: document.getElementById('f_lote').value,
+            num_bandejas: document.getElementById('f_num_bandejas').value
+        };
+        DB_TRAZA[mesaSeleccionada].items.push(nuevo);
+        persistir(); mostrarTablaTraza(); actualizarUI();
     }
 
     function abrirFito(id) {
-        mesaSeleccionada = id; indexEdicion = null;
-        document.getElementById('logTitulo').innerText = (id.startsWith('C') ? "Carro " : "Mesa ") + id;
-        switchTab('log');
-        mostrarLog(); mostrarFitoPro();
+        mesaSeleccionada = id;
+        document.getElementById('logTitulo').innerText = "Logística " + id;
+        mostrarLog();
         document.getElementById('overlay').style.display = 'block';
         document.getElementById('modalFito').style.display = 'block';
     }
 
     function mostrarLog() {
-        let html = ""; let data = DB_FITO[mesaSeleccionada] || { pedidos: [] };
+        let data = DB_FITO[mesaSeleccionada] || { pedidos: [] };
+        let html = "";
         (data.pedidos || []).forEach((p, i) => {
             html += `<tr><td>${p.cli}</td><td>${p.bnd}</td><td>${p.lot}</td>
-                <td style="display:flex; gap:3px;">
-                    <button class="btn-accion" onclick="editarLog(${i})">✏️</button>
-                    <button class="btn-accion" onclick="borrarLog(${i})">🗑️</button>
-                </td></tr>`;
+                <td><button onclick="DB_FITO['${mesaSeleccionada}'].pedidos.splice(${i},1); persistir(); mostrarLog(); actualizarUI();">🗑️</button></td></tr>`;
         });
-        document.getElementById('logCuerpoMesa').innerHTML = html || "<tr><td colspan='4'>Sin datos</td></tr>";
-        document.getElementById('zonaPegarLog').innerHTML = portapapeles ? `<button class="btn-guardar" style="background:var(--purpura);" onclick="pegarEnLog()">📋 PEGAR AQUÍ</button>` : "";
+        document.getElementById('logCuerpoMesa').innerHTML = html || "<tr><td colspan='4'>Sin pedidos</td></tr>";
+        
+        // Botón especial si hay algo en el portapapeles
+        document.getElementById('zonaRejunte').innerHTML = rejunteMemoria ? 
+            `<button class="btn-guardar" style="background:var(--purpura);" onclick="pegarRejunte()">📋 PEGAR REJUNTE (${rejunteMemoria.bnd} bnd)</button>` : "";
     }
 
     function guardarLog() {
-        if(!DB_FITO[mesaSeleccionada]) DB_FITO[mesaSeleccionada] = { pedidos: [], fito: [] };
-        let nuevo = { 
-            cli: document.getElementById('l_cli').value.toUpperCase(), 
-            bnd: document.getElementById('l_bnd').value, 
+        if (!DB_FITO[mesaSeleccionada]) DB_FITO[mesaSeleccionada] = { pedidos: [] };
+        DB_FITO[mesaSeleccionada].pedidos.push({
+            cli: document.getElementById('l_cli').value.toUpperCase(),
+            bnd: document.getElementById('l_bnd').value,
             lot: document.getElementById('l_lot').value,
             fecha: document.getElementById('l_fecha').value,
             urgente: document.getElementById('l_urgente').value
-        };
-        if(indexEdicion !== null) { DB_FITO[mesaSeleccionada].pedidos[indexEdicion] = nuevo; }
-        else { DB_FITO[mesaSeleccionada].pedidos.push(nuevo); }
-        persistir(); mostrarLog(); actualizarTodo(); cerrarModales();
-    }
-
-    function toggleRejuntarTraza() {
-        if(!DB_TRAZA[mesaSeleccionada]) DB_TRAZA[mesaSeleccionada] = { items: [], rej: false };
-        if(Array.isArray(DB_TRAZA[mesaSeleccionada])) DB_TRAZA[mesaSeleccionada] = { items: DB_TRAZA[mesaSeleccionada], rej: false };
-        DB_TRAZA[mesaSeleccionada].rej = !DB_TRAZA[mesaSeleccionada].rej;
-        persistir(); mostrarTablaTraza(); actualizarTodo();
-    }
-
-    function cortarLote(i, origen) {
-        let items = (origen === 'traza') ? (Array.isArray(DB_TRAZA[mesaSeleccionada]) ? DB_TRAZA[mesaSeleccionada] : DB_TRAZA[mesaSeleccionada].items) : DB_FITO[mesaSeleccionada].pedidos;
-        let item = items[i];
-        portapapeles = (origen === 'traza') ? {...item} : { ref: item.cli, lote: item.lot, num_bandejas: item.bnd };
-        items.splice(i, 1);
-        persistir(); (origen === 'traza') ? mostrarTablaTraza() : mostrarLog();
-        actualizarTodo(); alert("Cortado al portapapeles.");
-    }
-
-    function pegarEnTraza() {
-        if(!portapapeles) return;
-        if(!DB_TRAZA[mesaSeleccionada]) DB_TRAZA[mesaSeleccionada] = { items: [], rej: false };
-        if(Array.isArray(DB_TRAZA[mesaSeleccionada])) DB_TRAZA[mesaSeleccionada] = { items: DB_TRAZA[mesaSeleccionada], rej: false };
-        DB_TRAZA[mesaSeleccionada].items.push({ ref: portapapeles.ref || portapapeles.cli, lote: portapapeles.lote || portapapeles.lot, num_bandejas: portapapeles.num_bandejas || portapapeles.bnd });
-        portapapeles = null; persistir(); mostrarTablaTraza(); actualizarTodo();
-    }
-
-    function pegarEnLog() {
-        if(!portapapeles) return;
-        if(!DB_FITO[mesaSeleccionada]) DB_FITO[mesaSeleccionada] = { pedidos: [], fito: [] };
-        DB_FITO[mesaSeleccionada].pedidos.push({ cli: portapapeles.ref || portapapeles.cli, bnd: portapapeles.num_bandejas || portapapeles.bnd, lot: portapapeles.lote || portapapeles.lot });
-        portapapeles = null; persistir(); mostrarLog(); actualizarTodo();
-    }
-
-    function guardarFitoPro() {
-        if(!DB_FITO[mesaSeleccionada]) DB_FITO[mesaSeleccionada] = { pedidos: [], fito: [] };
-        let hoy = new Date(); let venc = new Date();
-        venc.setDate(hoy.getDate() + parseInt(document.getElementById('fi_plazo').value || 0));
-        DB_FITO[mesaSeleccionada].fito.push({
-            plaga: document.getElementById('fi_plaga').value.toUpperCase(),
-            nomcom: document.getElementById('fi_nomcom').value.toUpperCase(),
-            color_manual: document.getElementById('fi_color_manual').value,
-            f: hoy.toLocaleDateString(), v: venc.toISOString()
         });
-        persistir(); mostrarFitoPro(); actualizarTodo();
+        persistir(); mostrarLog(); actualizarUI();
     }
 
-    function mostrarFitoPro() {
-        let html = ""; let regs = (DB_FITO[mesaSeleccionada]?.fito) || [];
-        regs.forEach((r, idx) => {
-            html += `<tr><td>${r.f}</td><td>${r.nomcom}</td><td>${new Date(r.v).toLocaleDateString()}</td><td><button class="btn-accion" onclick="DB_FITO['${mesaSeleccionada}'].fito.splice(${idx},1); persistir(); mostrarFitoPro(); actualizarTodo();">🗑️</button></td></tr>`;
+    function mostrarMcDonalds() {
+        const pan = document.getElementById('pantallaMcdonalds');
+        pan.innerHTML = "";
+        let pedidos = [];
+        for(let id in DB_FITO) {
+            if(DB_FITO[id].pedidos) {
+                DB_FITO[id].pedidos.forEach(p => { if(p.fecha || p.urgente==='si') pedidos.push({...p, mesa: id}); });
+            }
+        }
+        if(pedidos.length === 0) { pan.innerHTML = "<p style='color:#555;'>No hay avisos próximos...</p>"; return; }
+        
+        pedidos.sort((a,b) => (a.urgente === 'si' ? -1 : 1)).forEach(p => {
+            pan.innerHTML += `<div class="tarjeta-pedido ${p.urgente==='si'?'urgente':''}" onclick="abrirFito('${p.mesa}')">
+                <div style="font-weight:bold; border-bottom:1px solid #555;">${p.cli} <span style="float:right">#${p.mesa}</span></div>
+                <div style="font-size:12px;">📦 ${p.bnd} bnd | ${p.lot}</div>
+                <div style="font-size:10px; color:#aaa; margin-top:5px;">📅 ${p.fecha || 'Sin fecha'}</div>
+            </div>`;
         });
-        document.getElementById('fitoCuerpoMesaPro').innerHTML = html;
     }
 
-    function actualizarColoresMapas() {
+    function registrarHistorial(msg) {
+        let fecha = new Date().toLocaleString('es-ES');
+        DB_HISTORIAL.unshift({ fecha, msg });
+        if(DB_HISTORIAL.length > 50) DB_HISTORIAL.pop(); // Guardamos últimos 50
+        localStorage.setItem('culti_hist', JSON.stringify(DB_HISTORIAL));
+    }
+
+    function mostrarHistorial() {
+        const cont = document.getElementById('listaHistorial');
+        cont.innerHTML = DB_HISTORIAL.map(h => `<div class="log-entry"><span class="log-date">[${h.fecha}]</span> ${h.msg}</div>`).join('');
+    }
+
+    function actualizarColores() {
         document.querySelectorAll('#svg-trazabilidad .mesa').forEach(r => {
-            let id = r.id.replace('t-', ''); let d = DB_TRAZA[id];
-            r.classList.remove('ocupada', 'rejuntado');
-            if(d) {
-                let items = Array.isArray(d) ? d : d.items;
-                if(items?.length > 0) d.rej ? r.classList.add('rejuntado') : r.classList.add('ocupada');
-            }
+            let id = r.id.replace('t-', '');
+            let d = DB_TRAZA[id];
+            r.classList.remove('ocupada');
+            if(d && (Array.isArray(d)?d:d.items)?.length > 0) r.classList.add('ocupada');
         });
-        document.querySelectorAll('#svg-fito .mesa, #svg-fito .carro').forEach(rect => {
-            let id = rect.id.replace('f-', ''); let data = DB_FITO[id];
-            rect.style.fill = (data?.pedidos?.length > 0) ? "var(--neon-ready)" : "white";
-            rect.style.stroke = "#333"; rect.style.strokeWidth = "1.5";
-            if(data?.fito?.length > 0) {
-                let last = data.fito[data.fito.length-1];
-                rect.style.strokeWidth = "6";
-                rect.style.stroke = (last.color_manual === "RED" || new Date(last.v) > new Date()) ? "var(--rojo-fito)" : "var(--verde-cultigar)";
-            }
+        document.querySelectorAll('#svg-fito .mesa, #svg-fito .carro').forEach(r => {
+            let id = r.id.replace('f-', '');
+            r.style.fill = (DB_FITO[id]?.pedidos?.length > 0) ? "var(--neon-ready)" : "white";
         });
     }
 
-    function switchTab(t) {
-        document.getElementById('panelLog').style.display = t === 'log' ? 'block' : 'none';
-        document.getElementById('panelFit').style.display = t === 'fit' ? 'block' : 'none';
-        document.getElementById('btLog').style.background = t === 'log' ? '#2980b9' : '#555';
-        document.getElementById('btFit').style.background = t === 'fit' ? '#c0392b' : '#555';
-    }
-
-    function cerrarModales() {
-        document.getElementById('overlay').style.display = 'none';
-        document.querySelectorAll('.modal').forEach(m => m.style.display = 'none');
-        indexEdicion = null;
+    function cambiarPestaña(id, btn) {
+        document.querySelectorAll('.pestaña-cont').forEach(p => p.style.display = 'none');
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById(id).style.display = 'block';
+        btn.classList.add('active');
     }
 
     function persistir() {
@@ -500,13 +377,22 @@
         subirDatos();
     }
 
+    function cerrarModales() { 
+        document.getElementById('overlay').style.display = 'none'; 
+        document.querySelectorAll('.modal').forEach(m => m.style.display = 'none'); 
+    }
+
     async function subirDatos() {
         const token = localStorage.getItem('github_token'); if(!token) return;
         try {
             await fetch(`https://api.github.com/gists/${GIST_ID}`, {
                 method: 'PATCH',
                 headers: { 'Authorization': `token ${token}` },
-                body: JSON.stringify({ files: { "cultigar_db.json": { content: JSON.stringify(DB_TRAZA) }, "cultigar_fito.json": { content: JSON.stringify(DB_FITO) } }})
+                body: JSON.stringify({ files: { 
+                    "cultigar_db.json": { content: JSON.stringify(DB_TRAZA) }, 
+                    "cultigar_fito.json": { content: JSON.stringify(DB_FITO) },
+                    "cultigar_hist.json": { content: JSON.stringify(DB_HISTORIAL) }
+                }})
             });
         } catch(e) {}
     }
@@ -517,8 +403,21 @@
             const data = await res.json();
             if(data.files["cultigar_db.json"]) DB_TRAZA = JSON.parse(data.files["cultigar_db.json"].content);
             if(data.files["cultigar_fito.json"]) DB_FITO = JSON.parse(data.files["cultigar_fito.json"].content);
-            actualizarTodo();
+            if(data.files["cultigar_hist.json"]) DB_HISTORIAL = JSON.parse(data.files["cultigar_hist.json"].content);
+            actualizarUI();
         } catch(e) {}
+    }
+
+    function ejecutarBusqueda() {
+        const bus = document.getElementById('buscador').value.toUpperCase();
+        document.querySelectorAll('.mesa').forEach(m => m.classList.remove('resaltado'));
+        if(!bus) return;
+        for(let id in DB_TRAZA) {
+            let items = Array.isArray(DB_TRAZA[id]) ? DB_TRAZA[id] : DB_TRAZA[id].items;
+            if(items.some(i => i.ref.includes(bus) || i.lote.includes(bus))) {
+                document.getElementById('t-' + id).classList.add('resaltado');
+            }
+        }
     }
 
     window.onload = () => { inicializarMapas(); bajarDatos(); };
