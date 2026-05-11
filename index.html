@@ -1,56 +1,263 @@
 <!DOCTYPE html>
-<html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>CULTIGAR V3</title>
-<style>
-:root { --bg: #1e272e; --green: #27ae60; --red: #c0392b; --orange: #e67e22; --blue: #2980b9; --purple: #8e44ad; --neon: #39FF14; }
-body { font-family: sans-serif; background: var(--bg); color: white; margin: 0; padding-bottom: 50px; }
-.header-sticky { position: sticky; top: 0; background: white; padding: 10px; z-index: 1000; display: flex; gap: 10px; }
-.input-busqueda { flex-grow: 1; padding: 12px; border-radius: 8px; border: 2px solid #ddd; font-size: 16px; color: #333; }
-.tabs-nav { display: flex; background: #2c3e50; padding: 5px; }
-.tab-btn { flex: 1; padding: 12px; border: none; background: #34495e; color: white; cursor: pointer; font-weight: bold; }
-.tab-btn.active { background: var(--green); }
-.contenedor-pedidos { display: flex; gap: 15px; overflow-x: auto; padding: 15px; background: #121212; margin: 10px; border-radius: 10px; min-height: 80px; border: 1px solid #333; }
-.tarjeta-pedido { min-width: 180px; background: #2c3e50; border-left: 8px solid var(--blue); padding: 10px; border-radius: 8px; font-size: 13px; flex-shrink: 0; }
-.seccion-mapa { background: #eee; margin: 15px auto; padding: 15px; width: 480px; border-radius: 10px; border: 3px solid #000; color: #333; }
-svg { display: block; margin: auto; background: white; }
-.mesa { fill: white; stroke: #444; stroke-width: 1.2; cursor: pointer; }
-.ocupada { fill: #a9dfbf !important; }
-.texto-id { font-size: 10px; font-weight: bold; fill: black; pointer-events: none; text-anchor: middle; }
-.modal { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 95%; max-width: 500px; height: 85%; background: #1a1a1a; border-radius: 15px; display: none; z-index: 2000; padding: 20px; overflow-y: auto; border: 2px solid #444; }
-.overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); display: none; z-index: 1500; }
-table { width: 100%; border-collapse: collapse; margin-bottom: 15px; font-size: 12px; }
-th { background: #333; color: var(--green); padding: 8px; text-align: left; }
-td { padding: 8px; border-bottom: 1px solid #333; }
-.btn-accion { padding: 6px; border: none; border-radius: 4px; cursor: pointer; color: white; margin-right: 2px; }
-.btn-edit { background: var(--blue); } .btn-cut { background: var(--purple); } .btn-del { background: var(--red); }
-.form-group { margin-bottom: 8px; } .form-group label { display: block; font-size: 10px; color: #aaa; }
-.form-group input, .form-group select { width: 100%; padding: 8px; background: #262626; border: 1px solid #444; color: white; border-radius: 5px; box-sizing: border-box; }
-.btn-guardar { width: 100%; padding: 12px; border: none; border-radius: 8px; font-weight: bold; color: white; cursor: pointer; margin-top: 5px; }
-</style></head>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CULTIGAR - SISTEMA INTEGRAL PRO</title>
+    <style>
+        :root { --bg: #2c3e50; --green: #27ae60; --red: #c0392b; --orange: #e67e22; --blue: #2980b9; --purple: #af7ac5; --neon: #39FF14; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; color: white; padding-bottom: 50px; }
+        .header-sticky { position: sticky; top: 0; background: white; padding: 10px; z-index: 1000; display: flex; gap: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+        .input-busqueda { flex-grow: 1; padding: 12px; border-radius: 8px; border: 2px solid #ddd; font-size: 16px; color: #333; }
+        .btn-nube { padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; color: white; }
+        .seccion-mapa { background: #eee; margin: 20px auto; padding: 15px; width: 480px; border-radius: 10px; border: 3px solid #000; }
+        svg { display: block; margin: auto; background: white; }
+        .mesa, .carro { fill: white; stroke: #333; stroke-width: 1.5; cursor: pointer; }
+        .ocupada { fill: #a9dfbf !important; }
+        .rejuntado { fill: var(--blue) !important; }
+        .resaltado { fill: #f39c12 !important; stroke: #d35400; stroke-width: 4; }
+        .listo-salida { fill: var(--neon) !important; }
+        .texto-id { font-size: 10px; font-weight: bold; fill: black; pointer-events: none; text-anchor: middle; }
+        .modal { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 95%; max-width: 500px; height: 90%; background: #1a1a1a; border: 4px solid #444; border-radius: 15px; display: none; z-index: 2000; padding: 20px; overflow-y: auto; }
+        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none; z-index: 1500; }
+        .form-group { margin-bottom: 12px; }
+        label { display: block; font-size: 11px; color: #aaa; margin-bottom: 3px; }
+        input, select { width: 100%; padding: 8px; border-radius: 5px; border: 1px solid #444; background: #222; color: white; box-sizing: border-box; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 12px; }
+        th { border-bottom: 2px solid var(--green); padding: 8px; text-align: left; color: var(--green); }
+        td { padding: 8px; border-bottom: 1px solid #333; }
+        .btn-guardar { width: 100%; padding: 15px; border: none; border-radius: 8px; font-weight: bold; color: white; cursor: pointer; margin-bottom: 5px; }
+        .btn-accion { padding: 5px; cursor: pointer; border: none; border-radius: 3px; font-size: 14px; margin-right: 2px; }
+    </style>
+</head>
 <body>
-<div class="header-sticky"><input type="text" id="buscador" class="input-busqueda" placeholder="🔍 Buscar..." onkeyup="actualizarPantalla()"><button onclick="subirDatos()" style="background:var(--green); border:none; color:white; padding:10px; border-radius:8px;">⬆</button></div>
-<nav class="tabs-nav"><button class="tab-btn active" onclick="verP('p-mapas', this)">MAPAS</button><button class="tab-btn" onclick="verP('p-hist', this)">HISTORIAL</button></nav>
-<div id="p-mapas"><div id="pantallaMcdonalds" class="contenedor-pedidos"></div><div class="seccion-mapa"><h3>MAPA 1: TRAZABILIDAD</h3><svg width="460" height="780" id="svg-t1"></svg></div><div class="seccion-mapa"><h3>MAPA 2: LOGÍSTICA / FITOS</h3><svg width="460" height="880" id="svg-t2"></svg></div></div>
-<div id="p-hist" style="display:none; padding:20px;"></div><div class="overlay" id="overlay" onclick="closeM()"></div>
-<div id="modalM" class="modal"><h2 id="mT"></h2><table><thead><tr><th>VAR</th><th>LOT</th><th>BND</th><th>ACC</th></tr></thead><tbody id="bodyT"></tbody></table><div style="background:#222; padding:10px; border-radius:8px;"><div class="form-group"><label>Variedad</label><input type="text" id="t_v"></div><div class="form-group"><label>Lote</label><input type="text" id="t_l"></div><div class="form-group"><label>Bandejas</label><input type="number" id="t_c"></div><button class="btn-guardar" style="background:var(--green);" onclick="saveT()">💾 GUARDAR</button></div><button class="btn-guardar" style="background:#444;" onclick="closeM()">CERRAR</button></div>
-<div id="modalL" class="modal"><h2 id="lT"></h2><div style="background:#2d1414; padding:10px; border-radius:8px; border:1px solid var(--red); margin-bottom:10px;"><label style="color:var(--red); font-weight:bold;">🛡️ FITOS</label><input type="text" id="f_p" placeholder="Producto/Plaga" style="width:100%; margin:5px 0; padding:5px;"><div style="display:flex; gap:5px;"><input type="text" id="f_d" placeholder="Dosis" style="flex:1;"><input type="number" id="f_z" placeholder="Plazo" style="flex:1;"></div><button class="btn-guardar" style="background:var(--red);" onclick="saveF()">REGISTRAR</button></div><div id="areaRejunte"></div><table><thead><tr><th>CLI</th><th>BND</th><th>INFO</th><th>ACC</th></tr></thead><tbody id="bodyL"></tbody></table><input type="text" id="l_c" placeholder="Cliente" style="width:100%; margin:5px 0; padding:8px;"><input type="number" id="l_b" placeholder="Bandejas" style="width:100%; margin:5px 0; padding:8px;"><input type="text" id="l_i" placeholder="Info" style="width:100%; margin:5px 0; padding:8px;"><button class="btn-guardar" style="background:var(--blue);" onclick="saveP()">🚚 AÑADIR</button><button class="btn-guardar" style="background:#444;" onclick="closeM()">CERRAR</button></div>
+
+<div class="header-sticky">
+    <input type="text" id="buscador" class="input-busqueda" placeholder="🔍 Buscar Variedad..." onkeyup="ejecutarBusqueda()">
+    <button class="btn-nube" style="background: var(--green);" onclick="subirDatos()">⬆</button>
+    <button class="btn-nube" style="background: var(--blue);" onclick="bajarDatos()">⬇</button>
+</div>
+
+<div class="seccion-mapa">
+    <h3 style="color:var(--green); text-align:center;">MAPA 1: TRAZABILIDAD</h3>
+    <svg width="460" height="780" id="svg1"></svg>
+</div>
+
+<div class="seccion-mapa">
+    <h3 style="color:var(--blue); text-align:center;">MAPA 2: LOGÍSTICA / FITOS</h3>
+    <svg width="460" height="880" id="svg2"></svg>
+</div>
+
+<div class="overlay" id="ov" onclick="cerrar()"></div>
+
+<div id="modT" class="modal">
+    <h2 id="titT" style="color:var(--green)"></h2>
+    <div id="pT"></div>
+    <table><thead><tr><th>Ref</th><th>Lot</th><th>Bnd</th><th>Acción</th></tr></thead><tbody id="bodyT"></tbody></table>
+    <div class="form-group"><label>Ref</label><input type="text" id="t_ref"></div>
+    <div class="form-group"><label>Lote</label><input type="text" id="t_lot"></div>
+    <div style="display:flex; gap:10px">
+        <div class="form-group" style="flex:1"><label>Bnd</label><input type="number" id="t_bnd"></div>
+        <div class="form-group" style="flex:1"><label>Tipo</label><input type="text" id="t_tip" list="lbnd"></div>
+    </div>
+    <button class="btn-guardar" style="background:var(--green)" onclick="saveT()">💾 GUARDAR</button>
+    <button id="btnRej" class="btn-guardar" onclick="toggleRej()">⬜ REJUNTAR</button>
+    <button class="btn-guardar" style="background:#555" onclick="cerrar()">CERRAR</button>
+</div>
+
+<div id="modL" class="modal">
+    <div style="display:flex; gap:5px; margin-bottom:15px">
+        <button class="btn-guardar" style="background:var(--blue); flex:1" onclick="tab('log')">📦 LOG</button>
+        <button class="btn-guardar" style="background:var(--red); flex:1" onclick="tab('fit')">🛡️ FITO</button>
+    </div>
+    <div id="pLog">
+        <h2 id="titL" style="color:var(--blue)"></h2>
+        <div id="pL"></div>
+        <table><thead><tr><th>Cli</th><th>Bnd</th><th>Detalle</th><th>Acción</th></tr></thead><tbody id="bodyL"></tbody></table>
+        <input type="text" id="l_cli" placeholder="Cliente" style="margin-bottom:5px">
+        <input type="number" id="l_bnd" placeholder="Bandejas" style="margin-bottom:5px">
+        <input type="text" id="l_det" placeholder="Detalle">
+        <button class="btn-guardar" style="background:var(--blue)" onclick="saveL()">🚚 AÑADIR SALIDA</button>
+    </div>
+    <div id="pFit" style="display:none">
+        <h2 style="color:var(--red)">🛡️ NUEVO TRATAMIENTO</h2>
+        <input type="text" id="f_pro" placeholder="Producto/Plaga" style="margin-bottom:5px">
+        <div style="display:flex; gap:5px">
+            <input type="number" id="f_pla" placeholder="Plazo Días">
+            <select id="f_col"><option value="AUTO">AUTO</option><option value="RED">ROJO</option><option value="ORANGE">NARANJA</option></select>
+        </div>
+        <button class="btn-guardar" style="background:var(--red)" onclick="saveF()">⚠️ REGISTRAR</button>
+        <table><thead><tr><th>Fecha</th><th>Producto</th><th>Vence</th><th>Acción</th></tr></thead><tbody id="bodyF"></tbody></table>
+    </div>
+    <button class="btn-guardar" style="background:#555" onclick="cerrar()">CERRAR</button>
+</div>
+
+<datalist id="lbnd"><option value="40"><option value="60"><option value="84"></datalist>
+
 <script>
-let DB_T=JSON.parse(localStorage.getItem('culti_t'))||{}, DB_L=JSON.parse(localStorage.getItem('culti_l'))||{}, DB_H=JSON.parse(localStorage.getItem('culti_h'))||[], mA="", iE=null, bR=null;
-const GEO=[{id:'10-48',x:10,y:70,w:40,h:140},{id:'11-49',x:55,y:70,w:40,h:140},{id:'12-50',x:105,y:70,w:40,h:140},{id:'13-51',x:150,y:70,w:40,h:140},{id:'7-45',x:15,y:220,w:40,h:65},{id:'8-46',x:65,y:220,w:45,h:90},{id:'9-47',x:135,y:220,w:38,h:90},{id:'4-42',x:10,y:325,w:45,h:200},{id:'5-43',x:65,y:325,w:45,h:200},{id:'6-44',x:125,y:325,w:45,h:200},{id:'1-39',x:10,y:540,w:45,h:210},{id:'2-40',x:65,y:540,w:45,h:210},{id:'3-41',x:125,y:580,w:45,h:170},{id:'22-63',x:210,y:70,w:38,h:75},{id:'23-64',x:255,y:70,w:38,h:75},{id:'24-65',x:300,y:70,w:38,h:75},{id:'22-60',x:210,y:155,w:38,h:100},{id:'23-61',x:255,y:155,w:38,h:100},{id:'24-62',x:300,y:155,w:38,h:100},{id:'18-56',x:215,y:360,w:35,h:110},{id:'19-57',x:255,y:325,w:38,h:200},{id:'20-58',x:300,y:325,w:38,h:200},{id:'21-59',x:345,y:325,w:38,h:200},{id:'14-52',x:210,y:540,w:38,h:145},{id:'15-53',x:255,y:540,w:38,h:145},{id:'16-54',x:300,y:540,w:38,h:145},{id:'17-55',x:345,y:540,w:38,h:145}];
-function draw(){let h1="",h2="";GEO.forEach(m=>{h1+=`<rect id="t-${m.id}" class="mesa" x="${m.x}" y="${m.y}" width="${m.w}" height="${m.h}" onclick="openM('${m.id}')"></rect><text x="${m.x+m.w/2}" y="${m.y+m.h-5}" class="texto-id">${m.id}</text>`;h2+=`<rect id="l-${m.id}" class="mesa" x="${m.x}" y="${m.y}" width="${m.w}" height="${m.h}" onclick="openL('${m.id}')"></rect><text x="${m.x+m.w/2}" y="${m.y+m.h-5}" class="texto-id">${m.id}</text>`;});for(let i=1;i<=14;i++){let y=70+(14-i)*46;h1+=`<rect id="t-${i}" class="mesa" x="380" y="${y}" width="70" height="38" onclick="openM('${i}')"></rect><text x="415" y="${y+22}" class="texto-id">${i}</text>`;h2+=`<rect id="l-${i}" class="mesa" x="380" y="${y}" width="70" height="38" onclick="openL('${i}')"></rect><text x="415" y="${y+22}" class="texto-id">${i}</text>`;}['C1','C2','C3','C4'].forEach((c,i)=>{let x=210+(i*60);h2+=`<g onclick="openL('${c}')"><rect x="${x}" y="750" width="50" height="30" class="carro-base" rx="2" fill="#ddd" stroke="#333"></rect><text x="${x+25}" y="770" class="texto-id">${c}</text></g>`;});document.getElementById('svg-t1').innerHTML=h1;document.getElementById('svg-t2').innerHTML=h2;actualizarPantalla();}
-function openM(id){mA=id;iE=null;document.getElementById('mT').innerText="Mesa "+id;let h="";(DB_T[id]?.items||[]).forEach((it,i)=>{h+=`<tr><td>${it.v}</td><td>${it.l}</td><td>${it.c}</td><td><button class="btn-accion btn-edit" onclick="editT(${i})">✏️</button><button class="btn-accion btn-cut" onclick="cutT(${i})">✂️</button><button class="btn-accion btn-del" onclick="delT(${i})">🗑️</button></td></tr>`;});document.getElementById('bodyT').innerHTML=h||"<tr><td colspan='4'>Vacío</td></tr>";document.getElementById('overlay').style.display='block';document.getElementById('modalM').style.display='block';}
-function saveT(){if(!DB_T[mA])DB_T[mA]={items:[]};let d={v:document.getElementById('t_v').value.toUpperCase(),l:document.getElementById('t_l').value,c:parseInt(document.getElementById('t_c').value)};if(iE!==null)DB_T[mA].items[iE]=d;else DB_T[mA].items.push(d);persist();openM(mA);}
-function editT(i){let it=DB_T[mA].items[i];document.getElementById('t_v').value=it.v;document.getElementById('t_l').value=it.l;document.getElementById('t_c').value=it.c;iE=i;}
-function delT(i){if(confirm("¿Borrar?")){DB_T[mA].items.splice(i,1);persist();openM(mA);}}
-function cutT(i){let it=DB_T[mA].items[i];let n=prompt("Bandejas a cortar:",it.c);if(!n||n<=0||n>it.c)return;bR={v:it.v,l:it.l,c:parseInt(n),o:mA};it.c-=parseInt(n);if(it.c<=0)DB_T[mA].items.splice(i,1);persist();openM(mA);}
-function openL(id){mA=id;document.getElementById('lT').innerText="Ubicación "+id;let h="";(DB_L[id]?.p||[]).forEach((p,i)=>{h+=`<tr><td>${p.c}</td><td>${p.b}</td><td>${p.i}</td><td><button class="btn-accion btn-del" onclick="delL(${i})">🗑️</button></td></tr>`;});document.getElementById('bodyL').innerHTML=h||"<tr><td colspan='4'>Sin pedidos</td></tr>";document.getElementById('areaRejunte').innerHTML=bR?`<button class="btn-guardar" style="background:var(--purple)" onclick="paste()">📋 PEGAR (${bR.c} bnd)</button>`:"";document.getElementById('overlay').style.display='block';document.getElementById('modalL').style.display='block';}
-function paste(){if(!bR)return;let cli=prompt("Cliente:","AMILCAR");if(!cli)return;if(!DB_L[mA])DB_L[mA]={p:[]};DB_L[mA].p.push({c:cli.toUpperCase(),b:bR.c,i:bR.v+" ("+bR.l+")"});bR=null;persist();openL(mA);}
-function saveF(){if(!DB_L[mA])DB_L[mA]={p:[]};DB_L[mA].f={p:document.getElementById('f_p').value,z:parseInt(document.getElementById('f_z').value),d:new Date().getTime()};persist();alert("Fito guardado");}
-function saveP(){if(!DB_L[mA])DB_L[mA]={p:[]};DB_L[mA].p.push({c:document.getElementById('l_c').value.toUpperCase(),b:document.getElementById('l_b').value,i:document.getElementById('l_i').value});persist();openL(mA);}
-function delL(i){DB_L[mA].p.splice(i,1);persist();openL(mA);}
-function persist(){localStorage.setItem('culti_t',JSON.stringify(DB_T));localStorage.setItem('culti_l',JSON.stringify(DB_L));actualizarPantalla();}
-function actualizarPantalla(){document.querySelectorAll('#svg-t1 .mesa').forEach(r=>{let id=r.id.replace('t-','');r.classList.toggle('ocupada',DB_T[id]?.items?.length>0);});document.querySelectorAll('#svg-t2 .mesa, .carro-base').forEach(r=>{let id=r.id?r.id.replace('l-',''):r.parentElement.textContent.trim();let f=DB_L[id]?.f;if(f){let diff=(new Date().getTime()-f.d)/86400000;if(diff<f.z)r.style.fill="var(--red)";else if(diff<f.z+2)r.style.fill="var(--orange)";else r.style.fill=DB_L[id]?.p?.length>0?"var(--neon)":"white";}else r.style.fill=DB_L[id]?.p?.length>0?"var(--neon)":"white";});let mh="";for(let id in DB_L)(DB_L[id].p||[]).forEach(p=>{mh+=`<div class="tarjeta-pedido" onclick="openL('${id}')"><b>${p.c} (${id})</b><br>${p.b} bnd - ${p.i}</div>`;});document.getElementById('pantallaMcdonalds').innerHTML=mh;}
-function verP(id,b){document.getElementById('p-mapas').style.display=id==='p-mapas'?'block':'none';document.getElementById('p-hist').style.display=id==='p-hist'?'block':'none';document.querySelectorAll('.tab-btn').forEach(x=>x.classList.remove('active'));b.classList.add('active');}
-function closeM(){document.getElementById('overlay').style.display='none';document.querySelectorAll('.modal').forEach(m=>m.style.display='none');}
-function subirDatos(){alert("Sincronizando con Gist...");}
-window.onload=draw;
-</script></body></html>
+    const GIST = "dc4b1ac9b41655086c76352f03ccfafe";
+    let DB_T = JSON.parse(localStorage.getItem('culti_traza')) || {};
+    let DB_F = JSON.parse(localStorage.getItem('culti_fito')) || {};
+    let mA = "", iE = null, port = null;
+
+    const GEO = [{id:'10-48',x:10,y:70,w:40,h:140},{id:'11-49',x:55,y:70,w:40,h:140},{id:'12-50',x:105,y:70,w:40,h:140},{id:'13-51',x:150,y:70,w:40,h:140},{id:'7-45',x:15,y:220,w:40,h:65},{id:'8-46',x:65,y:220,w:45,h:90},{id:'9-47',x:135,y:220,w:38,h:90},{id:'4-42',x:10,y:325,w:45,h:200},{id:'5-43',x:65,y:325,w:45,h:200},{id:'6-44',x:125,y:325,w:45,h:200},{id:'1-39',x:10,y:540,w:45,h:210},{id:'2-40',x:65,y:540,w:45,h:210},{id:'3-41',x:125,y:580,w:45,h:170},{id:'22-63',x:210,y:70,w:38,h:75},{id:'23-64',x:255,y:70,w:38,h:75},{id:'24-65',x:300,y:70,w:38,h:75},{id:'22-60',x:210,y:155,w:38,h:100},{id:'23-61',x:255,y:155,w:38,h:100},{id:'24-62',x:300,y:155,w:38,h:100},{id:'18-56',x:215,y:360,w:35,h:110},{id:'19-57',x:255,y:325,w:38,h:200},{id:'20-58',x:300,y:325,w:38,h:200},{id:'21-59',x:345,y:325,w:38,h:200},{id:'14-52',x:210,y:540,w:38,h:145},{id:'15-53',x:255,y:540,w:38,h:145},{id:'16-54',x:300,y:540,w:38,h:145},{id:'17-55',x:345,y:540,w:38,h:145}];
+
+    function init() {
+        let h1 = "", h2 = "";
+        GEO.forEach(m => {
+            h1 += `<rect id="t-${m.id}" class="mesa" x="${m.x}" y="${m.y}" width="${m.w}" height="${m.h}" onclick="openT('${m.id}')"></rect><text x="${m.x+m.w/2}" y="${m.y+m.h-5}" class="texto-id">${m.id}</text>`;
+            h2 += `<rect id="f-${m.id}" class="mesa" x="${m.x}" y="${m.y}" width="${m.w}" height="${m.h}" onclick="openL('${m.id}')"></rect><text x="${m.x+m.w/2}" y="${m.y+m.h-5}" class="texto-id">${m.id}</text>`;
+        });
+        for(let i=1;i<=14;i++){
+            let y=70+(14-i)*46;
+            h1+=`<rect id="t-${i}" class="mesa" x="380" y="${y}" width="70" height="38" onclick="openT('${i}')"></rect><text x="415" y="${y+22}" class="texto-id">${i}</text>`;
+            h2+=`<rect id="f-${i}" class="mesa" x="380" y="${y}" width="70" height="38" onclick="openL('${i}')"></rect><text x="415" y="${y+22}" class="texto-id">${i}</text>`;
+        }
+        ['C1','C2','C3','C4'].forEach((c,i)=>{
+            let x=210+(i*55);
+            h2+=`<rect id="f-${c}" class="carro" x="${x}" y="750" width="50" height="30" onclick="openL('${c}')"></rect><text x="${x+25}" y="770" class="texto-id">${c}</text>`;
+        });
+        document.getElementById('svg1').innerHTML=h1; document.getElementById('svg2').innerHTML=h2;
+        render(); bajarDatos();
+    }
+
+    function openT(id) {
+        mA = id; iE = null; document.getElementById('titT').innerText = "Mesa " + id;
+        let h = ""; let d = DB_T[id] || { items: [] };
+        let its = Array.isArray(d) ? d : d.items;
+        its.forEach((r, i) => {
+            h += `<tr><td>${r.ref}</td><td>${r.lote}</td><td>${r.num_bandejas}</td><td>
+                <button class="btn-accion" style="background:var(--blue);color:white" onclick="editT(${i})">✏️</button>
+                <button class="btn-accion" style="background:var(--purple);color:white" onclick="cutT(${i})">✂️</button>
+                <button class="btn-accion" style="background:var(--red);color:white" onclick="delT(${i})">🗑️</button></td></tr>`;
+        });
+        document.getElementById('bodyT').innerHTML = h || "<tr><td colspan='4'>Vacía</td></tr>";
+        document.getElementById('btnRej').style.background = d.rej ? "var(--blue)" : "#555";
+        document.getElementById('pT').innerHTML = port ? `<button class="btn-guardar" style="background:var(--purple)" onclick="pegarT()">📋 PEGAR REJUNTE</button>` : "";
+        show('modT');
+    }
+
+    function saveT() {
+        if(!DB_T[mA]) DB_T[mA] = { items: [], rej: false };
+        if(Array.isArray(DB_T[mA])) DB_T[mA] = { items: DB_T[mA], rej: false };
+        let n = { ref: val('t_ref').toUpperCase(), lote: val('t_lot'), num_bandejas: val('t_bnd'), tipo_bandeja: val('t_tip') };
+        if(iE !== null) DB_T[mA].items[iE] = n; else DB_T[mA].items.push(n);
+        persist(); openT(mA); clear();
+    }
+
+    function editT(i) {
+        let its = Array.isArray(DB_T[mA]) ? DB_T[mA] : DB_T[mA].items;
+        let r = its[i]; iE = i;
+        set('t_ref', r.ref); set('t_lot', r.lote); set('t_bnd', r.num_bandejas); set('t_tip', r.tipo_bandeja);
+    }
+
+    function delT(i) { if(confirm('¿Borrar?')) { (Array.isArray(DB_T[mA])?DB_T[mA]:DB_T[mA].items).splice(i,1); persist(); openT(mA); } }
+
+    function cutT(i) {
+        let its = Array.isArray(DB_T[mA]) ? DB_T[mA] : DB_T[mA].items;
+        port = {...its[i]}; its.splice(i,1); persist(); openT(mA); alert("Cortado.");
+    }
+
+    function pegarT() {
+        if(!DB_T[mA]) DB_T[mA] = { items: [], rej: false };
+        if(Array.isArray(DB_T[mA])) DB_T[mA] = { items: DB_T[mA], rej: false };
+        DB_T[mA].items.push(port); port = null; persist(); openT(mA);
+    }
+
+    function toggleRej() {
+        if(!DB_T[mA]) DB_T[mA] = { items: [], rej: false };
+        if(Array.isArray(DB_T[mA])) DB_T[mA] = { items: DB_T[mA], rej: false };
+        DB_T[mA].rej = !DB_T[mA].rej; persist(); openT(mA);
+    }
+
+    function openL(id) {
+        mA = id; iE = null; document.getElementById('titL').innerText = (id.startsWith('C')?'Carro ':'Ubicación ')+id;
+        show('modL'); tab('log'); refreshL();
+    }
+
+    function refreshL() {
+        let h = ""; let d = DB_F[mA] || { pedidos: [], fito: [] };
+        (d.pedidos||[]).forEach((p,i) => {
+            h += `<tr><td>${p.cli}</td><td>${p.bnd}</td><td>${p.lot}</td><td><button class="btn-accion" style="background:var(--red);color:white" onclick="delL(${i})">🗑️</button></td></tr>`;
+        });
+        document.getElementById('bodyL').innerHTML = h || "<tr><td colspan='4'>Sin datos</td></tr>";
+        document.getElementById('pL').innerHTML = port ? `<button class="btn-guardar" style="background:var(--purple)" onclick="pegarL()">📋 PEGAR REJUNTE</button>` : "";
+        
+        let hf = ""; (d.fito||[]).forEach((f,i) => {
+            let dias = Math.ceil((new Date(f.v) - new Date())/(1000*60*60*24));
+            hf += `<tr><td>${f.f}</td><td>${f.pro}</td><td style="color:${dias>0?'red':'green'}">${dias>0?dias+'d':'OK'}</td><td><button class="btn-accion" style="background:var(--red);color:white" onclick="delF(${i})">🗑️</button></td></tr>`;
+        });
+        document.getElementById('bodyF').innerHTML = hf || "<tr><td colspan='4'>Sin tratamientos</td></tr>";
+    }
+
+    function saveL() {
+        if(!DB_F[mA]) DB_F[mA] = { pedidos: [], fito: [] };
+        DB_F[mA].pedidos.push({ cli: val('l_cli').toUpperCase(), bnd: val('l_bnd'), lot: val('l_det') });
+        persist(); refreshL(); clear();
+    }
+    function delL(i) { DB_F[mA].pedidos.splice(i,1); persist(); refreshL(); }
+
+    function pegarL() {
+        if(!DB_F[mA]) DB_F[mA] = { pedidos: [], fito: [] };
+        DB_F[mA].pedidos.push({ cli: "REJUNTE", bnd: port.num_bandejas, lot: port.ref });
+        port = null; persist(); refreshL();
+    }
+
+    function saveF() {
+        if(!DB_F[mA]) DB_F[mA] = { pedidos: [], fito: [] };
+        if(!DB_F[mA].fito) DB_F[mA].fito = [];
+        let v = new Date(); v.setDate(v.getDate() + parseInt(val('f_pla')||0));
+        DB_F[mA].fito.push({ pro: val('f_pro').toUpperCase(), f: new Date().toLocaleDateString(), v: v.toISOString(), col: val('f_col') });
+        persist(); refreshL(); clear();
+    }
+    function delF(i) { DB_F[mA].fito.splice(i,1); persist(); refreshL(); }
+
+    function render() {
+        document.querySelectorAll('#svg1 .mesa').forEach(r => {
+            let id = r.id.replace('t-', ''); let d = DB_T[id];
+            r.classList.remove('ocupada', 'rejuntado');
+            if(d) {
+                let its = Array.isArray(d) ? d : d.items;
+                if(its?.length > 0) d.rej ? r.classList.add('rejuntado') : r.classList.add('ocupada');
+            }
+        });
+        document.querySelectorAll('#svg2 .mesa, #svg2 .carro').forEach(r => {
+            let id = r.id.replace('f-', ''); let d = DB_F[id];
+            r.style.fill = (d?.pedidos?.length > 0) ? "var(--neon)" : "white";
+            r.style.stroke = "#333"; r.style.strokeWidth = "1.5";
+            if(d?.fito?.length > 0) {
+                let last = d.fito[d.fito.length-1];
+                let col = (last.col !== "AUTO") ? last.col : (new Date(last.v) > new Date() ? "var(--red)" : "var(--green)");
+                r.style.stroke = col; r.style.strokeWidth = "5";
+            }
+        });
+    }
+
+    function persist() { localStorage.setItem('culti_traza', JSON.stringify(DB_T)); localStorage.setItem('culti_fito', JSON.stringify(DB_F)); render(); subirDatos(); }
+    function show(id) { document.getElementById('ov').style.display = 'block'; document.getElementById(id).style.display = 'block'; }
+    function cerrar() { document.querySelectorAll('.modal, .overlay').forEach(x => x.style.display = 'none'); }
+    function tab(t) { document.getElementById('pLog').style.display = t=='log'?'block':'none'; document.getElementById('pFit').style.display = t=='fit'?'block':'none'; }
+    function val(id) { return document.getElementById(id).value; }
+    function set(id,v) { document.getElementById(id).value = v; }
+    function clear() { document.querySelectorAll('input').forEach(i => i.value = ""); }
+
+    async function subirDatos() {
+        const t = localStorage.getItem('github_token'); if(!t) return;
+        try { await fetch(`https://api.github.com/gists/${GIST}`, { method: 'PATCH', headers: { 'Authorization': `token ${t}` }, body: JSON.stringify({ files: { "cultigar_db.json": { content: JSON.stringify(DB_T) }, "cultigar_fito.json": { content: JSON.stringify(DB_F) } }}) }); } catch(e){}
+    }
+    async function bajarDatos() {
+        try { const r = await fetch(`https://api.github.com/gists/${GIST}?cb=${Date.now()}`); const d = await r.json(); if(d.files["cultigar_db.json"]) DB_T = JSON.parse(d.files["cultigar_db.json"].content); if(d.files["cultigar_fito.json"]) DB_F = JSON.parse(d.files["cultigar_fito.json"].content); render(); } catch(e){}
+    }
+    function ejecutarBusqueda() {
+        let b = val('buscador').toUpperCase();
+        document.querySelectorAll('#svg1 .mesa').forEach(m => m.classList.remove('resaltado'));
+        if(!b) return;
+        for(let m in DB_T) {
+            let its = Array.isArray(DB_T[m]) ? DB_T[m] : DB_T[m].items;
+            if(its?.some(r => r.ref.includes(b))) document.getElementById('t-'+m)?.classList.add('resaltado');
+        }
+    }
+    window.onload = init;
+</script>
+</body>
+</html>
