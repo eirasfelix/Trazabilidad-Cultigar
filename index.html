@@ -218,6 +218,8 @@
             <div class="form-group"><label>Nombre Comercial</label><input type="text" id="fi_nomcom"></div>
             <div class="form-group"><label>Nº Registro</label><input type="text" id="fi_nreg"></div>
         </div>
+
+        <div class="form-group"><label>Tipo de Plaga / Objetivo</label><input type="text" id="fi_plaga" placeholder="Ej: Pulgón, Araña roja..."></div>
         
         <div class="flex-row">
             <div class="form-group"><label>Aplicador</label><input type="text" id="fi_aplicador"></div>
@@ -246,7 +248,7 @@
         <h2 style="color: #aaa; font-size: 14px; margin-top:20px;">Historial de la Mesa</h2>
         <div style="overflow-x: auto;">
             <table style="min-width: 600px;">
-                <thead><tr><th>Fecha</th><th>Producto</th><th>Vence</th><th>Aplicador</th><th>m²</th><th>Acción</th></tr></thead>
+                <thead><tr><th>Fecha</th><th>Producto (Plaga)</th><th>Vence</th><th>Aplicador</th><th>m²</th><th>Acción</th></tr></thead>
                 <tbody id="fitoCuerpoMesaPro"></tbody>
             </table>
         </div>
@@ -313,6 +315,7 @@
         document.getElementById('f_num_bandejas').value = ""; document.getElementById('f_tipo_bandeja').value = "";
         document.getElementById('l_cli').value = ""; document.getElementById('l_bnd').value = ""; document.getElementById('l_lot').value = "";
         document.getElementById('fi_nomcom').value = ""; document.getElementById('fi_nreg').value = "";
+        document.getElementById('fi_plaga').value = ""; // LIMPIAR PLAGA
         document.getElementById('fi_aplicador').value = ""; document.getElementById('fi_equipo').value = "";
         document.getElementById('fi_dosis').value = ""; document.getElementById('fi_m2').value = "";
         document.getElementById('fi_plazo').value = ""; document.getElementById('fi_color_manual').value = "AUTO";
@@ -473,6 +476,7 @@
         let nuevoRegistro = {
             nomcom: document.getElementById('fi_nomcom').value.toUpperCase(),
             nreg: document.getElementById('fi_nreg').value,
+            plaga: document.getElementById('fi_plaga').value.toUpperCase(), // GUARDAR PLAGA
             aplicador: document.getElementById('fi_aplicador').value.toUpperCase(),
             equipo: document.getElementById('fi_equipo').value.toUpperCase(),
             dosis: document.getElementById('fi_dosis').value,
@@ -500,7 +504,7 @@
             let dias = Math.ceil((new Date(r.v) - hoy) / (1000 * 60 * 60 * 24));
             html += `<tr>
                 <td>${r.f}</td>
-                <td>${r.nomcom}</td>
+                <td>${r.nomcom} (${r.plaga || '-'})</td>
                 <td style="color:${dias>0?'red':'green'}">${dias>0?dias+'d':'OK'}</td>
                 <td>${r.aplicador}</td>
                 <td>${r.m2}</td>
@@ -518,13 +522,13 @@
         indexFitoEdicion = idx;
         document.getElementById('fi_nomcom').value = r.nomcom;
         document.getElementById('fi_nreg').value = r.nreg;
+        document.getElementById('fi_plaga').value = r.plaga || ""; // CARGAR PLAGA
         document.getElementById('fi_aplicador').value = r.aplicador;
         document.getElementById('fi_equipo').value = r.equipo;
         document.getElementById('fi_dosis').value = r.dosis;
         document.getElementById('fi_m2').value = r.m2;
         document.getElementById('fi_color_manual').value = r.color_manual;
         
-        // Calcular plazo en días basándose en la fecha de vencimiento guardada
         let dias = Math.ceil((new Date(r.v) - new Date(r.f)) / (1000 * 60 * 60 * 24));
         document.getElementById('fi_plazo').value = dias;
     }
