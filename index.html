@@ -153,6 +153,10 @@
 
         .flex-row { display: flex; gap: 10px; }
         .flex-row .form-group { flex: 1; }
+        
+        /* Estilos específicos para la nueva lógica de avisos */
+        .aviso-urgente { background: rgba(192, 57, 43, 0.2); border-left: 4px solid var(--rojo-fito); }
+        .badge-dias { padding: 2px 6px; border-radius: 4px; font-weight: bold; font-size: 10px; }
     </style>
 </head>
 <body>
@@ -196,9 +200,10 @@
 </div>
 
 <div id="modalFito" class="modal">
-    <div id="tabsFito" style="display:flex; gap:5px; margin-bottom:15px;">
-        <button id="btLog" class="btn-guardar" style="background:#2980b9; flex:1; padding:10px;" onclick="switchTab('log')">📦 LOGÍSTICA</button>
-        <button id="btFit" class="btn-guardar" style="background:#555; flex:1; padding:10px;" onclick="switchTab('fit')">🛡️ FITOS</button>
+    <div id="tabsFito" style="display:flex; gap:3px; margin-bottom:15px;">
+        <button id="btLog" class="btn-guardar" style="background:#2980b9; flex:1; padding:10px; font-size: 11px;" onclick="switchTab('log')">📦 LOG.</button>
+        <button id="btAvi" class="btn-guardar" style="background:#555; flex:1; padding:10px; font-size: 11px;" onclick="switchTab('avi')">📅 AVISOS</button>
+        <button id="btFit" class="btn-guardar" style="background:#555; flex:1; padding:10px; font-size: 11px;" onclick="switchTab('fit')">🛡️ FITOS</button>
     </div>
     
     <div id="panelLog">
@@ -211,26 +216,32 @@
         <button id="btnGuardarLog" class="btn-guardar" style="background:#2980b9;" onclick="guardarLog()">💾 AÑADIR PEDIDO</button>
     </div>
 
+    <div id="panelAvi" style="display:none;">
+        <h2 style="color: var(--purpura); font-size: 18px;">📅 Próximas Salidas</h2>
+        <p style="font-size: 11px; color: #aaa;">Pedidos según cuadrante de castaños</p>
+        <table style="font-size: 11px;">
+            <thead>
+                <tr><th>Cliente</th><th>Variedad</th><th>Cant.</th><th>Fecha</th><th>Ajuste</th></tr>
+            </thead>
+            <tbody id="aviCuerpo"></tbody>
+        </table>
+    </div>
+
     <div id="panelFit" style="display:none;">
         <h2 style="color: var(--rojo-fito); font-size: 18px;">🛡️ Nuevo Tratamiento</h2>
-        
         <div class="flex-row">
             <div class="form-group"><label>Nombre Comercial</label><input type="text" id="fi_nomcom"></div>
             <div class="form-group"><label>Nº Registro</label><input type="text" id="fi_nreg"></div>
         </div>
-
         <div class="form-group"><label>Tipo de Plaga / Objetivo</label><input type="text" id="fi_plaga" placeholder="Ej: Pulgón, Araña roja..."></div>
-        
         <div class="flex-row">
             <div class="form-group"><label>Aplicador</label><input type="text" id="fi_aplicador"></div>
             <div class="form-group"><label>Equipo</label><input type="text" id="fi_equipo"></div>
         </div>
-
         <div class="flex-row">
             <div class="form-group"><label>Dosis</label><input type="text" id="fi_dosis"></div>
             <div class="form-group"><label>Superficie m²</label><input type="number" id="fi_m2"></div>
         </div>
-
         <div class="flex-row">
             <div class="form-group"><label>Plazo Seguridad (Días)</label><input type="number" id="fi_plazo"></div>
             <div class="form-group"><label>Color Manual Mapa</label>
@@ -242,9 +253,7 @@
                 </select>
             </div>
         </div>
-
         <button id="btnGuardarFito" class="btn-guardar" style="background:var(--rojo-fito);" onclick="guardarFitoPro()">🛡️ REGISTRAR TRATAMIENTO</button>
-        
         <h2 style="color: #aaa; font-size: 14px; margin-top:20px;">Historial de la Mesa</h2>
         <div style="overflow-x: auto;">
             <table style="min-width: 600px;">
@@ -260,6 +269,17 @@
     const GIST_ID = "dc4b1ac9b41655086c76352f03ccfafe";
     let DB_TRAZA = JSON.parse(localStorage.getItem('culti_traza')) || {};
     let DB_FITO = JSON.parse(localStorage.getItem('culti_fito')) || {};
+    
+    // NUEVA DB: PEDIDOS EXTRAÍDOS DEL PAPEL (Con fechas por defecto iniciales)
+    let DB_PEDIDOS = JSON.parse(localStorage.getItem('culti_pedidos')) || [
+        {cli: "LIONEL", var: "7521", cant: 5000, fecha: "2026-03-01"},
+        {cli: "AMILCAR", var: "7521", cant: 3000, fecha: "2026-04-15"},
+        {cli: "ALEGRIA", var: "7521", cant: 4000, fecha: "2026-03-20"},
+        {cli: "LIBORIO", var: "1483", cant: 400, fecha: "2026-02-28"},
+        {cli: "J. CANEDO", var: "111", cant: 500, fecha: "2026-05-01"},
+        {cli: "ALVIMICOS", var: "MARSOL", cant: 1500, fecha: "2026-04-10"}
+    ];
+
     let mesaSeleccionada = "";
     let indexEdicion = null;
     let indexFitoEdicion = null;
@@ -315,7 +335,7 @@
         document.getElementById('f_num_bandejas').value = ""; document.getElementById('f_tipo_bandeja').value = "";
         document.getElementById('l_cli').value = ""; document.getElementById('l_bnd').value = ""; document.getElementById('l_lot').value = "";
         document.getElementById('fi_nomcom').value = ""; document.getElementById('fi_nreg').value = "";
-        document.getElementById('fi_plaga').value = ""; // LIMPIAR PLAGA
+        document.getElementById('fi_plaga').value = "";
         document.getElementById('fi_aplicador').value = ""; document.getElementById('fi_equipo').value = "";
         document.getElementById('fi_dosis').value = ""; document.getElementById('fi_m2').value = "";
         document.getElementById('fi_plazo').value = ""; document.getElementById('fi_color_manual').value = "AUTO";
@@ -324,8 +344,41 @@
     function persistir() {
         localStorage.setItem('culti_traza', JSON.stringify(DB_TRAZA));
         localStorage.setItem('culti_fito', JSON.stringify(DB_FITO));
+        localStorage.setItem('culti_pedidos', JSON.stringify(DB_PEDIDOS));
         subirDatos();
     }
+
+    // --- FUNCIONES DE LA NUEVA LÓGICA DE AVISOS ---
+    function mostrarAvisos() {
+        let html = "";
+        let hoy = new Date();
+        
+        // Ordenar por fecha más cercana
+        DB_PEDIDOS.sort((a,b) => new Date(a.fecha) - new Date(b.fecha));
+
+        DB_PEDIDOS.forEach((p, idx) => {
+            let fechaP = new Date(p.fecha);
+            let diff = Math.ceil((fechaP - hoy) / (1000 * 60 * 60 * 24));
+            let colorBadge = diff <= 7 ? 'red' : (diff <= 15 ? 'orange' : 'green');
+            let claseUrgente = diff <= 7 ? 'aviso-urgente' : '';
+
+            html += `<tr class="${claseUrgente}">
+                <td><strong>${p.cli}</strong></td>
+                <td>${p.var}</td>
+                <td>${p.cant}</td>
+                <td><span class="badge-dias" style="background:${colorBadge}; color:white">${diff}d</span></td>
+                <td><input type="date" value="${p.fecha}" onchange="cambiarFechaAviso(${idx}, this.value)" style="font-size:10px; width:80px;"></td>
+            </tr>`;
+        });
+        document.getElementById('aviCuerpo').innerHTML = html;
+    }
+
+    function cambiarFechaAviso(idx, nuevaFecha) {
+        DB_PEDIDOS[idx].fecha = nuevaFecha;
+        persistir();
+        mostrarAvisos();
+    }
+    // ----------------------------------------------
 
     function abrirTraza(id) {
         mesaSeleccionada = id; indexEdicion = null;
@@ -391,7 +444,7 @@
             document.getElementById('tabsFito').style.display = 'flex';
             switchTab('log');
         }
-        mostrarLog(); mostrarFitoPro();
+        mostrarLog(); mostrarFitoPro(); mostrarAvisos();
         document.getElementById('overlay').style.display = 'block';
         document.getElementById('modalFito').style.display = 'block';
     }
@@ -461,22 +514,22 @@
     function switchTab(t) {
         document.getElementById('panelLog').style.display = t === 'log' ? 'block' : 'none';
         document.getElementById('panelFit').style.display = t === 'fit' ? 'block' : 'none';
+        document.getElementById('panelAvi').style.display = t === 'avi' ? 'block' : 'none';
         document.getElementById('btLog').style.background = t === 'log' ? '#2980b9' : '#555';
         document.getElementById('btFit').style.background = t === 'fit' ? '#c0392b' : '#555';
+        document.getElementById('btAvi').style.background = t === 'avi' ? 'var(--purpura)' : '#555';
     }
 
     function guardarFitoPro() {
         if(!DB_FITO[mesaSeleccionada]) DB_FITO[mesaSeleccionada] = { pedidos: [], fito: [] };
         if(!DB_FITO[mesaSeleccionada].fito) DB_FITO[mesaSeleccionada].fito = [];
-        
         let hoy = new Date();
         let venc = new Date();
         venc.setDate(hoy.getDate() + parseInt(document.getElementById('fi_plazo').value || 0));
-        
         let nuevoRegistro = {
             nomcom: document.getElementById('fi_nomcom').value.toUpperCase(),
             nreg: document.getElementById('fi_nreg').value,
-            plaga: document.getElementById('fi_plaga').value.toUpperCase(), // GUARDAR PLAGA
+            plaga: document.getElementById('fi_plaga').value.toUpperCase(),
             aplicador: document.getElementById('fi_aplicador').value.toUpperCase(),
             equipo: document.getElementById('fi_equipo').value.toUpperCase(),
             dosis: document.getElementById('fi_dosis').value,
@@ -485,16 +538,13 @@
             f: hoy.toLocaleDateString(),
             v: venc.toISOString()
         };
-
         if(indexFitoEdicion !== null) {
             DB_FITO[mesaSeleccionada].fito[indexFitoEdicion] = nuevoRegistro;
             indexFitoEdicion = null;
         } else {
             DB_FITO[mesaSeleccionada].fito.push(nuevoRegistro);
         }
-
-        persistir(); mostrarFitoPro(); actualizarColoresMapas();
-        limpiarForms();
+        persistir(); mostrarFitoPro(); actualizarColoresMapas(); limpiarForms();
     }
 
     function mostrarFitoPro() {
@@ -502,17 +552,8 @@
         let regs = (DB_FITO[mesaSeleccionada] && DB_FITO[mesaSeleccionada].fito) ? DB_FITO[mesaSeleccionada].fito : [];
         regs.forEach((r, idx) => {
             let dias = Math.ceil((new Date(r.v) - hoy) / (1000 * 60 * 60 * 24));
-            html += `<tr>
-                <td>${r.f}</td>
-                <td>${r.nomcom} (${r.plaga || '-'})</td>
-                <td style="color:${dias>0?'red':'green'}">${dias>0?dias+'d':'OK'}</td>
-                <td>${r.aplicador}</td>
-                <td>${r.m2}</td>
-                <td style="display:flex; gap:3px;">
-                    <button class="btn-accion" onclick="editarFito(${idx})">✏️</button>
-                    <button class="btn-accion" onclick="borrarFito(${idx})">🗑️</button>
-                </td>
-            </tr>`;
+            html += `<tr><td>${r.f}</td><td>${r.nomcom} (${r.plaga || '-'})</td><td style="color:${dias>0?'red':'green'}">${dias>0?dias+'d':'OK'}</td><td>${r.aplicador}</td><td>${r.m2}</td>
+                <td style="display:flex; gap:3px;"><button class="btn-accion" onclick="editarFito(${idx})">✏️</button><button class="btn-accion" onclick="borrarFito(${idx})">🗑️</button></td></tr>`;
         });
         document.getElementById('fitoCuerpoMesaPro').innerHTML = html;
     }
@@ -522,13 +563,12 @@
         indexFitoEdicion = idx;
         document.getElementById('fi_nomcom').value = r.nomcom;
         document.getElementById('fi_nreg').value = r.nreg;
-        document.getElementById('fi_plaga').value = r.plaga || ""; // CARGAR PLAGA
+        document.getElementById('fi_plaga').value = r.plaga || "";
         document.getElementById('fi_aplicador').value = r.aplicador;
         document.getElementById('fi_equipo').value = r.equipo;
         document.getElementById('fi_dosis').value = r.dosis;
         document.getElementById('fi_m2').value = r.m2;
         document.getElementById('fi_color_manual').value = r.color_manual;
-        
         let dias = Math.ceil((new Date(r.v) - new Date(r.f)) / (1000 * 60 * 60 * 24));
         document.getElementById('fi_plazo').value = dias;
     }
@@ -580,7 +620,8 @@
                 headers: { 'Authorization': `token ${token}` },
                 body: JSON.stringify({ files: { 
                     "cultigar_db.json": { content: JSON.stringify(DB_TRAZA) },
-                    "cultigar_fito.json": { content: JSON.stringify(DB_FITO) }
+                    "cultigar_fito.json": { content: JSON.stringify(DB_FITO) },
+                    "cultigar_pedidos.json": { content: JSON.stringify(DB_PEDIDOS) }
                 }})
             });
         } catch(e) {}
@@ -592,6 +633,7 @@
             const data = await res.json();
             if(data.files["cultigar_db.json"]) DB_TRAZA = JSON.parse(data.files["cultigar_db.json"].content);
             if(data.files["cultigar_fito.json"]) DB_FITO = JSON.parse(data.files["cultigar_fito.json"].content);
+            if(data.files["cultigar_pedidos.json"]) DB_PEDIDOS = JSON.parse(data.files["cultigar_pedidos.json"].content);
             actualizarColoresMapas();
         } catch(e) {}
     }
