@@ -45,7 +45,6 @@
             color: #333;
         }
 
-        /* NUEVO ESTILO: Botón de Alerta Principal */
         .btn-alerta-principal {
             padding: 10px;
             border: none;
@@ -54,7 +53,7 @@
             font-weight: bold;
             font-size: 12px;
             color: white;
-            min-width: 100px;
+            min-width: 110px;
             transition: 0.3s;
             background: #7f8c8d;
         }
@@ -133,7 +132,7 @@
 
         .btn-guardar { width: 100%; padding: 15px; border: none; border-radius: 8px; font-weight: bold; color: white; cursor: pointer; font-size: 16px; margin-bottom: 5px; }
         .btn-cerrar { background: #555; margin-top: 10px; }
-        .btn-accion { padding: 5px; cursor: pointer; border: none; border-radius: 3px; }
+        .btn-accion { padding: 5px; cursor: pointer; border: none; border-radius: 3px; background: #444; color: white; }
 
         .flex-row { display: flex; gap: 10px; }
         .flex-row .form-group { flex: 1; }
@@ -164,11 +163,20 @@
 <div id="modalMesa" class="modal">
     <h2 id="mesaTitulo" style="color: var(--verde-cultigar); font-size: 18px;">Mesa --</h2>
     <div id="zonaPegarTraza"></div>
-    <table><thead><tr><th>Ref</th><th>Lote</th><th>Bnd</th><th>Acción</th></tr></thead><tbody id="tablaCuerpoMesa"></tbody></table>
+    <table>
+        <thead><tr><th>Ref</th><th>Lote</th><th>Bnd</th><th>Acción</th></tr></thead>
+        <tbody id="tablaCuerpoMesa"></tbody>
+    </table>
     <div class="form-group"><label>Variedad</label><input type="text" id="f_ref"></div>
     <div class="form-group"><label>Lote</label><input type="text" id="f_lote"></div>
-    <div class="flex-row"><div class="form-group"><label>Nº Bnd</label><input type="number" id="f_num_bandejas"></div><div class="form-group"><label>Tipo</label><input type="text" id="f_tipo_bandeja" list="op_bnd"></div></div>
-    <div style="display:flex; gap:5px;"><button class="btn-guardar" style="background: var(--verde-cultigar); flex:2;" onclick="guardarRegistroTrazabilidad()">💾 GUARDAR</button><button id="btnRejuntarTraza" class="btn-guardar" style="background: #555; flex:1;" onclick="toggleRejuntarTraza()">⬜ REJUNTAR</button></div>
+    <div class="flex-row">
+        <div class="form-group"><label>Nº Bnd</label><input type="number" id="f_num_bandejas"></div>
+        <div class="form-group"><label>Tipo</label><input type="text" id="f_tipo_bandeja" list="op_bnd"></div>
+    </div>
+    <div style="display:flex; gap:5px;">
+        <button class="btn-guardar" style="background: var(--verde-cultigar); flex:2;" onclick="guardarRegistroTrazabilidad()">💾 GUARDAR</button>
+        <button id="btnRejuntarTraza" class="btn-guardar" style="background: #555; flex:1;" onclick="toggleRejuntarTraza()">⬜ REJUNTAR</button>
+    </div>
     <button class="btn-guardar btn-cerrar" onclick="cerrarModales()">CERRAR</button>
 </div>
 
@@ -188,29 +196,23 @@
     </div>
     <div id="panelFit" style="display:none;">
         <h2 style="color: var(--rojo-fito); font-size: 18px;">🛡️ Fitos</h2>
-        <div class="form-group"><label>Plaga</label><input type="text" id="fi_plaga"></div>
-        <button class="btn-guardar" style="background:var(--rojo-fito);" onclick="guardarFitoPro()">🛡️ REGISTRAR</button>
         <tbody id="fitoCuerpoMesaPro"></tbody>
     </div>
     <button class="btn-guardar btn-cerrar" onclick="cerrarModales()">CERRAR</button>
 </div>
 
 <div id="modalAvisos" class="modal">
-    <h2 style="color: var(--purpura); font-size: 18px;">📅 Panel de Próximos Pedidos</h2>
+    <h2 style="color: var(--purpura); font-size: 18px;">📅 Próximos Pedidos</h2>
     <div id="panelListaAvisos">
         <table style="font-size: 11px;">
             <thead><tr><th>Días</th><th>Cliente</th><th>Var.</th><th>Fecha</th><th>Mapa</th></tr></thead>
             <tbody id="cuerpoAvisosGlobal"></tbody>
         </table>
-        <button class="btn-guardar" style="background: var(--azul-log);" onclick="mostrarImportador()">📝 EDITAR LISTA MAESTRA (HOJA)</button>
+        <button class="btn-guardar" style="background: var(--azul-log);" onclick="mostrarImportador()">📝 EDITAR LISTA MAESTRA</button>
     </div>
-    
-    <div id="panelImportador" style="display:none; margin-top:10px; border-top: 1px solid #444; padding-top:10px;">
-        <p style="font-size:11px; color:#aaa;">Pega los datos siguiendo este formato:<br><b>CLIENTE, VARIEDAD, CANTIDAD, AAAA-MM-DD</b></p>
-        <div class="form-group">
-            <textarea id="txtImportar" rows="10" placeholder="Ej: LIONEL, 7521, 5000, 2026-03-01"></textarea>
-        </div>
-        <button class="btn-guardar" style="background: var(--verde-cultigar);" onclick="procesarImportacion()">✅ GUARDAR NUEVA LISTA</button>
+    <div id="panelImportador" style="display:none;">
+        <textarea id="txtImportar" rows="10" style="width:100%; background:#222; color:white;"></textarea>
+        <button class="btn-guardar" style="background: var(--verde-cultigar);" onclick="procesarImportacion()">✅ GUARDAR</button>
         <button class="btn-guardar" style="background: #555;" onclick="ocultarImportador()">VOLVER</button>
     </div>
     <button class="btn-guardar btn-cerrar" onclick="cerrarModales()">CERRAR</button>
@@ -220,19 +222,13 @@
     const GIST_ID = "dc4b1ac9b41655086c76352f03ccfafe";
     let DB_TRAZA = JSON.parse(localStorage.getItem('culti_traza')) || {};
     let DB_FITO = JSON.parse(localStorage.getItem('culti_fito')) || {};
-    
-    // NUEVA DB: PEDIDOS (INICIALIZADA CON TUS DATOS DEL PAPEL)
-    let DB_PEDIDOS = JSON.parse(localStorage.getItem('culti_pedidos')) || [
-        {cli: "LIONEL", var: "7521", cant: 5000, fecha: "2026-03-01"},
-        {cli: "LIBORIO", var: "1483", cant: 400, fecha: "2026-02-28"},
-        {cli: "ALEGRIA", var: "7521", cant: 4000, fecha: "2026-03-15"}
-    ];
+    let DB_PEDIDOS = JSON.parse(localStorage.getItem('culti_pedidos')) || [];
 
     let mesaSeleccionada = "";
     let indexEdicion = null;
-    let indexFitoEdicion = null;
     let portapapeles = null;
 
+    // GEOMETRÍA COMPLETA RESTAURADA
     const GEOMETRIA = [
         {id:'10-48', x:10, y:70, w:40, h:140}, {id:'11-49', x:55, y:70, w:40, h:140},
         {id:'12-50', x:105, y:70, w:40, h:140}, {id:'13-51', x:150, y:70, w:40, h:140},
@@ -250,89 +246,6 @@
         {id:'16-54', x:300, y:540, w:38, h:145}, {id:'17-55', x:345, y:540, w:38, h:145}
     ];
 
-    // --- NUEVA LÓGICA DE AVISOS Y ACTUALIZACIÓN ---
-    function actualizarBotonAlerta() {
-        let hoy = new Date();
-        let masUrgente = 999;
-        let proximoCli = "Sin pedidos";
-
-        DB_PEDIDOS.forEach(p => {
-            let diff = Math.ceil((new Date(p.fecha) - hoy) / (1000 * 60 * 60 * 24));
-            if(diff < masUrgente) { masUrgente = diff; proximoCli = p.cli; }
-        });
-
-        const btn = document.getElementById('btnAlerta');
-        btn.innerHTML = `📅 ${masUrgente}d - ${proximoCli}`;
-        btn.className = "btn-alerta-principal";
-        if(masUrgente <= 3) btn.classList.add('urgencia-alta');
-        else if(masUrgente <= 10) btn.classList.add('urgencia-media');
-    }
-
-    function abrirAvisosGlobal() {
-        document.getElementById('overlay').style.display = 'block';
-        document.getElementById('modalAvisos').style.display = 'block';
-        pintarListaAvisos();
-    }
-
-    function pintarListaAvisos() {
-        let html = ""; let hoy = new Date();
-        DB_PEDIDOS.sort((a,b) => new Date(a.fecha) - new Date(b.fecha));
-        DB_PEDIDOS.forEach((p, idx) => {
-            let diff = Math.ceil((new Date(p.fecha) - hoy) / (1000 * 60 * 60 * 24));
-            html += `<tr>
-                <td><span class="badge-dias" style="background:${diff<=5?'red':'#555'}">${diff}d</span></td>
-                <td><b>${p.cli}</b></td>
-                <td>${p.var}</td>
-                <td><input type="date" value="${p.fecha}" onchange="cambiarFechaManual(${idx}, this.value)" style="font-size:10px;"></td>
-                <td><button onclick="resaltarYBuscar('${p.var}')">👁️</button></td>
-            </tr>`;
-        });
-        document.getElementById('cuerpoAvisosGlobal').innerHTML = html;
-    }
-
-    function cambiarFechaManual(idx, nueva) {
-        DB_PEDIDOS[idx].fecha = nueva;
-        persistir(); actualizarBotonAlerta(); pintarListaAvisos();
-    }
-
-    function resaltarYBuscar(variedad) {
-        document.getElementById('buscador').value = variedad;
-        ejecutarBusqueda();
-        cerrarModales();
-    }
-
-    function mostrarImportador() {
-        document.getElementById('panelListaAvisos').style.display = 'none';
-        document.getElementById('panelImportador').style.display = 'block';
-        let txt = DB_PEDIDOS.map(p => `${p.cli}, ${p.var}, ${p.cant}, ${p.fecha}`).join('\n');
-        document.getElementById('txtImportar').value = txt;
-    }
-
-    function ocultarImportador() {
-        document.getElementById('panelListaAvisos').style.display = 'block';
-        document.getElementById('panelImportador').style.display = 'none';
-    }
-
-    function procesarImportacion() {
-        let lineas = document.getElementById('txtImportar').value.split('\n');
-        let nuevaLista = [];
-        lineas.forEach(l => {
-            let partes = l.split(',');
-            if(partes.length >= 4) {
-                nuevaLista.push({
-                    cli: partes[0].trim().toUpperCase(),
-                    var: partes[1].trim().toUpperCase(),
-                    cant: partes[2].trim(),
-                    fecha: partes[3].trim()
-                });
-            }
-        });
-        DB_PEDIDOS = nuevaLista;
-        persistir(); actualizarBotonAlerta(); ocultarImportador(); pintarListaAvisos();
-        alert("Lista actualizada correctamente.");
-    }
-    // ----------------------------------------------
-
     function inicializarMapas() {
         let trazHtml = "", fitoHtml = "";
         GEOMETRIA.forEach(m => {
@@ -349,33 +262,82 @@
         actualizarColoresMapas();
     }
 
-    function cerrarModales() {
-        document.getElementById('overlay').style.display = 'none';
-        document.querySelectorAll('.modal').forEach(m => m.style.display = 'none');
-        ocultarImportador();
-    }
-
-    function persistir() {
-        localStorage.setItem('culti_traza', JSON.stringify(DB_TRAZA));
-        localStorage.setItem('culti_fito', JSON.stringify(DB_FITO));
-        localStorage.setItem('culti_pedidos', JSON.stringify(DB_PEDIDOS));
-        subirDatos();
-    }
-
-    // Funciones Base (Trazabilidad/Logística) mantenidas exactamente iguales...
-    function abrirTraza(id) { mesaSeleccionada = id; mostrarTablaTraza(); document.getElementById('overlay').style.display = 'block'; document.getElementById('modalMesa').style.display = 'block'; }
+    // TRAZABILIDAD - BOTONES RESTAURADOS
     function mostrarTablaTraza() {
         let html = ""; let mesa = DB_TRAZA[mesaSeleccionada] || { items: [] };
         let datos = Array.isArray(mesa) ? mesa : (mesa.items || []);
-        datos.forEach((r, i) => { html += `<tr><td>${r.ref}</td><td>${r.lote}</td><td>${r.num_bandejas}</td><td><button onclick="borrarTraza(${i})">🗑️</button></td></tr>`; });
+        datos.forEach((r, i) => {
+            html += `<tr><td>${r.ref}</td><td>${r.lote}</td><td>${r.num_bandejas}</td>
+                <td>
+                    <button class="btn-accion" onclick="editarTraza(${i})">✏️</button>
+                    <button class="btn-accion" onclick="borrarTraza(${i})">🗑️</button>
+                </td></tr>`;
+        });
+        document.getElementById('mesaTitulo').innerText = "Mesa " + mesaSeleccionada;
         document.getElementById('tablaCuerpoMesa').innerHTML = html || "<tr><td colspan='4'>Vacía</td></tr>";
     }
+
+    function editarTraza(i) {
+        let items = Array.isArray(DB_TRAZA[mesaSeleccionada]) ? DB_TRAZA[mesaSeleccionada] : DB_TRAZA[mesaSeleccionada].items;
+        let r = items[i]; indexEdicion = i;
+        document.getElementById('f_ref').value = r.ref;
+        document.getElementById('f_lote').value = r.lote;
+        document.getElementById('f_num_bandejas').value = r.num_bandejas;
+    }
+
+    function borrarTraza(i) {
+        if(confirm("¿Borrar registro?")) {
+            let items = Array.isArray(DB_TRAZA[mesaSeleccionada]) ? DB_TRAZA[mesaSeleccionada] : DB_TRAZA[mesaSeleccionada].items;
+            items.splice(i, 1); persistir(); mostrarTablaTraza(); actualizarColoresMapas();
+        }
+    }
+
+    function abrirTraza(id) { mesaSeleccionada = id; indexEdicion = null; mostrarTablaTraza(); document.getElementById('overlay').style.display = 'block'; document.getElementById('modalMesa').style.display = 'block'; }
+    
     function guardarRegistroTrazabilidad() {
         if(!DB_TRAZA[mesaSeleccionada]) DB_TRAZA[mesaSeleccionada] = { items: [] };
-        DB_TRAZA[mesaSeleccionada].items.push({ ref: document.getElementById('f_ref').value.toUpperCase(), lote: document.getElementById('f_lote').value, num_bandejas: document.getElementById('f_num_bandejas').value });
+        let nuevo = { ref: document.getElementById('f_ref').value.toUpperCase(), lote: document.getElementById('f_lote').value, num_bandejas: document.getElementById('f_num_bandejas').value };
+        if(indexEdicion !== null) DB_TRAZA[mesaSeleccionada].items[indexEdicion] = nuevo;
+        else DB_TRAZA[mesaSeleccionada].items.push(nuevo);
         persistir(); actualizarColoresMapas(); cerrarModales();
     }
 
+    // AVISOS - FUNCIONALIDAD
+    function actualizarBotonAlerta() {
+        if(DB_PEDIDOS.length === 0) { document.getElementById('btnAlerta').innerHTML = "📅 Sin Pedidos"; return; }
+        let hoy = new Date();
+        DB_PEDIDOS.sort((a,b) => new Date(a.fecha) - new Date(b.fecha));
+        let p = DB_PEDIDOS[0];
+        let diff = Math.ceil((new Date(p.fecha) - hoy) / (1000 * 60 * 60 * 24));
+        const btn = document.getElementById('btnAlerta');
+        btn.innerHTML = `📅 ${diff}d - ${p.cli}`;
+        btn.className = "btn-alerta-principal " + (diff <= 3 ? 'urgencia-alta' : (diff <= 10 ? 'urgencia-media' : ''));
+    }
+
+    function abrirAvisosGlobal() { document.getElementById('overlay').style.display = 'block'; document.getElementById('modalAvisos').style.display = 'block'; pintarListaAvisos(); }
+    
+    function pintarListaAvisos() {
+        let html = ""; let hoy = new Date();
+        DB_PEDIDOS.forEach((p, idx) => {
+            let diff = Math.ceil((new Date(p.fecha) - hoy) / (1000 * 60 * 60 * 24));
+            html += `<tr><td><span class="badge-dias" style="background:${diff<=5?'red':'#555'}">${diff}d</span></td>
+                <td><b>${p.cli}</b></td><td>${p.var}</td>
+                <td><input type="date" value="${p.fecha}" onchange="cambiarFechaManual(${idx}, this.value)" style="font-size:10px;"></td>
+                <td><button onclick="resaltarYBuscar('${p.var}')">👁️</button></td></tr>`;
+        });
+        document.getElementById('cuerpoAvisosGlobal').innerHTML = html;
+    }
+
+    function cambiarFechaManual(i, v) { DB_PEDIDOS[i].fecha = v; persistir(); actualizarBotonAlerta(); pintarListaAvisos(); }
+    function resaltarYBuscar(v) { document.getElementById('buscador').value = v; ejecutarBusqueda(); cerrarModales(); }
+    function mostrarImportador() { document.getElementById('panelListaAvisos').style.display='none'; document.getElementById('panelImportador').style.display='block'; document.getElementById('txtImportar').value = DB_PEDIDOS.map(p=>`${p.cli},${p.var},${p.cant},${p.fecha}`).join('\n'); }
+    function ocultarImportador() { document.getElementById('panelListaAvisos').style.display='block'; document.getElementById('panelImportador').style.display='none'; }
+    function procesarImportacion() {
+        DB_PEDIDOS = document.getElementById('txtImportar').value.split('\n').filter(l=>l.includes(',')).map(l=>{let parts=l.split(','); return {cli:parts[0].trim().toUpperCase(), var:parts[1].trim().toUpperCase(), cant:parts[2].trim(), fecha:parts[3].trim()}});
+        persistir(); actualizarBotonAlerta(); ocultarImportador(); pintarListaAvisos();
+    }
+
+    // BASE FUNCIONES
     function abrirFito(id) { mesaSeleccionada = id; switchTab('log'); mostrarLog(); document.getElementById('overlay').style.display = 'block'; document.getElementById('modalFito').style.display = 'block'; }
     function mostrarLog() {
         let html = ""; let data = DB_FITO[mesaSeleccionada] || { pedidos: [] };
@@ -387,50 +349,16 @@
         DB_FITO[mesaSeleccionada].pedidos.push({ cli: document.getElementById('l_cli').value.toUpperCase(), bnd: document.getElementById('l_bnd').value, lot: document.getElementById('l_lot').value });
         persistir(); actualizarColoresMapas(); cerrarModales();
     }
-
-    function switchTab(t) {
-        document.getElementById('panelLog').style.display = t === 'log' ? 'block' : 'none';
-        document.getElementById('panelFit').style.display = t === 'fit' ? 'block' : 'none';
-    }
-
+    function switchTab(t) { document.getElementById('panelLog').style.display = t === 'log' ? 'block' : 'none'; document.getElementById('panelFit').style.display = t === 'fit' ? 'block' : 'none'; }
+    function cerrarModales() { document.getElementById('overlay').style.display = 'none'; document.querySelectorAll('.modal').forEach(m => m.style.display = 'none'); }
+    function persistir() { localStorage.setItem('culti_traza', JSON.stringify(DB_TRAZA)); localStorage.setItem('culti_fito', JSON.stringify(DB_FITO)); localStorage.setItem('culti_pedidos', JSON.stringify(DB_PEDIDOS)); subirDatos(); }
     function actualizarColoresMapas() {
-        document.querySelectorAll('#svg-trazabilidad .mesa').forEach(r => {
-            let id = r.id.replace('t-', ''); let d = DB_TRAZA[id];
-            r.classList.remove('ocupada'); if(d?.items?.length > 0) r.classList.add('ocupada');
-        });
-        document.querySelectorAll('#svg-fito .mesa').forEach(rect => {
-            let id = rect.id.replace('f-', ''); let data = DB_FITO[id];
-            rect.style.fill = data?.pedidos?.length > 0 ? "var(--neon-ready)" : "white";
-        });
+        document.querySelectorAll('#svg-trazabilidad .mesa').forEach(r => { let id = r.id.replace('t-', ''); let d = DB_TRAZA[id]; r.classList.remove('ocupada'); if(d?.items?.length > 0) r.classList.add('ocupada'); });
+        document.querySelectorAll('#svg-fito .mesa').forEach(rect => { let id = rect.id.replace('f-', ''); let data = DB_FITO[id]; rect.style.fill = data?.pedidos?.length > 0 ? "var(--neon-ready)" : "white"; });
     }
-
-    function ejecutarBusqueda() {
-        let b = document.getElementById('buscador').value.toUpperCase();
-        document.querySelectorAll('.mesa').forEach(m => m.classList.remove('resaltado'));
-        if(!b) return;
-        for(let m in DB_TRAZA) {
-            if(DB_TRAZA[m].items?.some(r => r.ref.includes(b))) document.getElementById('t-'+m)?.classList.add('resaltado');
-        }
-    }
-
-    async function subirDatos() {
-        const token = localStorage.getItem('github_token'); if(!token) return;
-        fetch(`https://api.github.com/gists/${GIST_ID}`, {
-            method: 'PATCH', headers: { 'Authorization': `token ${token}` },
-            body: JSON.stringify({ files: { "cultigar_db.json": { content: JSON.stringify(DB_TRAZA) }, "cultigar_fito.json": { content: JSON.stringify(DB_FITO) }, "cultigar_pedidos.json": { content: JSON.stringify(DB_PEDIDOS) } }})
-        });
-    }
-
-    async function bajarDatos() {
-        try {
-            const res = await fetch(`https://api.github.com/gists/${GIST_ID}?cb=${Date.now()}`);
-            const data = await res.json();
-            if(data.files["cultigar_db.json"]) DB_TRAZA = JSON.parse(data.files["cultigar_db.json"].content);
-            if(data.files["cultigar_fito.json"]) DB_FITO = JSON.parse(data.files["cultigar_fito.json"].content);
-            if(data.files["cultigar_pedidos.json"]) DB_PEDIDOS = JSON.parse(data.files["cultigar_pedidos.json"].content);
-            actualizarColoresMapas(); actualizarBotonAlerta();
-        } catch(e) {}
-    }
+    function ejecutarBusqueda() { let b = document.getElementById('buscador').value.toUpperCase(); document.querySelectorAll('.mesa').forEach(m => m.classList.remove('resaltado')); if(!b) return; for(let m in DB_TRAZA) { if(DB_TRAZA[m].items?.some(r => r.ref.includes(b))) document.getElementById('t-'+m)?.classList.add('resaltado'); } }
+    async function subirDatos() { const token = localStorage.getItem('github_token'); if(!token) return; fetch(`https://api.github.com/gists/${GIST_ID}`, { method: 'PATCH', headers: { 'Authorization': `token ${token}` }, body: JSON.stringify({ files: { "cultigar_db.json": { content: JSON.stringify(DB_TRAZA) }, "cultigar_fito.json": { content: JSON.stringify(DB_FITO) }, "cultigar_pedidos.json": { content: JSON.stringify(DB_PEDIDOS) } }}) }); }
+    async function bajarDatos() { try { const res = await fetch(`https://api.github.com/gists/${GIST_ID}?cb=${Date.now()}`); const data = await res.json(); if(data.files["cultigar_db.json"]) DB_TRAZA = JSON.parse(data.files["cultigar_db.json"].content); if(data.files["cultigar_fito.json"]) DB_FITO = JSON.parse(data.files["cultigar_fito.json"].content); if(data.files["cultigar_pedidos.json"]) DB_PEDIDOS = JSON.parse(data.files["cultigar_pedidos.json"].content); actualizarColoresMapas(); actualizarBotonAlerta(); } catch(e) {} }
 
     window.onload = () => { inicializarMapas(); bajarDatos(); };
 </script>
